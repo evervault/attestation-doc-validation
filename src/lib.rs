@@ -19,11 +19,14 @@ pub struct PCRs {
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum AttestationError {
+pub enum AttestationError
+where
+    Self: Send + Sync,
+{
     #[error(transparent)]
     CertStacking(#[from] openssl::error::ErrorStack),
-    #[error(transparent)]
-    Cose(#[from] aws_nitro_enclaves_cose::error::CoseError),
+    #[error("COSE error: `{0}`")]
+    Cose(String),
     #[error(transparent)]
     Cbor(#[from] serde_cbor::error::Error),
     #[error("A part of the attestation doc structure was deemed invalid")]
@@ -41,7 +44,9 @@ pub type Result<T> = std::result::Result<T, AttestationError>;
 fn extract_attestation_doc(
     cose_sign_1_decoded: &aws_nitro_enclaves_cose::CoseSign1,
 ) -> Result<AttestationDoc> {
-    let cbor = cose_sign_1_decoded.get_payload::<aws_nitro_enclaves_cose::crypto::Openssl>(None)?;
+    let cbor = cose_sign_1_decoded
+        .get_payload::<aws_nitro_enclaves_cose::crypto::Openssl>(None)
+        .map_err(|err| AttestationError::Cose(err.to_string()))?;
     Ok(serde_cbor::from_slice(&cbor)?)
 }
 
@@ -127,9 +132,9 @@ fn validate_cose_signature(
 ) -> Result<()> {
     let signing_cert_public_key = attestation_doc_signing_cert.public_key()?;
     true_or_invalid(
-        cose_sign_1_decoded.verify_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(
-            &signing_cert_public_key,
-        )?,
+        cose_sign_1_decoded
+            .verify_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&signing_cert_public_key)
+            .map_err(|err| AttestationError::Cose(err.to_string()))?,
         AttestationError::InvalidCoseSignature,
     )
 }
