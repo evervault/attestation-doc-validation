@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 
 static NITRO_ROOT_CA_BYTES: &[u8] = include_bytes!("nitro.pem");
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PCRs {
     pub pcr_0: String,
     pub pcr_1: String,
