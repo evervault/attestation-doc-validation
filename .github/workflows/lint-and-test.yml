@@ -13,6 +13,12 @@ jobs:
       - run: rustup component add clippy 
       - uses: actions-rs/clippy-check@v1
         with:
+          name: pedantic-check
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -- -W clippy::pedantic
+      - uses: actions-rs/clippy-check@v1
+        with:
+          name: regular-check
           token: ${{ secrets.GITHUB_TOKEN }}
           args: -- -D warnings
       - name: Format project
