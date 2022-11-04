@@ -56,7 +56,7 @@ where
 
 pub type Result<T> = std::result::Result<T, AttestationError>;
 
-fn extract_attestation_doc(
+pub fn extract_attestation_doc(
     cose_sign_1_decoded: &aws_nitro_enclaves_cose::CoseSign1,
 ) -> Result<AttestationDoc> {
     let cbor = cose_sign_1_decoded
