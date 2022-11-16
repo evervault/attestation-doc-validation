@@ -5,6 +5,7 @@ use openssl::{
     x509::{store, X509StoreContext, X509},
 };
 use std::collections::BTreeMap;
+use pyo3::prelude::*;
 
 /**
  * Adapted from code written by chinaza-evervault
@@ -12,12 +13,21 @@ use std::collections::BTreeMap;
 
 static NITRO_ROOT_CA_BYTES: &[u8] = include_bytes!("nitro.pem");
 
+#[pyclass]
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PCRs {
     pub pcr_0: String,
     pub pcr_1: String,
     pub pcr_2: String,
     pub pcr_8: String,
+}
+
+#[pymethods]
+impl PCRs {
+    #[new]
+    pub fn new(pcr_0: String, pcr_1: String, pcr_2: String, pcr_8: String) -> PCRs {
+        PCRs { pcr_0, pcr_1, pcr_2, pcr_8 }
+    }
 }
 
 impl ToString for PCRs {
@@ -203,6 +213,14 @@ pub fn validate_attestation_doc(
     Ok(attestation_doc)
 }
 
+#[pyfunction]
+pub fn validate_attestation_doc_py(
+    attestation_doc_cose_sign_1_bytes: &[u8],
+    expected_pcrs: &PCRs,
+) -> PyResult<bool> {
+    Ok(validate_attestation_doc(attestation_doc_cose_sign_1_bytes, expected_pcrs).is_ok())
+}
+
 #[cfg(test)]
 mod attestation_tests {
     use super::*;
@@ -259,4 +277,14 @@ mod attestation_tests {
         let err = validate_attestation_doc(&sample_cose_sign_1_bytes, &expected_pcrs).unwrap_err();
         assert!(matches!(err, AttestationError::UntrustedCert));
     }
+}
+
+/// A Python module implemented in Rust. The name of this function must match
+/// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
+/// import the module.
+#[pymodule]
+fn attestation_doc_validation(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(validate_attestation_doc_py, m)?)?;
+    m.add_class::<PCRs>()?;
+    Ok(())
 }
