@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "attestation-doc-validation"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "aws-nitro-enclaves-cose",
  "aws-nitro-enclaves-nsm-api",
