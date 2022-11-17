@@ -23,8 +23,8 @@ jobs:
           args: -- -D warnings
       - name: Format project
         run: cargo fmt --check 
-      - name: Test project, excluding time-sensitive tests validate_valid_attestation_doc_in_cert
-        run: cargo test -- --skip time_sensitive
+      - name: Test project, excluding time-sensitive tests
+        run: cargo test -- --skip time_sensitive validate_valid_attestation_doc_in_cert
       - name: Install libfaketime for use in time-sensitive tests
         run: sudo apt-get install -y libfaketime
       - name: Run time-sensitive tests at older date
