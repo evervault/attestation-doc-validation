@@ -52,10 +52,21 @@ where
     UnexpectedPCRs(String, String),
     #[error("PCR{0} was missing in the attestation doc")]
     MissingPCR(usize),
+    #[error("The received certificate had no Subject Alt Name extension")]
+    NoSubjectAltNames,
+    #[error("Unable to parse attestation doc bytes from Subject Alt Name extension")]
+    ParseError,
+    #[error(transparent)]
+    HexError(#[from] hex::FromHexError),
+    #[error("Attempts to parse certificate from PEM and DER encoding failed")]
+    CertDecodeError,
 }
 
 pub type Result<T> = std::result::Result<T, AttestationError>;
 
+/// # Errors
+///
+/// Will return `Err` if the CBOR data cannot be extracted from the COSE data or if it cannot be parsed as an attestation document
 pub fn extract_attestation_doc(
     cose_sign_1_decoded: &aws_nitro_enclaves_cose::CoseSign1,
 ) -> Result<AttestationDoc> {
@@ -74,9 +85,7 @@ fn true_or_invalid(check: bool, err: AttestationError) -> Result<()> {
 }
 
 /// Derived from [AWS attestation process](https://github.com/aws/aws-nitro-enclaves-nsm-api/blob/main/docs/attestation_process.md)
-pub fn validate_attestation_document_structure(
-    attestation_document: &AttestationDoc,
-) -> Result<()> {
+fn validate_attestation_document_structure(attestation_document: &AttestationDoc) -> Result<()> {
     let valid_structure_check = !attestation_document.module_id.is_empty()
         && attestation_document.digest == Digest::SHA384
         && !attestation_document.pcrs.is_empty()
@@ -181,6 +190,9 @@ fn pcrs_match(attestation_doc: &AttestationDoc, expected_pcrs: &PCRs) -> Result<
     )
 }
 
+/// # Errors
+///
+/// Will return `Err` due to parsing errors or if the parsed attestation document is deemed invalid
 pub fn validate_attestation_doc(
     attestation_doc_cose_sign_1_bytes: &[u8],
     expected_pcrs: &PCRs,
@@ -201,6 +213,43 @@ pub fn validate_attestation_doc(
     validate_cose_signature(&attestation_doc_signing_cert, &cose_sign_1_decoded)?;
     pcrs_match(&attestation_doc, expected_pcrs)?;
     Ok(attestation_doc)
+}
+
+/// The self signed certificate provided by the enclave embeds the
+/// cose-sign1 structure as a subject alternative name (SAN) in the form
+///
+/// `<hex_encoded_cose_sign_1>..*.cages.evervault.com`
+///
+/// In order to extract it, we simply pick the longest SAN, take the string before the first dot, and decode the hex.
+fn extract_signed_cose_sign_1_from_certificate(certificate: &X509) -> Result<Vec<u8>> {
+    let subject_alt_names = certificate
+        .subject_alt_names()
+        .ok_or(AttestationError::NoSubjectAltNames)?;
+    let parsed_attestation_bytes = subject_alt_names
+        .iter()
+        .filter_map(openssl::x509::GeneralNameRef::dnsname)
+        .filter_map(|x| x.split('.').next())
+        .reduce(|a, b| if a.len() > b.len() { a } else { b })
+        .ok_or(AttestationError::ParseError)?;
+    Ok(hex::decode(parsed_attestation_bytes)?)
+}
+
+/// # Errors
+///
+/// Will return `Err` due to parsing errors or if the parsed attestation document is deemed invalid
+pub fn validate_attestation_doc_in_cert(
+    cert_bytes: &[u8],
+    expected_pcrs: &PCRs,
+) -> Result<AttestationDoc> {
+    let parsed_cert = if let Ok(cert) = X509::from_pem(cert_bytes) {
+        cert
+    } else if let Ok(cert) = X509::from_der(cert_bytes) {
+        cert
+    } else {
+        return Err(AttestationError::CertDecodeError);
+    };
+    let cose_sign_1_bytes = extract_signed_cose_sign_1_from_certificate(&parsed_cert)?;
+    validate_attestation_doc(&cose_sign_1_bytes, expected_pcrs)
 }
 
 #[cfg(test)]
@@ -258,5 +307,51 @@ mod attestation_tests {
         };
         let err = validate_attestation_doc(&sample_cose_sign_1_bytes, &expected_pcrs).unwrap_err();
         assert!(matches!(err, AttestationError::UntrustedCert));
+    }
+
+    #[test]
+    fn validate_valid_attestation_doc_in_cert() {
+        let sample_cert_bytes = std::fs::read(std::path::Path::new(
+            "./test-files/pem-sample-cert-containing-attestation-doc-16-11-22-10-55",
+        ))
+        .unwrap();
+        let expected_pcrs = PCRs {
+            pcr_0: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_1: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_2: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_8: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+        };
+        let _doc = validate_attestation_doc_in_cert(&sample_cert_bytes, &expected_pcrs).unwrap();
+    }
+
+    #[test]
+    fn validate_valid_attestation_doc_in_cert_incorrect_pcrs() {
+        let sample_cert_bytes = std::fs::read(std::path::Path::new(
+            "./test-files/pem-sample-cert-containing-attestation-doc-16-11-22-10-55",
+        ))
+        .unwrap();
+        let expected_pcrs = PCRs {
+            pcr_0: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_1: "000000000000000incorrect000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_2: "00000000000000000000000000000000000000000incorrect000000000000000000000000000000000000000".to_string(),
+            pcr_8: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+        };
+        let err = validate_attestation_doc_in_cert(&sample_cert_bytes, &expected_pcrs).unwrap_err();
+        assert!(matches!(err, AttestationError::UnexpectedPCRs(_, _)));
+    }
+
+    #[test]
+    fn validate_valid_attestation_doc_in_cert_der_encoding() {
+        let sample_cert_bytes = std::fs::read(std::path::Path::new(
+            "./test-files/der-sample-cert-containing-attestation-doc-16-11-22-10-55",
+        ))
+        .unwrap();
+        let expected_pcrs = PCRs {
+            pcr_0: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_1: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_2: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+            pcr_8: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000".to_string(),
+        };
+        let _doc = validate_attestation_doc_in_cert(&sample_cert_bytes, &expected_pcrs).unwrap();
     }
 }
