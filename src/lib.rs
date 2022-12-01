@@ -270,12 +270,24 @@ pub fn validate_attestation_doc_py(
     Ok(validate_attestation_doc(attestation_doc_cose_sign_1_bytes, expected_pcrs).is_ok())
 }
 
+#[pyfunction]
+pub fn validate_attestation_doc_in_cert_py(
+    cert_bytes: &[u8],
+    expected_pcrs: &PCRs,
+) -> PyResult<bool> {
+    match validate_attestation_doc_in_cert(cert_bytes, expected_pcrs) {
+        Ok(_) => Ok(true),
+        Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e.to_string()))
+    }
+}
+
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
 /// import the module.
 #[pymodule]
 fn attestation_doc_validation(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(validate_attestation_doc_py, m)?)?;
+    m.add_function(wrap_pyfunction!(validate_attestation_doc_in_cert_py, m)?)?;
     m.add_class::<PCRs>()?;
     Ok(())
 }
