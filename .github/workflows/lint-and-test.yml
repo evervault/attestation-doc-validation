@@ -1,8 +1,8 @@
 on:
   push:
     paths:
-      - src/**
-      - test-files/**
+      - attestation-doc-validation/src/**
+      - attestation-doc-validation/test-files/**
       - .github/workflows/lint-and-test.yml
 name: Lint and Test
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: rustup component add clippy 
+      - run: rustup component add clippy
       - uses: actions-rs/clippy-check@v1
         with:
           name: pedantic-check
@@ -22,19 +22,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: -- -D warnings
       - name: Format project
-        run: cargo fmt --check 
+        run: cargo fmt --check
       - name: Test project, excluding time-sensitive tests
         run: cargo test -- --skip time_sensitive --skip validate_valid_attestation_doc_in_cert
       - name: Install libfaketime for use in time-sensitive tests
         run: sudo apt-get install -y libfaketime
       - name: Run time-sensitive tests at older date
-        env: 
+        env:
           LD_PRELOAD: /usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1
-          FAKETIME: '2022-10-13 10:00:00'
+          FAKETIME: "2022-10-13 10:00:00"
         run: cargo test time_sensitive
       - name: Run cert tests at correct date
         env:
           LD_PRELOAD: /usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1
-          FAKETIME: '2022-11-16 10:55:00'
+          FAKETIME: "2022-11-16 10:55:00"
         run: cargo test validate_valid_attestation_doc_in_cert
-        
