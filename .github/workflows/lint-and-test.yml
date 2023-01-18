@@ -24,16 +24,11 @@ jobs:
       - name: Format project
         run: cargo fmt --check
       - name: Test project, excluding time-sensitive tests
-        run: cargo test -- --skip time_sensitive --skip validate_valid_attestation_doc_in_cert
+        run: cargo test -- --skip time_sensitive
       - name: Install libfaketime for use in time-sensitive tests
         run: sudo apt-get install -y libfaketime
-      - name: Run time-sensitive tests at older date
+      - name: Run tests using real certs at older date
         env:
           LD_PRELOAD: /usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1
-          FAKETIME: "2023-01-18 15:00:00"
+          FAKETIME: "2023-01-18 15:15:00"
         run: cargo test time_sensitive
-      - name: Run cert tests at correct date
-        env:
-          LD_PRELOAD: /usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1
-          FAKETIME: "2023-01-18 15:00:00"
-        run: cargo test validate_valid_attestation_doc_in_cert

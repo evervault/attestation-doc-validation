@@ -4,7 +4,7 @@
  * our validity checks. To get around this the tests corresponding to live certs are suffixed with time_sensitive, and
  * only run in CI when the time has been spoofed to match their validity window.
  *
- * The certs being used were generated on January 18th 2023 at approximately 3pm.
+ * The certs being used were generated on January 18th 2023 at approximately 15:15.
  */
 use attestation_doc_validation::{
     error, parse_cert, validate_attestation_doc_in_cert, validate_expected_pcrs, PCRProvider,
