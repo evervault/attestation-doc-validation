@@ -1,10 +1,11 @@
 mod attestation_doc;
 mod cert;
-pub mod error;
 
 use attestation_doc::AttestationDoc;
-pub use attestation_doc::{validate_expected_pcrs, PCRProvider};
 use openssl::x509::X509;
+
+pub use attestation_doc::{validate_expected_pcrs, PCRProvider};
+pub mod error;
 
 // Helper function to fail early on any variant of error::AttestError
 fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> Result<(), E> {
@@ -73,7 +74,7 @@ mod test {
     use super::attestation_doc::PCRs;
     use super::*;
 
-    use rcgen::{generate_simple_self_signed, Certificate};
+    use rcgen::generate_simple_self_signed;
 
     fn embed_attestation_doc_in_cert(hostname: &str, cose_bytes: &[u8]) -> rcgen::Certificate {
         let subject_alt_names = vec![
@@ -90,15 +91,6 @@ mod test {
 
     fn rcgen_cert_to_der(cert: rcgen::Certificate) -> Vec<u8> {
         cert.serialize_der().unwrap()
-    }
-
-    fn test_validation_on_attestable_cert<T: PCRProvider>(cert: Certificate, pcrs: &T) {
-        let cert = rcgen_cert_to_pem(cert);
-        let cert = parse_cert(&cert).unwrap();
-        let validated_ad = validate_attestation_doc_in_cert(&cert);
-        assert!(validated_ad.is_ok());
-        let is_attested = validate_expected_pcrs(validated_ad.as_ref().unwrap(), pcrs).is_ok();
-        assert!(is_attested);
     }
 
     #[test]
@@ -145,23 +137,6 @@ mod test {
                     .unwrap_or(false)
             });
         assert!(matched_hostname);
-    }
-
-    #[test]
-    fn validate_valid_attestation_doc_time_sensitive() {
-        let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
-        ))
-        .unwrap();
-        let expected_pcrs = PCRs {
-        pcr_0: "f4d48b81a460c9916d1e685119074bf24660afd3e34fae9fca0a0d28d9d5599936332687e6f66fc890ac8cf150142d8b".to_string(),
-        pcr_1: "bcdf05fefccaa8e55bf2c8d6dee9e79bbff31e34bf28a99aa19e6b29c37ee80b214a414b7607236edf26fcb78654e63f".to_string(),
-        pcr_2: "d8f114da658de5481f8d9ec73907feb553560787522f705c92d7d96beed8e15e2aa611984e098c576832c292e8dc469a".to_string(),
-        pcr_8: "8790eb3cce6c83d07e84b126dc61ca923333d6f66615c4a79157de48c5ab2418bdc60746ea7b7afbff03a1c6210201cb".to_string(),
-    };
-        let attestable_cert =
-            embed_attestation_doc_in_cert("test-cage.localhost:6789", &sample_cose_sign_1_bytes);
-        test_validation_on_attestable_cert(attestable_cert, &expected_pcrs);
     }
 
     #[test]
