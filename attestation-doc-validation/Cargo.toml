@@ -16,3 +16,4 @@ serde_bytes = "0.11"
 
 [dev-dependencies]
 rcgen = "0.10"
+base64 = "0.21"

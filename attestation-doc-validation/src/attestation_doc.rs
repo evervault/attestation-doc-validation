@@ -86,11 +86,10 @@ impl PCRProvider for PCRs {
     }
 }
 
-
 ///
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if any of the expected PCRs are missing from the attestation document, or if the expected PCRs don't match the values embedded in the doc
 pub fn validate_expected_pcrs<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
