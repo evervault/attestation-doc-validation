@@ -65,4 +65,8 @@ where
     HexError(#[from] hex::FromHexError),
     #[error("Failed to compute seconds since the unix epoch")]
     TimeError,
+    #[error("Failed to parse TLS Root Cert as trust anchor")]
+    TrustAnchorError,
+    #[error("X509 Cert is malformed")]
+    MalformedCert,
 }

@@ -5,7 +5,7 @@ use super::{
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
 pub(super) use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
 use aws_nitro_enclaves_nsm_api::api::Digest;
-use openssl::pkey::{PKey, Public};
+use x509_parser::x509::SubjectPublicKeyInfo;
 use std::collections::BTreeMap;
 use std::fmt::Write;
 
@@ -115,10 +115,12 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     )
 }
 
-pub(super) fn validate_cose_signature(
-    signing_cert_public_key: &PKey<Public>,
+pub(super) fn validate_cose_signature<'a>(
+    signing_cert_public_key: &'a SubjectPublicKeyInfo<'a>,
     cose_sign_1_decoded: &CoseSign1,
 ) -> AttestationDocResult<()> {
+    
+  
     true_or_invalid(
         cose_sign_1_decoded
             .verify_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(signing_cert_public_key)
