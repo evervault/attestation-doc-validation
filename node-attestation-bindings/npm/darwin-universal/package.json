@@ -1,0 +1,15 @@
+{
+  "name": "node-attestation-bindings-darwin-universal",
+  "version": "0.0.0",
+  "os": [
+    "darwin"
+  ],
+  "main": "node-attestation-bindings.darwin-universal.node",
+  "files": [
+    "node-attestation-bindings.darwin-universal.node"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">= 10"
+  }
+}
