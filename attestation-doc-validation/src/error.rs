@@ -5,6 +5,7 @@ pub type AttestationDocResult<T> = Result<T, AttestationDocError>;
 pub type CertResult<T> = Result<T, CertError>;
 
 /// Top level wrapper to show which step in validation failed.
+#[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum AttestError
 where
@@ -17,6 +18,7 @@ where
 }
 
 /// Wrapping type to record the specific error that occurred while validating the attestation document received
+#[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum AttestationDocError
 where
@@ -43,6 +45,7 @@ where
 }
 
 /// Wrapping type to record the specific error that occurred while validating the TLS Cert received
+#[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum CertError
 where
