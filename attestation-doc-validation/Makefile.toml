@@ -35,7 +35,7 @@ dependencies = ["test", "test_time_sensitive"]
 
 [tasks.build]
 command = "cargo"
-args = ["build", "--release"]
+args = ["build"]
 
 [tasks.ci]
 dependencies = ["lint","format","check","test_ci","build"]
