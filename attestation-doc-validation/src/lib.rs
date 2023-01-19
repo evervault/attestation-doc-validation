@@ -4,7 +4,7 @@ mod cert;
 use attestation_doc::AttestationDoc;
 use openssl::x509::X509;
 
-pub use attestation_doc::{validate_expected_pcrs, PCRProvider};
+pub use attestation_doc::{validate_expected_pcrs, validate_expected_nonce, PCRProvider};
 pub mod error;
 
 // Helper function to fail early on any variant of error::AttestError
