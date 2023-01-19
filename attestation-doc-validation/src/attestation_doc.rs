@@ -117,9 +117,9 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
 }
 
 /// Extracts the nonce embedded in the attestation doc, encodes it to base64 and compares it to the base64 encoded nonce given
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns a `NonceMismatch` error if the attestation document contains an unexpected nonce, or does not contain a nonce
 pub fn validate_expected_nonce<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
