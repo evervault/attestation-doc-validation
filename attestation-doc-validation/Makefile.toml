@@ -1,0 +1,41 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+[tasks.lint]
+install_crate = "clippy"
+command = "cargo"
+args = ["clippy", "--", "-W", "clippy::pedantic"]
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--check"]
+
+[tasks.check]
+command = "cargo"
+args = ["check"]
+
+[tasks.test]
+command = "cargo"
+args = ["test","--","--skip","time_sensitive"]
+
+[tasks.add_lib_faketime]
+script = '''
+sudo apt-get install -y libfaketime
+'''
+
+[tasks.test_time_sensitive]
+dependencies = ["add_lib_faketime"]
+env = { "LD_PRELOAD" = "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1", "FAKETIME" = "2023-01-18 15:15:00" }
+command = "cargo"
+args = ["test","time_sensitive"]
+
+[tasks.test_ci]
+dependencies = ["test", "test_time_sensitive"]
+
+[tasks.build]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.ci]
+dependencies = ["lint","format","check","test_ci","build"]
