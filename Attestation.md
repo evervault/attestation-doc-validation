@@ -22,4 +22,4 @@ Cages also support the use of a nonce as a liveness check! By default, Clients w
 
 ## Diagram
 
-[Cage Attestation Flow](./static//Attestation.png)
+![Cage Attestation Flow](./static//Attestation.png)
