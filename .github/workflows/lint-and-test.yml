@@ -17,4 +17,7 @@ jobs:
           override: true
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
-      - run: cargo make ci
+      - name: Run CI Tasks with backtrace
+        run: cargo make ci
+        env:
+          RUST_BACKTRACE: full

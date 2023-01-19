@@ -4,5 +4,5 @@ members = [
   "node-attestation-bindings"
 ]
 
-[profile.release]
+[node-attestation-bindings.profile.release]
 lto = true
