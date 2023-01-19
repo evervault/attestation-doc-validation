@@ -15,8 +15,12 @@ args = ["fmt", "--check"]
 command = "cargo"
 args = ["build", "--release"]
 
+[tasks.install_deps]
+command = "yarn"
+
 [tasks.build_bindings]
-command = "npm"
+dependencies = ["install_deps"]
+command = "yarn"
 args = ["run", "build"]
 
 [tasks.build]
