@@ -5,6 +5,7 @@ use super::{
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
 pub(super) use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
 use aws_nitro_enclaves_nsm_api::api::Digest;
+use base64::Engine;
 use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
 use std::fmt::Write;
@@ -112,6 +113,33 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     true_or_invalid(
         same_pcrs,
         AttestationDocError::UnexpectedPCRs(expected_pcrs.to_string(), received_pcrs.to_string()),
+    )
+}
+
+/// Extracts the nonce embedded in the attestation doc, encodes it to base64 and compares it to the base64 encoded nonce given
+///
+/// # Errors
+///
+/// Returns a `NonceMismatch` error if the attestation document contains an unexpected nonce, or does not contain a nonce
+pub fn validate_expected_nonce<T: PCRProvider>(
+    attestation_doc: &AttestationDoc,
+    expected_nonce: &str,
+) -> AttestationDocResult<()> {
+    let matching_nonce = attestation_doc
+        .nonce
+        .as_ref()
+        .map(|existing_nonce| base64::prelude::BASE64_STANDARD.encode(existing_nonce))
+        .ok_or_else(|| AttestationDocError::NonceMismatch {
+            expected: expected_nonce.to_string(),
+            received: None,
+        })?;
+
+    true_or_invalid(
+        matching_nonce == expected_nonce,
+        AttestationDocError::NonceMismatch {
+            expected: expected_nonce.to_string(),
+            received: Some(matching_nonce),
+        },
     )
 }
 

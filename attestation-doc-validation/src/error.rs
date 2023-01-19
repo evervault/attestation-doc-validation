@@ -42,6 +42,11 @@ where
     MissingUserData,
     #[error("User data in attestation doc did not contain the certificate public key")]
     UserDataMismatch,
+    #[error("Nonce in the attestation doc did not match the nonce provided,\n\nExpected: {expected}\nReceived: {received:?}")]
+    NonceMismatch {
+        expected: String,
+        received: Option<String>,
+    },
 }
 
 /// Wrapping type to record the specific error that occurred while validating the TLS Cert received
