@@ -1,7 +1,8 @@
 [workspace]
 members = [
   "attestation-doc-validation",
-  "python-attestation-bindings"
+  "python-attestation-bindings",
+  "node-attestation-bindings"
 ]
 
 [profile.release]

@@ -1,0 +1,30 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+[tasks.lint]
+install_crate = "clippy"
+command = "cargo"
+args = ["clippy", "--", "-W", "clippy::pedantic"]
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--check"]
+
+[tasks.build_lib]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.install_deps]
+command = "yarn"
+
+[tasks.build_bindings]
+dependencies = ["install_deps"]
+command = "yarn"
+args = ["run", "build"]
+
+[tasks.build]
+dependencies = ["build_lib","build_bindings"]
+
+[tasks.ci]
+dependencies = ["lint","format","build"]
