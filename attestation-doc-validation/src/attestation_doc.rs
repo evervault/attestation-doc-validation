@@ -8,7 +8,6 @@ use aws_nitro_enclaves_nsm_api::api::Digest;
 use base64::Engine;
 use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
-use std::fmt::Write;
 
 // Helper macros to get, write and compare PCRs
 macro_rules! extract_pcr {
@@ -18,14 +17,6 @@ macro_rules! extract_pcr {
             .ok_or(AttestationDocError::MissingPCR($idx))?
             .to_string()
     }};
-}
-
-macro_rules! write_pcr {
-    ($provider:ident, $writer:expr, $pcr:ident, $label:expr) => {
-        if let Some(pcr_val) = $provider.$pcr() {
-            let _ = writeln!($writer, "{}: {}", $label, pcr_val);
-        }
-    };
 }
 
 macro_rules! compare_pcrs {
@@ -47,12 +38,13 @@ pub trait PCRProvider {
     fn pcr_8(&self) -> Option<&str>;
 
     fn to_string(&self) -> String {
-        let mut pcrs_str = String::new();
-        write_pcr!(self, &mut pcrs_str, pcr_0, "PCR0");
-        write_pcr!(self, &mut pcrs_str, pcr_1, "PCR1");
-        write_pcr!(self, &mut pcrs_str, pcr_2, "PCR2");
-        write_pcr!(self, &mut pcrs_str, pcr_8, "PCR8");
-        pcrs_str
+        format!(
+            "PCRS {{ PCR0: {:?}, PCR1: {:?}, PCR2: {:?}, PCR8: {:?} }}",
+            self.pcr_0(),
+            self.pcr_1(),
+            self.pcr_2(),
+            self.pcr_8()
+        )
     }
 
     fn eq<T: PCRProvider>(&self, rhs: &T) -> bool {
