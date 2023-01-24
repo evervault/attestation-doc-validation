@@ -1,7 +1,5 @@
 [workspace]
 members = [
-  "attestation-doc-validation"
+  "attestation-doc-validation",
+  "node-attestation-bindings"
 ]
-
-[profile.release]
-lto = true

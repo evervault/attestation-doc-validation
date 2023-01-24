@@ -1,8 +1,8 @@
 on:
   push:
     paths:
-      - attestation-doc-validation/src/**
-      - attestation-doc-validation/test-files/**
+      - attestation-doc-validation/**
+      - node-attestation-bindings/**
       - .github/workflows/lint-and-test.yml
 name: Lint and Test
 jobs:
@@ -10,25 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: rustup component add clippy
-      - uses: actions-rs/clippy-check@v1
+      - name: Install latest stable toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          name: pedantic-check
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -W clippy::pedantic
-      - uses: actions-rs/clippy-check@v1
-        with:
-          name: regular-check
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D warnings
-      - name: Format project
-        run: cargo fmt --check
-      - name: Test project, excluding time-sensitive tests
-        run: cargo test -- --skip time_sensitive
-      - name: Install libfaketime for use in time-sensitive tests
-        run: sudo apt-get install -y libfaketime
-      - name: Run tests using real certs at older date
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Run CI Tasks with backtrace
+        run: cargo make ci
         env:
-          LD_PRELOAD: /usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1
-          FAKETIME: "2023-01-18 15:15:00"
-        run: cargo test time_sensitive
+          RUST_BACKTRACE: full
