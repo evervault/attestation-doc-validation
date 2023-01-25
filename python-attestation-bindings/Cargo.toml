@@ -9,5 +9,5 @@ name = "python_attestation_bindings"
 crate-type = ["cdylib"]
 
 [dependencies]
-attestation-doc-validation = { path = "../attestation-doc-validation" }
+attestation-doc-validation = { path = "../attestation-doc-validation", features = ["vendored_openssl"] }
 pyo3 = { version = "0.18", features = ["extension-module"] }
