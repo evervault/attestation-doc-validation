@@ -1,14 +1,16 @@
-mod attestation_doc;
+mod attestation;
 mod cert;
+mod nsm;
 
-use attestation_doc::AttestationDoc;
+use attestation::AttestationDoc;
 use openssl::x509::X509;
 
-pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
+pub use attestation::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
 pub mod error;
+use error::Result;
 
 // Helper function to fail early on any variant of error::AttestError
-fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> Result<(), E> {
+fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> std::result::Result<(), E> {
     if check {
         Ok(())
     } else {
@@ -21,7 +23,7 @@ fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> Result<(
 /// # Errors
 ///
 /// If both PEM and DER decoding of the certificate fail
-pub fn parse_cert(given_cert: &[u8]) -> error::AttestResult<X509> {
+pub fn parse_cert(given_cert: &[u8]) -> Result<X509> {
     let parsed_cert =
         cert::parse_pem_cert(given_cert).or_else(|_| cert::parse_der_cert(given_cert))?;
     Ok(parsed_cert)
@@ -41,14 +43,14 @@ pub fn parse_cert(given_cert: &[u8]) -> error::AttestResult<X509> {
 /// - The attestation document is not signed by the nitro cert chain
 /// - The public key from the certificate is not present in the attestation document's challenge
 /// - Any of the certificates are malformed
-pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> error::AttestResult<AttestationDoc> {
+pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<AttestationDoc> {
     // Extract raw attestation doc from subject alt names
     let cose_signature = cert::extract_signed_cose_sign_1_from_certificate(given_cert)?;
 
     // Parse attestation doc from cose signature and validate structure
     let (cose_sign_1_decoded, decoded_attestation_doc) =
-        attestation_doc::decode_attestation_document(&cose_signature)?;
-    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+        attestation::decode_attestation_document(&cose_signature)?;
+    attestation::validate_attestation_document_structure(&decoded_attestation_doc)?;
 
     // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
     let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
@@ -60,11 +62,11 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> error::AttestResul
     // Validate Cose signature over attestation doc
     let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
     let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
-    attestation_doc::validate_cose_signature(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
+    attestation::validate_cose_signature(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
 
     // Validate that the cert public key is embedded in the attestation doc
     let cage_cert_public_key = cert::export_public_key_to_der(given_cert)?;
-    attestation_doc::validate_expected_challenge(&decoded_attestation_doc, &cage_cert_public_key)?;
+    attestation::validate_expected_challenge(&decoded_attestation_doc, &cage_cert_public_key)?;
 
     Ok(decoded_attestation_doc)
 }

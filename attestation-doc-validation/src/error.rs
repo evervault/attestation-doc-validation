@@ -1,8 +1,8 @@
 use thiserror::Error;
 
-pub type AttestResult<T> = Result<T, AttestError>;
-pub type AttestationDocResult<T> = Result<T, AttestationDocError>;
-pub type CertResult<T> = Result<T, CertError>;
+pub type Result<T> = std::result::Result<T, AttestError>;
+pub type AttestationResult<T> = std::result::Result<T, AttestationError>;
+pub type CertResult<T> = std::result::Result<T, CertError>;
 
 /// Top level wrapper to show which step in validation failed.
 #[allow(clippy::module_name_repetitions)]
@@ -11,8 +11,8 @@ pub enum AttestError
 where
     Self: Send + Sync,
 {
-    #[error("An error occurred while validating the attestation document received: {0}")]
-    AttestationDocError(#[from] AttestationDocError),
+    #[error("An error occurred while attesting the connection received: {0}")]
+    AttestationError(#[from] AttestationError),
     #[error("An error occurred while validating the TLS Certificate received: {0}")]
     CertError(#[from] CertError),
 }
@@ -20,7 +20,7 @@ where
 /// Wrapping type to record the specific error that occurred while validating the attestation document received
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
-pub enum AttestationDocError
+pub enum AttestationError
 where
     Self: Send + Sync,
 {
