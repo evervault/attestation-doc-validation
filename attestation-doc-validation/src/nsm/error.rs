@@ -46,6 +46,7 @@ impl std::convert::From<CoseError> for NsmError {
             CoseError::SerializationError(inner) => NsmError::Cbor(inner),
             CoseError::TagError(inner) => NsmError::TagError(inner),
             CoseError::EncryptionError(inner) => NsmError::EncryptionError(inner),
+            CoseError::SignatureError(inner) => NsmError::SignatureError(inner),
         }
     }
 }

@@ -91,7 +91,7 @@ fn validate_valid_attestation_doc_in_cert_incorrect_pcrs_time_sensitive() {
     let err = validate_expected_pcrs(&ad, &expected_pcrs).unwrap_err();
     assert!(matches!(
         err,
-        error::AttestationDocError::UnexpectedPCRs(_, _)
+        error::AttestationError::UnexpectedPCRs(_, _)
     ));
 }
 

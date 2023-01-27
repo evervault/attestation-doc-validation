@@ -1,4 +1,4 @@
-use super::error::{NsmError, NsmResult};
+
 use aws_nitro_enclaves_cose::crypto::{
     Decryption, Encryption, EncryptionAlgorithm, Entropy, Hash, MessageDigest,
 };
@@ -6,7 +6,6 @@ use aws_nitro_enclaves_cose::error::CoseError;
 use ring::aead::{Aad, BoundKey, Nonce, NonceSequence, SealingKey, OpeningKey, UnboundKey};
 use ring::aead::{Algorithm, AES_128_GCM, AES_256_GCM};
 use ring::rand::{SecureRandom, SystemRandom};
-use x509_parser::x509::SubjectPublicKeyInfo;
 
 struct NonceProvider<'a> {
     nonce: Option<&'a [u8]>,
@@ -35,16 +34,16 @@ impl Entropy for RingClient {
     fn rand_bytes(buff: &mut [u8]) -> Result<(), CoseError> {
         // TODO: evaluate performance of creating a new sys random client
         let rng = SystemRandom::new();
-        rng.fill(buff);
+        let _ = rng.fill(buff);
         Ok(())
     }
 }
 
-fn get_ring_cipher_from_encryption_algorithm(algorithm: EncryptionAlgorithm) -> Algorithm {
+fn get_ring_cipher_from_encryption_algorithm(algorithm: EncryptionAlgorithm) -> &'static Algorithm {
   match algorithm {
-    EncryptionAlgorithm::Aes128Gcm => AES_128_GCM,
+    EncryptionAlgorithm::Aes128Gcm => &AES_128_GCM,
     EncryptionAlgorithm::Aes192Gcm => unimplemented!(),
-    EncryptionAlgorithm::Aes256Gcm => AES_256_GCM,
+    EncryptionAlgorithm::Aes256Gcm => &AES_256_GCM,
   }
 }
 
@@ -65,7 +64,7 @@ impl Encryption for RingClient {
         data: &[u8],
         tag: &mut [u8],
     ) -> Result<Vec<u8>, CoseError> {
-        let cipher: Algorithm = get_ring_cipher_from_encryption_algorithm(algo);
+        let cipher = get_ring_cipher_from_encryption_algorithm(algo);
 
         let unbound_aes_key = UnboundKey::new(&cipher, key).unwrap();
         let mut aes_key = SealingKey::new(unbound_aes_key, NonceProvider::from(iv));
@@ -95,7 +94,7 @@ impl Decryption for RingClient {
       ciphertext: &[u8],
       tag: &[u8],
   ) -> Result<Vec<u8>, CoseError> {
-      let cipher: Algorithm = get_ring_cipher_from_encryption_algorithm(algo);
+      let cipher = get_ring_cipher_from_encryption_algorithm(algo);
 
       let unbound_aes_key = UnboundKey::new(&cipher, key).unwrap();
       let mut aes_key = OpeningKey::new(unbound_aes_key, NonceProvider::from(iv));
@@ -111,18 +110,18 @@ impl Decryption for RingClient {
   }
 }
 
-fn get_ring_algorithm_from_message_digest(digest: MessageDigest) -> ring::digest::Algorithm {
+fn get_ring_algorithm_from_message_digest<'a>(digest: MessageDigest) -> &'a ring::digest::Algorithm {
   match digest {
-    MessageDigest::Sha256 => ring::digest::SHA256,
-    MessageDigest::Sha384 => ring::digest::SHA384,
-    MessageDigest::Sha512 => ring::digest::SHA512,
+    MessageDigest::Sha256 => &ring::digest::SHA256,
+    MessageDigest::Sha384 => &ring::digest::SHA384,
+    MessageDigest::Sha512 => &ring::digest::SHA512,
   }
 }
 
 impl Hash for RingClient {
   fn hash(digest: MessageDigest, data: &[u8]) -> Result<Vec<u8>, CoseError> {
     let algorithm = get_ring_algorithm_from_message_digest(digest);  
-    let hashed_input = ring::digest::digest(&algorithm, data);
+    let hashed_input = ring::digest::digest(algorithm, data);
     Ok(hashed_input.as_ref().to_vec())
   }
 }
