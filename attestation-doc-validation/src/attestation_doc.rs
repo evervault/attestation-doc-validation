@@ -66,7 +66,6 @@ pub trait PCRProvider {
     }
 }
 
-
 /// Reference implementation of the AWS attestation doc's PCRs exposed at build time.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PCRs {

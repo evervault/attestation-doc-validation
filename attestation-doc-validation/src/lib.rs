@@ -1,6 +1,6 @@
 pub mod attestation_doc;
-pub mod error;
 pub mod cert;
+pub mod error;
 
 use attestation_doc::AttestationDoc;
 use openssl::x509::X509;
