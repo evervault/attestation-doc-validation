@@ -1,3 +1,4 @@
+//! Module for parsing and validating X509 certs
 use super::{
     error::{CertError, CertResult},
     true_or_invalid,
@@ -12,11 +13,8 @@ use serde_bytes::ByteBuf;
 static NITRO_ROOT_CA_BYTES: &[u8] = include_bytes!("nitro.pem");
 
 /// The self signed certificate provided by the enclave embeds the
-/// cose-sign1 structure as a subject alternative name (SAN) in the form
-///
-/// `<hex_encoded_cose_sign_1>..*.cages.evervault.com`
-///
-/// In order to extract it, we simply pick the longest SAN, take the string before the first dot, and decode the hex.
+/// cose-sign1 structure as a subject alternative name (SAN) in the form `<hex_encoded_cose_sign_1>.<cage_name>.<app_uuid>.cages.evervault.com`.
+/// This function extracts the longest SAN, takes the string before the first dot, and decode the hex.
 pub fn extract_signed_cose_sign_1_from_certificate(certificate: &X509) -> CertResult<Vec<u8>> {
     let subject_alt_names = certificate
         .subject_alt_names()

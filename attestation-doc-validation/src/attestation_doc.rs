@@ -1,3 +1,4 @@
+//! Module for parsing and validating attestation documents from AWS Nitro Enclaves.
 use super::{
     error::{AttestationDocError, AttestationDocResult},
     true_or_invalid,
@@ -40,6 +41,7 @@ macro_rules! compare_pcrs {
     };
 }
 
+/// Trait to allow custom implementations of PCR-like types. This helps to make the per language bindings more idiomatic.
 pub trait PCRProvider {
     fn pcr_0(&self) -> Option<&str>;
     fn pcr_1(&self) -> Option<&str>;
@@ -64,6 +66,8 @@ pub trait PCRProvider {
     }
 }
 
+
+/// Reference implementation of the AWS attestation doc's PCRs exposed at build time.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PCRs {
     pub pcr_0: String,
