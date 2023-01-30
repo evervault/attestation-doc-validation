@@ -67,6 +67,13 @@ pub(super) fn parse_der_cert(cert: &[u8]) -> CertResult<X509> {
     Ok(X509::from_der(cert)?)
 }
 
+pub(super) fn get_parser_cert_from_openssl<'a>(
+    der: &'a [u8],
+) -> CertResult<x509_parser::certificate::X509Certificate<'a>> {
+    let (_, parsed) = x509_parser::parse_x509_certificate(der).unwrap();
+    Ok(parsed)
+}
+
 pub(super) fn parse_cert_stack_from_cabundle(cabundle: &[ByteBuf]) -> CertResult<Stack<X509>> {
     let received_certificates: Vec<X509> =
         cabundle.iter().flat_map(|ca| X509::from_der(ca)).collect();

@@ -3,6 +3,7 @@ mod cert;
 mod nsm;
 
 use attestation::AttestationDoc;
+use nsm::RingClient;
 use openssl::x509::X509;
 
 pub use attestation::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
@@ -60,9 +61,13 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<Attestation
     cert::validate_cert_trust_chain(&attestation_doc_signing_cert, &received_certificates)?;
 
     // Validate Cose signature over attestation doc
-    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
-    let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
-    attestation::validate_cose_signature(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
+    // let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+    // let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
+
+    let cert = cert::get_parser_cert_from_openssl(&decoded_attestation_doc.certificate).unwrap();
+    let pub_key: nsm::PublicKey = cert.public_key().into();
+    // attestation::validate_cose_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
+    attestation::validate_cose_signature::<RingClient>(&pub_key, &cose_sign_1_decoded)?;
 
     // Validate that the cert public key is embedded in the attestation doc
     let cage_cert_public_key = cert::export_public_key_to_der(given_cert)?;

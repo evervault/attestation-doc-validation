@@ -6,4 +6,5 @@ mod header_map;
 mod nsm_api;
 mod pkey;
 
-pub(super) use crypto::RingClient;
+pub(super) use crypto::{Hash, RingClient};
+pub(super) use pkey::{PublicKey, SigningPublicKey};

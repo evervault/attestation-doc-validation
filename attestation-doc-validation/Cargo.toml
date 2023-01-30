@@ -21,6 +21,7 @@ x509-parser = "0.14.0"
 ring = { version = "0.16.20", features = ["std"] }
 der = { version = "0.6", features = ["alloc","derive","oid"] }
 p256 = { version = "0.12.0", features = ["ecdsa"] }
+p384 = { version = "0.12.0", features = ["ecdsa"] }
 
 [dev-dependencies]
 rcgen = "0.10"
