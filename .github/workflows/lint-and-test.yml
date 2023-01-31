@@ -21,6 +21,6 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Run CI Tasks with backtrace
-        run: cargo make ci -p ${{ matrix.pacakge }}
+        run: cargo make ci -p ${{ matrix.package }}
         env:
           RUST_BACKTRACE: full
