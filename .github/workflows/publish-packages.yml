@@ -1,0 +1,67 @@
+name: Release rust crate
+
+on:
+  push:
+    tags:
+      - "rust/v*"
+
+jobs:
+  runs-on: ubuntu-latest
+  get-version:
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Get version from tag
+        id: get-version
+        run: |
+          echo "using version tag ${GITHUB_REF:16}"
+          echo ::set-output name=version::${GITHUB_REF:16}
+  assert-matching-version:
+    needs: [get-version]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+      - name: Ensure version of crate matches release
+        id: get-cargo-version
+        run: |
+          CARGO_VERSION=$(cargo metadata --format-version 1 | jq '.packages[] | select( .name == "attestation-doc-validation" ) | .version')
+          if [ "$CARGO_VERSION" != "${{ env.TAG_VERSION }}" ]; then
+            echo "Version in tag does not match cargo.toml"
+            exit 1
+          fi
+        env:
+          TAG_VERSION: ${{ needs.get-version.outputs.version }}
+  # Before publishing, validate that all tests pass
+  run-ci-checks:
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Run CI Tasks with backtrace
+        run: cd attestation-doc-validation ; cargo make ci
+  dry-run-publish:
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Package and Publish Cargo to registry
+        run: |
+          cargo login --token ${{ secrets.CARGO_AUTH_TOKEN }}
+          cd attestation-doc-validation
+          cargo publish --dry-run
+  publish-crate:
+    environment: public-release
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Package and Publish Cargo to registry
+        run: |
+          cargo login --token ${{ secrets.CARGO_AUTH_TOKEN }}
+          cd attestation-doc-validation
+          cargo publish
