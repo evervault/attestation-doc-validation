@@ -65,9 +65,8 @@ jobs:
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Package and Publish Cargo to registry
         run: |
-          cargo login -- --token ${{ secrets.CARGO_AUTH_TOKEN }}
           cd attestation-doc-validation
-          cargo publish --dry-run
+          cargo publish --dry-run --token ${{ secrets.CARGO_AUTH_TOKEN }}
   publish-crate:
     runs-on: ubuntu-latest
     environment: public-release
@@ -82,6 +81,5 @@ jobs:
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Package and Publish Cargo to registry
         run: |
-          cargo login -- --token ${{ secrets.CARGO_AUTH_TOKEN }}
           cd attestation-doc-validation
-          cargo publish
+          cargo publish --token ${{ secrets.CARGO_AUTH_TOKEN }}
