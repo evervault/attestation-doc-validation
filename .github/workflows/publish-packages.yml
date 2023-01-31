@@ -6,8 +6,8 @@ on:
       - "rust/v*"
 
 jobs:
-  runs-on: ubuntu-latest
   get-version:
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
     steps:
@@ -17,6 +17,7 @@ jobs:
           echo "using version tag ${GITHUB_REF:16}"
           echo ::set-output name=version::${GITHUB_REF:16}
   assert-matching-version:
+    runs-on: ubuntu-latest
     needs: [get-version]
     steps:
       - uses: actions/checkout@v2
@@ -33,6 +34,8 @@ jobs:
           TAG_VERSION: ${{ needs.get-version.outputs.version }}
   # Before publishing, validate that all tests pass
   run-ci-checks:
+    runs-on: ubuntu-latest
+    needs: [get-version, assert-matching-version]
     steps:
       - uses: actions/checkout@v2
       - name: Install latest stable toolchain
@@ -45,6 +48,8 @@ jobs:
       - name: Run CI Tasks with backtrace
         run: cd attestation-doc-validation ; cargo make ci
   dry-run-publish:
+    runs-on: ubuntu-latest
+    needs: [get-version, assert-matching-version, run-ci-checks]
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -55,7 +60,9 @@ jobs:
           cd attestation-doc-validation
           cargo publish --dry-run
   publish-crate:
+    runs-on: ubuntu-latest
     environment: public-release
+    needs: [get-version, assert-matching-version, dry-run-publish]
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
