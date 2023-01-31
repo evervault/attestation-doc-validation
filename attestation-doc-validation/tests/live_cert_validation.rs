@@ -46,12 +46,13 @@ struct TestSpec {
     should_pcrs_match: bool,
 }
 
-const TEST_BASE_PATH: &'static str = "../test-specs";
+const TEST_BASE_PATH: &'static str = "..";
 
 macro_rules! evaluate_test_from_spec {
     ($test_spec:literal) => {
         // Resolve test spec
-        let test_def_filepath = format!("{}/{}", TEST_BASE_PATH, $test_spec);
+        println!("{}", std::env::current_dir().unwrap().display());
+        let test_def_filepath = format!("{}/test-specs/{}", TEST_BASE_PATH, $test_spec);
         let test_definition = std::fs::read(std::path::Path::new(&test_def_filepath)).unwrap();
         let test_def_str = std::str::from_utf8(&test_definition).unwrap();
         let test_spec: TestSpec = serde_json::from_str(test_def_str).unwrap();

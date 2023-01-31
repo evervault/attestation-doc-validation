@@ -93,7 +93,7 @@ mod test {
     #[test]
     fn test_der_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com";
@@ -116,7 +116,7 @@ mod test {
     #[test]
     fn test_pem_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com";
@@ -140,7 +140,7 @@ mod test {
     fn validate_debug_mode_attestation_doc() {
         // debug mode attestation docs fail due to an untrusted cert
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/debug-mode-attestation-doc-bytes",
+            "../test-data/debug-mode-attestation-doc-bytes",
         ))
         .unwrap();
         let attestable_cert =
