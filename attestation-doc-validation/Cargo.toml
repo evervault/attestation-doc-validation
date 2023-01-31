@@ -8,7 +8,7 @@ homepage = "https://github.com/evervault/attestation-doc-validation"
 documentation = "https://github.com/evervault/attestation-doc-validation"
 repository = "https://github.com/evervault/attestation-doc-validation"
 readme = "README.md"
-keywords = ["aws", "nitro enclaves", "confidential computing", "attestation"]
+keywords = ["aws", "nitro enclaves", "confidential computing", "attestation", "evervault"]
 categories = ["cryptography", "development-tools::ffi", "development-tools"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
