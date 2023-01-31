@@ -22,6 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
       - name: Ensure version of crate matches release
         id: get-cargo-version
         run: |
@@ -53,6 +57,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Package and Publish Cargo to registry
         run: |
@@ -66,6 +74,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Package and Publish Cargo to registry
         run: |
