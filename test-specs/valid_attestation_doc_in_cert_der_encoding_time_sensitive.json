@@ -1,0 +1,11 @@
+{
+  "file": "test-data/non-debug-cert-containing-attestation-document-18-1-23-der.crt",
+  "pcrs": {
+    "pcr0": "d265a83faa7b4fa0d73b82b6d06253e894445922937d0ee5a74fe4891da9817611a71e71b98e5329232902de3cf419af",
+    "pcr1": "bcdf05fefccaa8e55bf2c8d6dee9e79bbff31e34bf28a99aa19e6b29c37ee80b214a414b7607236edf26fcb78654e63f",
+    "pcr2": "e4f634d24ad83b7f6e49fe283bafdb220f6252fb4a278a858e19d15b7cd0f263b9168ed0bacefb4444266df9f9a77f24",
+    "pcr8": "97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca"
+  },
+  "isAttestationDocValid": true,
+  "shouldPcrsMatch": true
+}
