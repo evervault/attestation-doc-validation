@@ -32,6 +32,7 @@ jobs:
           CARGO_VERSION=$(cargo metadata --format-version 1 | jq '.packages[] | select( .name == "attestation-doc-validation" ) | .version')
           if [ "$CARGO_VERSION" != "${{ env.TAG_VERSION }}" ]; then
             echo "Version in tag does not match cargo.toml"
+            echo "Expected $CARGO_VERSION, Found ${{ env.TAG_VERSION }}"
             exit 1
           fi
         env:
