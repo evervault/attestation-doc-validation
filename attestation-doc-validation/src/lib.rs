@@ -1,11 +1,9 @@
-mod attestation_doc;
-mod cert;
+pub mod attestation_doc;
+pub mod cert;
+pub mod error;
 
 use attestation_doc::AttestationDoc;
 use openssl::x509::X509;
-
-pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
-pub mod error;
 
 // Helper function to fail early on any variant of error::AttestError
 fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> Result<(), E> {

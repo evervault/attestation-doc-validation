@@ -2,6 +2,14 @@
 name = "attestation-doc-validation"
 version = "0.3.0"
 edition = "2021"
+license = "Apache-2.0"
+description = "A Rust library for attesting enclaves according to the Evervault Attestation scheme. This crate is used to generate ffi bindings."
+homepage = "https://github.com/evervault/attestation-doc-validation"
+documentation = "https://github.com/evervault/attestation-doc-validation"
+repository = "https://github.com/evervault/attestation-doc-validation"
+readme = "README.md"
+keywords = ["aws", "nitro enclaves", "confidential computing", "attestation", "evervault"]
+categories = ["cryptography", "development-tools::ffi", "development-tools"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
