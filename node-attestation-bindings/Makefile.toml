@@ -32,4 +32,4 @@ args = ["run", "build"]
 dependencies = ["build_lib","build_bindings"]
 
 [tasks.ci]
-dependencies = ["lint","format","test","build"]
+dependencies = ["lint","format","build","test"]
