@@ -11,11 +11,6 @@ install_crate = "rustfmt"
 command = "cargo"
 args = ["fmt", "--check"]
 
-[tasks.test]
-dependencies = ["install_deps"]
-command = "yarn"
-args = ["test"]
-
 [tasks.build_lib]
 command = "cargo"
 args = ["build", "--release"]
@@ -31,5 +26,10 @@ args = ["run", "build"]
 [tasks.build]
 dependencies = ["build_lib","build_bindings"]
 
+[tasks.test]
+dependencies = ["build"]
+command = "yarn"
+args = ["test"]
+
 [tasks.ci]
-dependencies = ["lint","format","build","test"]
+dependencies = ["lint","format","test"]
