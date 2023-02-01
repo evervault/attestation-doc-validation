@@ -1,11 +1,11 @@
+//! Module for parsing and validating attestation documents from AWS Nitro Enclaves.
+use super::nsm::nsm_api::{AttestationDoc, Digest};
 use super::{
     error::{AttestationError, AttestationResult},
     nsm::{Hash, RingClient, SigningPublicKey},
     true_or_invalid,
 };
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
-pub(super) use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
-use aws_nitro_enclaves_nsm_api::api::Digest;
 use base64::Engine;
 // use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
@@ -41,6 +41,7 @@ macro_rules! compare_pcrs {
     };
 }
 
+/// Trait to allow custom implementations of PCR-like types. This helps to make the per language bindings more idiomatic.
 pub trait PCRProvider {
     fn pcr_0(&self) -> Option<&str>;
     fn pcr_1(&self) -> Option<&str>;
@@ -65,6 +66,7 @@ pub trait PCRProvider {
     }
 }
 
+/// Reference implementation of the AWS attestation doc's PCRs exposed at build time.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PCRs {
     pub pcr_0: String,
@@ -225,7 +227,7 @@ mod test {
         // this test only validates the structure of the AD, but not the validity of the Nitro signature over it
         // so it will pass despite the AD being expired.
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let expected_pcrs = PCRs {
@@ -244,7 +246,7 @@ mod test {
     #[test]
     fn validate_valid_attestation_doc_structure_with_mismatched_pcrs() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let expected_pcrs = PCRs {

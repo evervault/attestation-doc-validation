@@ -6,8 +6,6 @@ pub type NsmResult<T> = std::result::Result<T, NsmError>;
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum NsmError {
-    // #[error("")]
-    // Io([#from] std::io::Error),
     #[error("Failed to obtain sufficient entropy")]
     EntropyError(Box<dyn std::error::Error>),
     #[error("Failed to compute hash")]

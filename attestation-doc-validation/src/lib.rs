@@ -1,14 +1,14 @@
-mod attestation;
-mod cert;
+pub mod attestation_doc;
+pub mod cert;
+pub mod error;
 mod nsm;
 
-use attestation::AttestationDoc;
+pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
+use error::{AttestResult as Result};
+use nsm::nsm_api::AttestationDoc;
+
 use nsm::RingClient;
 use openssl::x509::X509;
-
-pub use attestation::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
-pub mod error;
-use error::Result;
 
 // Helper function to fail early on any variant of error::AttestError
 fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> std::result::Result<(), E> {
@@ -50,8 +50,8 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<Attestation
 
     // Parse attestation doc from cose signature and validate structure
     let (cose_sign_1_decoded, decoded_attestation_doc) =
-        attestation::decode_attestation_document(&cose_signature)?;
-    attestation::validate_attestation_document_structure(&decoded_attestation_doc)?;
+        attestation_doc::decode_attestation_document(&cose_signature)?;
+    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
 
     // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
     let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
@@ -67,11 +67,11 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<Attestation
     let cert = cert::get_parser_cert_from_openssl(&decoded_attestation_doc.certificate).unwrap();
     let pub_key: nsm::PublicKey = cert.public_key().into();
     // attestation::validate_cose_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
-    attestation::validate_cose_signature::<RingClient>(&pub_key, &cose_sign_1_decoded)?;
+    attestation_doc::validate_cose_signature::<RingClient>(&pub_key, &cose_sign_1_decoded)?;
 
     // Validate that the cert public key is embedded in the attestation doc
     let cage_cert_public_key = cert::export_public_key_to_der(given_cert)?;
-    attestation::validate_expected_challenge(&decoded_attestation_doc, &cage_cert_public_key)?;
+    attestation_doc::validate_expected_challenge(&decoded_attestation_doc, &cage_cert_public_key)?;
 
     Ok(decoded_attestation_doc)
 }
@@ -102,7 +102,7 @@ mod test {
     #[test]
     fn test_der_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com";
@@ -125,7 +125,7 @@ mod test {
     #[test]
     fn test_pem_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com";
@@ -149,7 +149,7 @@ mod test {
     fn validate_debug_mode_attestation_doc() {
         // debug mode attestation docs fail due to an untrusted cert
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/debug-mode-attestation-doc-bytes",
+            "../test-data/debug-mode-attestation-doc-bytes",
         ))
         .unwrap();
         let attestable_cert =

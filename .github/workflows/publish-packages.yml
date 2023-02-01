@@ -1,0 +1,85 @@
+name: Release rust crate
+
+on:
+  push:
+    tags:
+      - "rust/v*"
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Get version from tag
+        id: get-version
+        run: |
+          echo "using version tag ${GITHUB_REF:16}"
+          echo ::set-output name=version::${GITHUB_REF:16}
+  assert-matching-version:
+    runs-on: ubuntu-latest
+    needs: [get-version]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - name: Ensure version of crate matches release
+        id: get-cargo-version
+        run: |
+          CARGO_VERSION=$(cargo metadata --format-version 1 | jq '.packages[] | select( .name == "attestation-doc-validation" ) | .version' | tr -d '"')
+          if [ "$CARGO_VERSION" != "${{ env.TAG_VERSION }}" ]; then
+            echo "Version in tag does not match cargo.toml"
+            echo "Expected $CARGO_VERSION, Found ${{ env.TAG_VERSION }}"
+            exit 1
+          fi
+        env:
+          TAG_VERSION: ${{ needs.get-version.outputs.version }}
+  # Before publishing, validate that all tests pass
+  run-ci-checks:
+    runs-on: ubuntu-latest
+    needs: [get-version, assert-matching-version]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Run CI Tasks with backtrace
+        run: cd attestation-doc-validation ; cargo make ci
+  dry-run-publish:
+    runs-on: ubuntu-latest
+    needs: [get-version, assert-matching-version, run-ci-checks]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Package and Publish Cargo to registry
+        run: |
+          cd attestation-doc-validation
+          cargo publish --dry-run --token ${{ secrets.CARGO_AUTH_TOKEN }}
+  publish-crate:
+    runs-on: ubuntu-latest
+    environment: public-release
+    needs: [get-version, assert-matching-version, dry-run-publish]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - name: Package and Publish Cargo to registry
+        run: |
+          cd attestation-doc-validation
+          cargo publish --token ${{ secrets.CARGO_AUTH_TOKEN }}
