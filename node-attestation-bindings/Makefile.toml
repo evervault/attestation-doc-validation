@@ -13,7 +13,7 @@ args = ["fmt", "--check"]
 
 [tasks.clean]
 command = "cargo"
-args = "clean"
+args = ["clean"]
 
 [tasks.install_deps]
 command = "yarn"
