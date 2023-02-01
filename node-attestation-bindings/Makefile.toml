@@ -23,18 +23,16 @@ dependencies = ["clean","install_deps"]
 command = "yarn"
 args = ["run", "build"]
 
-[tasks.debug]
+[tasks.add_lib_faketime]
 script = '''
-ls
-tree -I node_modules
+sudo apt-get install -y libfaketime
 '''
 
-
 [tasks.test]
-dependencies = ["build","debug"]
+dependencies = ["build", "add_lib_faketime"]
+env = { "LD_PRELOAD" = "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1", "FAKETIME" = "2023-01-18 15:15:00" }
 command = "yarn"
 args = ["test"]
-
 
 [tasks.ci]
 dependencies = ["lint","format","test"]
