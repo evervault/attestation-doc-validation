@@ -5,7 +5,7 @@ edition = "2021"
 license = "Apache-2.0"
 description = "A Rust library for attesting enclaves according to the Evervault Attestation scheme. This crate is used to generate ffi bindings."
 homepage = "https://github.com/evervault/attestation-doc-validation"
-documentation = "https://github.com/evervault/attestation-doc-validation"
+documentation = "https://docs.rs/attestation-doc-validation"
 repository = "https://github.com/evervault/attestation-doc-validation"
 readme = "README.md"
 keywords = ["aws", "nitro-enclaves", "enclaves", "attestation", "evervault"]
@@ -26,3 +26,5 @@ serde_bytes = "0.11"
 [dev-dependencies]
 rcgen = "0.10"
 base64 = "0.21"
+serde_json = "1"
+serde = { version = "1.0.152", features = ["derive"] }

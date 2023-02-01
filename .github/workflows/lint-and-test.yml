@@ -8,6 +8,9 @@ name: Lint and Test
 jobs:
   lint_and_test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [attestation-doc-validation, node-attestation-bindings]
     steps:
       - uses: actions/checkout@v2
       - name: Install latest stable toolchain
@@ -18,6 +21,6 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Run CI Tasks with backtrace
-        run: cargo make ci
+        run: cd ${{ matrix.package }} ; cargo make ci
         env:
           RUST_BACKTRACE: full
