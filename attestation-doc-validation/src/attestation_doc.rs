@@ -1,11 +1,10 @@
 //! Module for parsing and validating attestation documents from AWS Nitro Enclaves.
+use super::nsm::nsm_api::{AttestationDoc, Digest};
 use super::{
     error::{AttestationDocError, AttestationDocResult},
     true_or_invalid,
 };
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
-pub(super) use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
-use aws_nitro_enclaves_nsm_api::api::Digest;
 use base64::Engine;
 use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
