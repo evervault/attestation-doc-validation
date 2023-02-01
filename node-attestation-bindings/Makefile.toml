@@ -12,6 +12,7 @@ command = "cargo"
 args = ["fmt", "--check"]
 
 [tasks.test]
+dependencies = ["install_deps"]
 command = "yarn"
 args = ["test"]
 
