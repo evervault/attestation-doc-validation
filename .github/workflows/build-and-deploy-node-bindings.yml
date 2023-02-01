@@ -2,6 +2,7 @@ name: Build and deploy node bindings
 env:
   DEBUG: napi:*
   APP_NAME: attestation-doc-validation
+  SUBDIRECTORY: node-attestation-bindings
   MACOSX_DEPLOYMENT_TARGET: "10.13"
 "on":
   push:
@@ -91,7 +92,7 @@ jobs:
     runs-on: ${{ matrix.settings.host }}
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -101,6 +102,7 @@ jobs:
           node-version: 18
           check-latest: true
           cache: yarn
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install
         uses: dtolnay/rust-toolchain@stable
         if: ${{ !matrix.settings.docker }}
@@ -139,6 +141,7 @@ jobs:
           check-latest: true
           cache: yarn
           architecture: x86
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Build in docker
         uses: addnab/docker-run-action@v3
         if: ${{ matrix.settings.docker }}
@@ -229,6 +232,7 @@ jobs:
   #         node-version: ${{ matrix.node }}
   #         check-latest: true
   #         cache: yarn
+  #         cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
   #     - name: Install dependencies
   #       run: yarn install
   #     - name: Download artifacts
@@ -264,6 +268,7 @@ jobs:
           node-version: ${{ matrix.node }}
           check-latest: true
           cache: yarn
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
@@ -299,6 +304,7 @@ jobs:
           node-version: ${{ matrix.node }}
           check-latest: true
           cache: yarn
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
         run: |
           yarn config set supportedArchitectures.libc "musl"
@@ -441,6 +447,7 @@ jobs:
           node-version: 18
           check-latest: true
           cache: yarn
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
         run: yarn install
       - name: Download macOS x64 artifact
@@ -500,6 +507,7 @@ jobs:
           node-version: 18
           check-latest: true
           cache: yarn
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
         run: yarn install
       - name: Download all artifacts
