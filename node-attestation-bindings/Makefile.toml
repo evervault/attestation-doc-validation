@@ -29,7 +29,7 @@ dependencies = ["build_lib","build_bindings"]
 [tasks.debug]
 script = '''
 ls
-cat index.js
+tree -I node_modules
 '''
 
 
