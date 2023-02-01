@@ -4,6 +4,8 @@ on:
       - attestation-doc-validation/**
       - node-attestation-bindings/**
       - .github/workflows/lint-and-test.yml
+      - test-data/**
+      - test-specs/**
 name: Lint and Test
 jobs:
   lint_and_test:
