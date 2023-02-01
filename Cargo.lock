@@ -27,6 +27,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "attestation-doc-validation"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8b657a11ef790cffece0c4e78a7043421e94599e58442920118f057e2892779"
+dependencies = [
+ "aws-nitro-enclaves-cose",
+ "aws-nitro-enclaves-nsm-api",
+ "base64 0.21.0",
+ "hex",
+ "openssl",
+ "serde_bytes",
+ "serde_cbor",
+ "thiserror",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -263,7 +279,7 @@ dependencies = [
 name = "node-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation",
+ "attestation-doc-validation 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "napi",
  "napi-build",
  "napi-derive",
