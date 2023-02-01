@@ -1,10 +1,10 @@
 {
-  "name": "node-attestation-bindings",
+  "name": "attestation-doc-validation",
   "version": "0.0.0",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
-    "name": "node-attestation-bindings",
+    "name": "attestation-doc-validation",
     "triples": {
       "additional": [
         "aarch64-apple-darwin",
