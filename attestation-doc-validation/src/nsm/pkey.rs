@@ -49,7 +49,10 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
         let encoded_point: EncodedPoint = p384::EncodedPoint::from_bytes(pub_key).unwrap();
         let affine_point: AffinePoint = AffinePoint::from_encoded_point(&encoded_point).unwrap();
         let uncompressed_point = affine_point.to_encoded_point(false);
-        println!("Uncompressed Point: {}", hex::encode(uncompressed_point.as_bytes()));
+        println!(
+            "Uncompressed Point: {}",
+            hex::encode(uncompressed_point.as_bytes())
+        );
         let pub_key = UnparsedPublicKey::new(ecdsa_sig_alg, uncompressed_point.as_bytes());
         pub_key
             .verify(digest, signature)
