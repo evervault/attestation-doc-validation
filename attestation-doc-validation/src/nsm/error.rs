@@ -25,5 +25,5 @@ pub enum NsmError {
     #[error("Tag was missing or invalid: {0:?}")]
     TagError(Option<u64>),
     #[error("Failed to perform an encryption operation")]
-    EncryptionError(Box<dyn std::error::Error>)
+    EncryptionError(Box<dyn std::error::Error>),
 }

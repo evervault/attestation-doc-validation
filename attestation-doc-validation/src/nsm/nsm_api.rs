@@ -51,20 +51,20 @@ pub struct AttestationDoc {
 }
 
 impl AttestationDoc {
-    /// Creates a new AttestationDoc.
+    /// Creates a new `AttestationDoc`.
     ///
     /// # Arguments
     ///
-    /// * module_id: a String representing the name of the NitroSecureModule
-    /// * digest: nsm_io::Digest that describes what the PlatformConfigurationRegisters
+    /// * `module_id`: a String representing the name of the `NitroSecureModule`
+    /// * digest: `nsm_io::Digest` that describes what the `PlatformConfigurationRegisters`
     ///           contain
-    /// * pcrs: BTreeMap containing the index to PCR value
-    /// * certificate: the serialized certificate that will be used to sign this AttestationDoc
+    /// * pcrs: `BTreeMap` containing the index to PCR value
+    /// * certificate: the serialized certificate that will be used to sign this `AttestationDoc`
     /// * cabundle: the serialized set of certificates up to the root of trust certificate that
     ///             emitted `certificate`
-    /// * user_data: optional user definted data included in the AttestationDoc
-    /// * nonce: optional cryptographic nonce that will be included in the AttestationDoc
-    /// * public_key: optional DER-encoded public key that will be included in the AttestationDoc
+    /// * `user_data`: optional user definted data included in the `AttestationDoc`
+    /// * nonce: optional cryptographic nonce that will be included in the `AttestationDoc`
+    /// * `public_key`: optional DER-encoded public key that will be included in the `AttestationDoc`
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         module_id: String,
@@ -79,7 +79,7 @@ impl AttestationDoc {
     ) -> Self {
         let mut pcrs_serialized = BTreeMap::new();
 
-        for (i, pcr) in pcrs.into_iter() {
+        for (i, pcr) in pcrs {
             let pcr = ByteBuf::from(pcr);
             pcrs_serialized.insert(i, pcr);
         }
@@ -99,13 +99,13 @@ impl AttestationDoc {
         }
     }
 
-    /// Helper function that converts an AttestationDoc structure to its CBOR representation
+    /// Helper function that converts an `AttestationDoc` structure to its CBOR representation
     pub fn to_binary(&self) -> Vec<u8> {
         // This should not fail
         to_vec(self).unwrap()
     }
 
-    /// Helper function that parses a CBOR representation of an AttestationDoc and creates the
+    /// Helper function that parses a CBOR representation of an `AttestationDoc` and creates the
     /// structure from it, if possible.
     pub fn from_binary(bin: &[u8]) -> NsmResult<Self> {
         from_slice(bin).map_err(NsmError::Cbor)
