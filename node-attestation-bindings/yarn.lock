@@ -232,6 +232,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"attestation-doc-validation@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "attestation-doc-validation@workspace:."
+  dependencies:
+    "@napi-rs/cli": ^2.14.3
+    ava: ^4.3.3
+  languageName: unknown
+  linkType: soft
+
 "ava@npm:^4.3.3":
   version: 4.3.3
   resolution: "ava@npm:4.3.3"
@@ -1400,15 +1409,6 @@ __metadata:
   checksum: b8ffeb1e262eff7968fc90a2b6767b04cfd9842582a9d0ece0af7049537266e7b2506dfb1d107a32f06dd849ab2aea834d5830f7f4d0e5cb7d36e1ae55d021d9
   languageName: node
   linkType: hard
-
-"node-attestation-bindings@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "node-attestation-bindings@workspace:."
-  dependencies:
-    "@napi-rs/cli": ^2.14.3
-    ava: ^4.3.3
-  languageName: unknown
-  linkType: soft
 
 "node-gyp@npm:latest":
   version: 9.3.1
