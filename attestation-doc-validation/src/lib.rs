@@ -1,8 +1,9 @@
 pub mod attestation_doc;
 pub mod cert;
 pub mod error;
+mod nsm;
 
-use attestation_doc::AttestationDoc;
+use nsm::nsm_api::AttestationDoc;
 use openssl::x509::X509;
 
 // Helper function to fail early on any variant of error::AttestError
