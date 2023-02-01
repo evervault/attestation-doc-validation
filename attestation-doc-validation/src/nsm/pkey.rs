@@ -44,6 +44,8 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
         };
 
         let pub_key = &self.inner.subject_public_key;
+        let hex_encoded = hex::encode(&pub_key.data);
+        println!("Key: {hex_encoded}");
         let encoded_point: EncodedPoint = p384::EncodedPoint::from_bytes(pub_key).unwrap();
         let affine_point: AffinePoint = AffinePoint::from_encoded_point(&encoded_point).unwrap();
         let uncompressed_point = affine_point.to_encoded_point(false);
