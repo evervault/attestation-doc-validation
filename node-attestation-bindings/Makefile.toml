@@ -26,10 +26,18 @@ args = ["run", "build"]
 [tasks.build]
 dependencies = ["build_lib","build_bindings"]
 
+[tasks.debug]
+script = '''
+ls
+cat index.js
+'''
+
+
 [tasks.test]
-dependencies = ["build"]
+dependencies = ["build","debug"]
 command = "yarn"
 args = ["test"]
+
 
 [tasks.ci]
 dependencies = ["lint","format","test"]
