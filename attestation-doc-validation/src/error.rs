@@ -29,11 +29,11 @@ where
     Self: Send + Sync,
 {
     #[error("COSE error: `{0}`")]
-    Cose(String),
+    InvalidCose(String),
     #[error(transparent)]
-    Cbor(#[from] serde_cbor::error::Error),
+    InvalidCbor(#[from] serde_cbor::error::Error),
     #[error("A part of the attestation doc structure was deemed invalid")]
-    DocStructure,
+    DocStructureInvalid,
     #[error("The COSE signature does not match the public key provided in the attestation doc")]
     InvalidCoseSignature,
     #[error(
