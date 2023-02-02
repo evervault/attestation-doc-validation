@@ -232,7 +232,10 @@ pub(super) fn validate_attestation_document_structure(
         .user_data
         .as_ref()
         .map_or(true, |user_data| user_data.len() > 0 && user_data.len() <= 512);
-    true_or_invalid(valid_structure_check, AttestationDocError::DocStructureInvalid)
+    true_or_invalid(
+        valid_structure_check,
+        AttestationDocError::DocStructureInvalid,
+    )
 }
 
 #[cfg(test)]
