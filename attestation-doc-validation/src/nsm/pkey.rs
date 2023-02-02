@@ -3,9 +3,7 @@ pub(crate) use aws_nitro_enclaves_cose::crypto::SigningPublicKey;
 use aws_nitro_enclaves_cose::crypto::{MessageDigest, SignatureAlgorithm};
 use aws_nitro_enclaves_cose::error::CoseError;
 use der::Decode;
-use p384::elliptic_curve::sec1::{FromEncodedPoint, ToEncodedPoint};
-use p384::{AffinePoint, EncodedPoint};
-use ring::signature::UnparsedPublicKey;
+use p384::EncodedPoint;
 use x509_parser::x509::SubjectPublicKeyInfo;
 
 pub struct PublicKey<'a> {
@@ -17,6 +15,9 @@ impl<'a> std::convert::From<&'a SubjectPublicKeyInfo<'a>> for PublicKey<'a> {
         Self { inner: value }
     }
 }
+
+use core::str::FromStr;
+use p384::ecdsa::signature::hazmat::PrehashVerifier;
 
 impl<'a> SigningPublicKey for PublicKey<'a> {
     fn get_parameters(&self) -> Result<(SignatureAlgorithm, MessageDigest), CoseError> {
@@ -36,30 +37,23 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
     }
 
     fn verify(&self, digest: &[u8], signature: &[u8]) -> Result<bool, CoseError> {
-        let (sig_alg, _) = self.get_parameters()?;
-        let ecdsa_sig_alg = match sig_alg {
-            SignatureAlgorithm::ES256 => &ring::signature::ECDSA_P256_SHA256_ASN1,
-            SignatureAlgorithm::ES384 => &ring::signature::ECDSA_P384_SHA384_ASN1,
-            _ => unimplemented!(),
-        };
+        // let (sig_alg, _) = self.get_parameters()?;
+        // let ecdsa_sig_alg = match sig_alg {
+        //     SignatureAlgorithm::ES256 => &ring::signature::ECDSA_P256_SHA256_ASN1,
+        //     SignatureAlgorithm::ES384 => &ring::signature::ECDSA_P384_SHA384_ASN1,
+        //     _ => unimplemented!(),
+        // };
 
         let pub_key = &self.inner.subject_public_key;
-        let hex_encoded = hex::encode(&pub_key.data);
-        println!("Key: {hex_encoded}");
         let encoded_point: EncodedPoint = p384::EncodedPoint::from_bytes(pub_key).unwrap();
-        let affine_point: AffinePoint = AffinePoint::from_encoded_point(&encoded_point).unwrap();
-        let uncompressed_point = affine_point.to_encoded_point(false);
-        println!(
-            "Uncompressed Point: {}",
-            hex::encode(uncompressed_point.as_bytes())
-        );
-        let pub_key = UnparsedPublicKey::new(ecdsa_sig_alg, uncompressed_point.as_bytes());
-        pub_key
-            .verify(digest, signature)
-            .map(|_| true)
-            .or_else(|err| {
-                eprintln!("{err:?}");
-                Ok(false)
-            })
+        let verifying_key: p384::ecdsa::VerifyingKey =
+            p384::ecdsa::VerifyingKey::from_encoded_point(&encoded_point).unwrap();
+        let hex_string = hex::encode(signature);
+        let sig =
+            p384::ecdsa::Signature::from_str(&hex_string).expect("Failed to decode signature");
+
+        let result = verifying_key.verify_prehash(digest, &sig);
+
+        result.map(|_| true).or_else(|_| Ok(false))
     }
 }

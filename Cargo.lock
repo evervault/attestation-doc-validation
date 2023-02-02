@@ -93,6 +93,7 @@ dependencies = [
  "serde_cbor",
  "serde_json",
  "serde_with 2.2.0",
+ "sha2",
  "thiserror",
  "webpki",
  "x509-parser",

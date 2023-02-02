@@ -39,3 +39,4 @@ args = ["build"]
 
 [tasks.ci]
 dependencies = ["lint","format","check","test_ci","build"]
+#/usr/lib/aarch64-linux-gnu/faketime/libfaketime
