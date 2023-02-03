@@ -2,7 +2,7 @@
 use super::nsm::nsm_api::{AttestationDoc, Digest};
 use super::{
     error::{AttestationError, AttestationResult},
-    nsm::{Hash, RingClient, SigningPublicKey},
+    nsm::{CryptoClient, Hash, SigningPublicKey},
     true_or_invalid,
 };
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
@@ -213,7 +213,7 @@ pub(super) fn decode_attestation_document(
 ) -> AttestationResult<(CoseSign1, AttestationDoc)> {
     let cose_sign_1_decoded: CoseSign1 = serde_cbor::from_slice(cose_sign_1_bytes)?;
     let cbor = cose_sign_1_decoded
-        .get_payload::<RingClient>(None)
+        .get_payload::<CryptoClient>(None)
         .map_err(|err| AttestationError::Cose(err.to_string()))?;
     Ok((cose_sign_1_decoded, serde_cbor::from_slice(&cbor)?))
 }

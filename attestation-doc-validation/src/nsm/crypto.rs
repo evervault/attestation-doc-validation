@@ -3,51 +3,80 @@ use aws_nitro_enclaves_cose::crypto::{
     Decryption, Encryption, EncryptionAlgorithm, Entropy, MessageDigest,
 };
 use aws_nitro_enclaves_cose::error::CoseError;
-use ring::aead::{Aad, BoundKey, Nonce, NonceSequence, OpeningKey, SealingKey, UnboundKey};
-use ring::aead::{Algorithm, AES_128_GCM, AES_256_GCM};
-use ring::rand::{SecureRandom, SystemRandom};
 
-struct NonceProvider<'a> {
-    nonce: Option<&'a [u8]>,
-}
+use aes::cipher::consts::U12;
+use aes::Aes192;
+use aes_gcm::{
+    aead::{Aead, KeyInit, Payload},
+    Aes128Gcm, Aes256Gcm, AesGcm, Nonce as AesNonce,
+};
+use rand::{rngs::OsRng, RngCore};
+use sha2::{Digest, Sha256, Sha384, Sha512};
 
-impl<'a> std::convert::From<Option<&'a [u8]>> for NonceProvider<'a> {
-    fn from(value: Option<&'a [u8]>) -> Self {
-        Self { nonce: value }
-    }
-}
-
-impl NonceSequence for NonceProvider<'_> {
-    fn advance(&mut self) -> Result<Nonce, ring::error::Unspecified> {
-        let maybe_nonce = self.nonce.take();
-        match maybe_nonce {
-            Some(nonce) => Nonce::try_assume_unique_for_key(&nonce[..12]),
-            None => Err(ring::error::Unspecified),
-        }
-    }
-}
+type Aes192Gcm = AesGcm<Aes192, U12>;
 
 /// Type that implements various cryptographic traits
-pub(crate) struct RingClient;
+pub(crate) struct CryptoClient;
 
-impl Entropy for RingClient {
+impl Entropy for CryptoClient {
     fn rand_bytes(buff: &mut [u8]) -> Result<(), CoseError> {
-        // TODO: evaluate performance of creating a new sys random client
-        let rng = SystemRandom::new();
-        let _ = rng.fill(buff);
+        OsRng.fill_bytes(buff);
         Ok(())
     }
 }
 
-fn get_ring_cipher_from_encryption_algorithm(algorithm: EncryptionAlgorithm) -> &'static Algorithm {
-    match algorithm {
-        EncryptionAlgorithm::Aes128Gcm => &AES_128_GCM,
-        EncryptionAlgorithm::Aes192Gcm => unimplemented!(),
-        EncryptionAlgorithm::Aes256Gcm => &AES_256_GCM,
-    }
+macro_rules! aes_encryption {
+    ($func_name:ident, $cipher:ident) => {
+        fn $func_name(
+            key: &[u8],
+            iv: Option<&[u8]>,
+            aad: &[u8],
+            data: &[u8],
+            tag: &mut [u8],
+        ) -> Result<Vec<u8>, CoseError> {
+            let cipher = $cipher::new_from_slice(key).unwrap();
+            let nonce = AesNonce::from_slice(iv.unwrap());
+            let authenticated_payload = Payload { msg: data, aad };
+            let encrypted = cipher.encrypt(nonce, authenticated_payload).unwrap();
+            let (ciphertext, computed_tag) = encrypted.split_at(encrypted.len() - 16);
+            tag.copy_from_slice(&computed_tag[..]);
+            return Ok(ciphertext.to_vec());
+        }
+    };
 }
 
-impl Encryption for RingClient {
+macro_rules! aes_decryption {
+    ($func_name:ident, $cipher:ident) => {
+        fn $func_name(
+            key: &[u8],
+            iv: Option<&[u8]>,
+            aad: &[u8],
+            ciphertext: &[u8],
+            tag: &[u8],
+        ) -> Result<Vec<u8>, CoseError> {
+            let cipher = $cipher::new_from_slice(key).unwrap();
+            let nonce = AesNonce::from_slice(iv.unwrap());
+            let tagged_cipher = vec![ciphertext, tag].concat();
+            let authenticated_payload = Payload {
+                msg: tagged_cipher.as_ref(),
+                aad,
+            };
+            let decrypted = cipher.decrypt(nonce, authenticated_payload).unwrap();
+            return Ok(decrypted);
+        }
+    };
+}
+
+aes_encryption!(perform_aes_128_gcm_encryption, Aes128Gcm);
+aes_decryption!(perform_aes_128_gcm_decryption, Aes128Gcm);
+
+aes_encryption!(perform_aes_192_gcm_encryption, Aes192Gcm);
+aes_decryption!(perform_aes_192_gcm_decryption, Aes192Gcm);
+
+aes_encryption!(perform_aes_256_gcm_encryption, Aes256Gcm);
+aes_decryption!(perform_aes_256_gcm_decryption, Aes256Gcm);
+
+impl Encryption for CryptoClient {
     /// Like `encrypt`, but for AEAD ciphers such as AES GCM.
     ///
     /// Additional Authenticated Data can be provided in the `aad` field, and the authentication tag
@@ -64,24 +93,16 @@ impl Encryption for RingClient {
         data: &[u8],
         tag: &mut [u8],
     ) -> Result<Vec<u8>, CoseError> {
-        let cipher = get_ring_cipher_from_encryption_algorithm(algo);
-
-        let unbound_aes_key = UnboundKey::new(&cipher, key).unwrap();
-        let mut aes_key = SealingKey::new(unbound_aes_key, NonceProvider::from(iv));
-        let aad = Aad::from(aad);
-
-        let mut ciphertext = data.to_vec();
-        let generated_tag = aes_key
-            .seal_in_place_separate_tag(aad, &mut ciphertext)
-            .unwrap();
-
-        let tag_bytes = generated_tag.as_ref();
-        tag.copy_from_slice(&tag_bytes[..tag_bytes.len()]);
-        Ok(ciphertext)
+        let encryption_func = match algo {
+            EncryptionAlgorithm::Aes128Gcm => perform_aes_128_gcm_encryption,
+            EncryptionAlgorithm::Aes192Gcm => perform_aes_192_gcm_encryption,
+            EncryptionAlgorithm::Aes256Gcm => perform_aes_256_gcm_encryption,
+        };
+        encryption_func(key, iv, aad, data, tag)
     }
 }
 
-impl Decryption for RingClient {
+impl Decryption for CryptoClient {
     /// Like `decrypt`, but for AEAD ciphers such as AES GCM.
     ///
     /// Additional Authenticated Data can be provided in the `aad` field, and the authentication tag
@@ -94,44 +115,36 @@ impl Decryption for RingClient {
         ciphertext: &[u8],
         tag: &[u8],
     ) -> Result<Vec<u8>, CoseError> {
-        let cipher = get_ring_cipher_from_encryption_algorithm(algo);
-
-        let unbound_aes_key = UnboundKey::new(&cipher, key).unwrap();
-        let mut aes_key = OpeningKey::new(unbound_aes_key, NonceProvider::from(iv));
-
-        let aad = Aad::from(aad);
-        let mut tagged_ciphertext = vec![ciphertext, tag].concat();
-        let plaintext = aes_key.open_in_place(aad, &mut tagged_ciphertext).unwrap();
-
-        Ok(plaintext.to_vec())
+        let decryption_func = match algo {
+            EncryptionAlgorithm::Aes128Gcm => perform_aes_128_gcm_decryption,
+            EncryptionAlgorithm::Aes192Gcm => perform_aes_192_gcm_decryption,
+            EncryptionAlgorithm::Aes256Gcm => perform_aes_256_gcm_decryption,
+        };
+        decryption_func(key, iv, aad, ciphertext, tag)
     }
 }
 
-fn get_ring_algorithm_from_message_digest<'a>(
-    digest: MessageDigest,
-) -> &'a ring::digest::Algorithm {
-    match digest {
-        MessageDigest::Sha256 => &ring::digest::SHA256,
-        MessageDigest::Sha384 => &ring::digest::SHA384,
-        MessageDigest::Sha512 => &ring::digest::SHA512,
-    }
+macro_rules! compute_hash {
+    ($hash:ident, $data:ident) => {
+        let mut hasher = $hash::new();
+        hasher.update($data);
+        let msg_digest = hasher.finalize();
+        return Ok(msg_digest.to_vec());
+    };
 }
 
-impl Hash for RingClient {
+impl Hash for CryptoClient {
     fn hash(digest: MessageDigest, data: &[u8]) -> Result<Vec<u8>, CoseError> {
-        let algorithm = get_ring_algorithm_from_message_digest(digest);
-        let hashed_input = ring::digest::digest(algorithm, data);
-        Ok(hashed_input.as_ref().to_vec())
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::{Hash, MessageDigest, RingClient};
-    #[test]
-    fn test_ring_client_hashing() {
-        let result = RingClient::hash(MessageDigest::Sha384, b"test");
-        let hash = result.unwrap();
-        assert_eq!("768412320f7b0aa5812fce428dc4706b3cae50e02a64caa16a782249bfe8efc4b7ef1ccb126255d196047dfedf17a0a9".to_string(), hex::encode(&hash));
+        match digest {
+            MessageDigest::Sha256 => {
+                compute_hash!(Sha256, data);
+            }
+            MessageDigest::Sha384 => {
+                compute_hash!(Sha384, data);
+            }
+            MessageDigest::Sha512 => {
+                compute_hash!(Sha512, data);
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRPr
 use error::AttestResult as Result;
 use nsm::nsm_api::AttestationDoc;
 
-use nsm::RingClient;
+use nsm::CryptoClient;
 use openssl::x509::X509;
 
 // Helper function to fail early on any variant of error::AttestError
@@ -67,7 +67,7 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<Attestation
     let cert = cert::get_parser_cert_from_openssl(&decoded_attestation_doc.certificate).unwrap();
     let pub_key: nsm::PublicKey = cert.public_key().try_into()?;
     // attestation::validate_cose_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
-    attestation_doc::validate_cose_signature::<RingClient>(&pub_key, &cose_sign_1_decoded)?;
+    attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
 
     // Validate that the cert public key is embedded in the attestation doc
     let cage_cert_public_key = cert::export_public_key_to_der(given_cert)?;

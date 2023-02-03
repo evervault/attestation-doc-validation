@@ -29,8 +29,6 @@ where
     TagError(Option<u64>),
     #[error("Failed to perform an encryption operation")]
     EncryptionError(String),
-    #[error("An unspecified error occurred while performing a cryptographic operation.")]
-    UnspecifiedError(#[from] ring::error::Unspecified),
     #[error("Failed to deserialize value from der")]
     DerDecodeError,
 }
