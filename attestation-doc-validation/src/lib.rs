@@ -8,7 +8,7 @@ use error::AttestResult as Result;
 use nsm::nsm_api::AttestationDoc;
 
 use nsm::CryptoClient;
-use openssl::x509::X509;
+use x509_parser::certificate::X509Certificate;
 
 // Helper function to fail early on any variant of error::AttestError
 fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> std::result::Result<(), E> {
@@ -24,7 +24,7 @@ fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> std::res
 /// # Errors
 ///
 /// If both PEM and DER decoding of the certificate fail
-pub fn parse_cert(given_cert: &[u8]) -> Result<X509> {
+pub fn parse_cert<'a>(given_cert: &'a [u8]) -> Result<X509Certificate<'a>> {
     let parsed_cert =
         cert::parse_pem_cert(given_cert).or_else(|_| cert::parse_der_cert(given_cert))?;
     Ok(parsed_cert)
@@ -44,7 +44,9 @@ pub fn parse_cert(given_cert: &[u8]) -> Result<X509> {
 /// - The attestation document is not signed by the nitro cert chain
 /// - The public key from the certificate is not present in the attestation document's challenge
 /// - Any of the certificates are malformed
-pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<AttestationDoc> {
+pub fn validate_attestation_doc_in_cert<'a>(
+    given_cert: &X509Certificate<'a>,
+) -> Result<AttestationDoc> {
     // Extract raw attestation doc from subject alt names
     let cose_signature = cert::extract_signed_cose_sign_1_from_certificate(given_cert)?;
 
@@ -64,7 +66,7 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<Attestation
     // let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
     // let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
 
-    let cert = cert::get_parser_cert_from_openssl(&decoded_attestation_doc.certificate).unwrap();
+    let cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
     let pub_key: nsm::PublicKey = cert.public_key().try_into()?;
     // attestation::validate_cose_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
     attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;

@@ -78,4 +78,10 @@ where
     HexError(#[from] hex::FromHexError),
     #[error("Failed to compute seconds since the unix epoch")]
     TimeError,
+    #[error("Failed to parse cert from pem encoding")]
+    PemError(#[from] x509_parser::error::PEMError),
+    #[error("Failed to parse x509 cert from pem encoding")]
+    X509Error,
+    #[error("No cert given")]
+    NoCertGiven,
 }
