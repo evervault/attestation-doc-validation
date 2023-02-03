@@ -29,7 +29,7 @@ jobs:
       - name: Ensure version of crate matches release
         id: get-cargo-version
         run: |
-          CARGO_VERSION=$(cargo metadata --format-version 1 | jq '.packages[] | select( .name == "attestation-doc-validation" ) | .version' | tr -d '"')
+          CARGO_VERSION=$(cargo metadata --no-deps --format-version 1 | jq '.packages[] | select( .name == "attestation-doc-validation" ) | .version' | tr -d '"')
           if [ "$CARGO_VERSION" != "${{ env.TAG_VERSION }}" ]; then
             echo "Version in tag does not match cargo.toml"
             echo "Expected $CARGO_VERSION, Found ${{ env.TAG_VERSION }}"
