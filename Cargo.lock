@@ -82,6 +82,7 @@ dependencies = [
  "aws-nitro-enclaves-cose",
  "base64 0.21.0",
  "der",
+ "ecdsa",
  "hex",
  "openssl",
  "p256",

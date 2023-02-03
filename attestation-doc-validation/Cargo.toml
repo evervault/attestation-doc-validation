@@ -29,6 +29,7 @@ ring = { version = "0.16.20", features = ["std"] }
 der = { version = "0.6", features = ["alloc","derive","oid"] }
 p256 = { version = "0.12.0", features = ["ecdsa"] }
 p384 = { version = "0.12.0", features = ["ecdsa","arithmetic"] }
+ecdsa = { version = "0.15.0", features = ["verifying"] }
 sha2 = "0.10.6"
 
 [dev-dependencies]
