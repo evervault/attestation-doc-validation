@@ -65,7 +65,7 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> Result<Attestation
     // let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
 
     let cert = cert::get_parser_cert_from_openssl(&decoded_attestation_doc.certificate).unwrap();
-    let pub_key: nsm::PublicKey = cert.public_key().into();
+    let pub_key: nsm::PublicKey = cert.public_key().try_into()?;
     // attestation::validate_cose_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
     attestation_doc::validate_cose_signature::<RingClient>(&pub_key, &cose_sign_1_decoded)?;
 

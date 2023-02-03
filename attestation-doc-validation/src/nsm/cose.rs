@@ -281,8 +281,7 @@ impl CoseSign1 {
 
         let sig_structure = SigStructure::new_sign1(&protected_bytes, payload)?;
 
-        let struct_digest = H::hash(digest, &sig_structure.as_bytes()?)
-            .map_err(|e| NsmError::SignatureError(Box::new(e)))?;
+        let struct_digest = H::hash(digest, &sig_structure.as_bytes()?)?;
 
         let signature = key.sign(struct_digest.as_ref())?;
 
@@ -354,8 +353,7 @@ impl CoseSign1 {
 
         let sig_structure = SigStructure::new_sign1(&self.protected, &self.payload)?;
 
-        let struct_digest = H::hash(digest, &sig_structure.as_bytes()?)
-            .map_err(|e| NsmError::SignatureError(Box::new(e)))?;
+        let struct_digest = H::hash(digest, &sig_structure.as_bytes()?)?;
 
         Ok(key.verify(struct_digest.as_ref(), &self.signature)?)
     }

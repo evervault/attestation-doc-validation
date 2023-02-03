@@ -1,6 +1,8 @@
 //! Module for categorizing errors returned during attestation
 use thiserror::Error;
 
+use crate::nsm::error::NsmError as InnerNsm;
+
 /// Generic Result type for the top level functions of the library
 pub type AttestResult<T> = Result<T, AttestError>;
 /// Generic Result type for the attestation doc module
@@ -19,6 +21,8 @@ where
     AttestationError(#[from] AttestationError),
     #[error("An error occurred while validating the TLS Certificate received: {0}")]
     CertError(#[from] CertError),
+    #[error("An error occurred interfacing with the Nitro Security Module: {0}")]
+    NsmError(#[from] InnerNsm),
 }
 
 /// Wrapping type to record the specific error that occurred while validating the attestation document.
