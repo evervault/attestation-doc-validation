@@ -51,7 +51,7 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
         let signature_verification_result = match sig_alg {
             SignatureAlgorithm::ES256 => self.verify_p256_signature(digest, signature),
             SignatureAlgorithm::ES384 => self.verify_p384_signature(digest, signature),
-            SignatureAlgorithm::ES512 => self.verify_p512_signature(digest, signature),
+            SignatureAlgorithm::ES512 => self.verify_p521_signature(digest, signature),
         };
         signature_verification_result
             .map(|_| true)
@@ -93,7 +93,7 @@ impl<'a> PublicKey<'a> {
         impl_signature_verification!(self, p384, digest, signature);
     }
 
-    fn verify_p512_signature(&self, _digest: &[u8], _signature: &[u8]) -> Result<(), CoseError> {
+    fn verify_p521_signature(&self, _digest: &[u8], _signature: &[u8]) -> Result<(), CoseError> {
         unimplemented!();
     }
 }

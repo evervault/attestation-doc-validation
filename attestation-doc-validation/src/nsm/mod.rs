@@ -1,7 +1,5 @@
-mod cose;
 mod crypto;
 mod der;
-mod header_map;
 mod pkey;
 
 pub(super) use crypto::{Hash, RingClient};
