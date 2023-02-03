@@ -98,8 +98,7 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_pcrs: &T,
 ) -> AttestationDocResult<()> {
-
-    let received_pcrs = get_pcrs(attestation_doc);
+    let received_pcrs = get_pcrs(attestation_doc)?;
     let same_pcrs = expected_pcrs.eq(&received_pcrs);
     true_or_invalid(
         same_pcrs,
@@ -107,24 +106,24 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     )
 }
 
-/// Parses `PCRs` from an attestation doc
+/// Parses `PCRs` from an `AttestationDoc`
 ///
 /// # Errors
 ///
 /// Returns an error if any of the expected PCRs are missing from the attestation document
-pub fn get_pcrs(attestation_doc: &AttestationDoc) -> PCRs {
+pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationDocResult<PCRs> {
     let encoded_measurements = attestation_doc
         .pcrs
         .iter()
         .map(|(&index, buf)| (index, hex::encode(&buf[..])))
         .collect::<BTreeMap<_, _>>();
 
-    PCRs {
+    Ok(PCRs {
         pcr_0: extract_pcr!(encoded_measurements, 0),
         pcr_1: extract_pcr!(encoded_measurements, 1),
         pcr_2: extract_pcr!(encoded_measurements, 2),
         pcr_8: extract_pcr!(encoded_measurements, 8),
-    }
+    })
 }
 
 /// Extracts the nonce embedded in the attestation doc, encodes it to base64 and compares it to the base64 encoded nonce given
