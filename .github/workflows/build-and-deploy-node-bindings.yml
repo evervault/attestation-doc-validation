@@ -199,9 +199,12 @@ jobs:
             whoami
             env
             freebsd-version
-            cd ${{ env.SUBDIRECTORY }}
+            cd node-attestation-bindings
+            ls 
             yarn install
             yarn build
+            ls
+            cwd
             strip -x *.node
             yarn test
             rm -rf node_modules
