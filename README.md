@@ -6,6 +6,12 @@ This repo contains several projects relating to the Remote Attestation Protocol 
 - [attestation-doc-validation](./attestation-doc-validation/) contains a rust crate which implements the core logic required for attesting a Cage (validating certs, and attestation docs)
 - [node-attestation-bindings](./node-attestation-bindings/) contains an npm module which creates bindings for consuming the rust crate from node clients
 
+## Note: this is a beta release of this project
+
+This branch uses pure rust libraries for validating the attestation document. The support for the curves used for attestation document signatures is incomplete.
+
+** This crate can not validate Attestation Documents which use p521r1 **
+
 ## Getting Started
 
 To get up and running with this project you'll need `rust`, `node`, `clippy`, `rustfmt`, and `cargo-make` installed.
