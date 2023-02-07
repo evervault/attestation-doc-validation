@@ -345,8 +345,8 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: actions/checkout@v3
+      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -364,7 +364,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:aarch64-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}:/build -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
           run: |
             set -e
             yarn test
@@ -378,8 +378,8 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: actions/checkout@v3
+      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -397,7 +397,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: multiarch/alpine:aarch64-latest-stable
-          options: "-v ${{ github.workspace }}:/build -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
           run: |
             set -e
             apk add nodejs npm yarn
@@ -418,8 +418,8 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: actions/checkout@v3
+      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -436,7 +436,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:armhf-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}:/build -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
           run: |
             set -e
             yarn test
