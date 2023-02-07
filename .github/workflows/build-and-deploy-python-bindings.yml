@@ -1,0 +1,73 @@
+name: Build and deploy python bindings
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          command: build
+          args: --release --sdist -o dist --find-interpreter
+          working-directory: python-attestation-bindings
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: python-attestation-bindings/dist
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release -o dist --find-interpreter
+          working-directory: python-attestation-bindings
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: python-attestation-bindings/dist
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release -o dist --universal2 --find-interpreter
+          working-directory: python-attestation-bindings
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: python-attestation-bindings/dist
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/')"
+    needs: [macos, windows, linux]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: wheels
+      - name: Publish to PyPI
+        uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          command: upload
+          args: --skip-existing *
+          working-directory: python-attestation-bindings
