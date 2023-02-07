@@ -9,5 +9,5 @@ name = "python_attestation_bindings"
 crate-type = ["cdylib"]
 
 [dependencies]
-attestation-doc-validation = { version = "0.4.2" }
+attestation-doc-validation = { version = "0.4.2-beta" }
 pyo3 = { version = "0.18", features = ["extension-module"] }
