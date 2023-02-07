@@ -267,9 +267,6 @@ jobs:
           - "16"
           - "18"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -280,17 +277,17 @@ jobs:
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
-        run: yarn install
+        run: cd ${{ env.SUBDIRECTORY }} ; yarn install
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           name: bindings-x86_64-unknown-linux-gnu
           path: ${{ env.SUBDIRECTORY }}
       - name: List packages
-        run: ls -R .
+        run: cd ${{ env.SUBDIRECTORY }} ; ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn test
+        run: docker run --rm -v $(pwd)/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build node:${{ matrix.node }}-slim yarn test
   test-linux-x64-musl-binding:
     name: Test bindings on x86_64-unknown-linux-musl - node@${{ matrix.node }}
     needs:
@@ -303,9 +300,6 @@ jobs:
           - "16"
           - "18"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -317,6 +311,7 @@ jobs:
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
         run: |
+          cd ${{ env.SUBDIRECTORY }}
           yarn config set supportedArchitectures.libc "musl"
           yarn install
       - name: Download artifacts
@@ -325,10 +320,10 @@ jobs:
           name: bindings-x86_64-unknown-linux-musl
           path: ${{ env.SUBDIRECTORY }}
       - name: List packages
-        run: ls -R .
+        run: cd ${{ env.SUBDIRECTORY }} ; ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine yarn test
+        run: docker run --rm -v $(pwd)/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build node:${{ matrix.node }}-alpine yarn test
   test-linux-aarch64-gnu-binding:
     name: Test bindings on aarch64-unknown-linux-gnu - node@${{ matrix.node }}
     needs:
@@ -364,7 +359,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:aarch64-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
             set -e
             yarn test
@@ -397,7 +392,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: multiarch/alpine:aarch64-latest-stable
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
             set -e
             apk add nodejs npm yarn
@@ -436,7 +431,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:armhf-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
             set -e
             yarn test

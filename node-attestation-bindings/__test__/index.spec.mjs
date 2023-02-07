@@ -8,7 +8,7 @@ const BASE_TEST_PATH = "..";
 const directory = readdirSync(`${BASE_TEST_PATH}/test-specs`, "utf8");
 
 function resolveCert(filePath) {
-  const rawCert = readFileSync(`${BASE_TEST_PATH}/${file}`);
+  const rawCert = readFileSync(`${BASE_TEST_PATH}/${filePath}`);
   if (!filePath.endsWith(".pem")) {
     return rawCert;
   }
