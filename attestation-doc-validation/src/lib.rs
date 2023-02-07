@@ -8,6 +8,7 @@ use error::AttestResult as Result;
 use nsm::nsm_api::AttestationDoc;
 
 use nsm::CryptoClient;
+use serde_bytes::ByteBuf;
 use x509_parser::certificate::X509Certificate;
 
 // Helper function to fail early on any variant of error::AttestError
@@ -17,6 +18,11 @@ fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> std::res
     } else {
         Err(err)
     }
+}
+
+// Helper function to convert the embedded `ca_bundle` into a `webpki` compatible cert stack
+fn create_intermediate_cert_stack(ca_bundle: &[ByteBuf]) -> Vec<&[u8]> {
+    ca_bundle.iter().map(|cert| cert.as_slice()).collect()
 }
 
 /// Attempts to DER decode a slice of bytes to an X509 Certificate
@@ -54,20 +60,12 @@ pub fn validate_attestation_doc_in_cert(
     attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
 
     // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
-    let intermediate_certs: Vec<&[u8]> = decoded_attestation_doc
-        .cabundle
-        .iter()
-        .map(|cert| cert.as_slice())
-        .collect();
+    let intermediate_certs = create_intermediate_cert_stack(&decoded_attestation_doc.cabundle);
     cert::validate_cert_trust_chain(&decoded_attestation_doc.certificate, &intermediate_certs)?;
 
     // Validate Cose signature over attestation doc
-    // let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
-    // let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
-
     let cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
     let pub_key: nsm::PublicKey = cert.public_key().try_into()?;
-    // attestation::validate_cose_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
     attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
 
     // Validate that the cert public key is embedded in the attestation doc
@@ -97,18 +95,15 @@ pub fn validate_attestation_doc(
     let (cose_sign_1_decoded, decoded_attestation_doc) =
         attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
     attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
 
     // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
-    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
-    let received_certificates =
-        cert::parse_cert_stack_from_cabundle(decoded_attestation_doc.cabundle.as_ref())?;
-
-    cert::validate_cert_trust_chain(&attestation_doc_signing_cert, &received_certificates)?;
+    let intermediate_certs = create_intermediate_cert_stack(&decoded_attestation_doc.cabundle);
+    cert::validate_cert_trust_chain(&decoded_attestation_doc.certificate, &intermediate_certs)?;
 
     // Validate Cose signature over attestation doc
-    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
-    let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
-    attestation_doc::validate_cose_signature(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
+    let pub_key: nsm::PublicKey = attestation_doc_signing_cert.public_key().try_into()?;
+    attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
 
     Ok(())
 }
