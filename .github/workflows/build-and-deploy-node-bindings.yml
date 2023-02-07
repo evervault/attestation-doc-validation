@@ -199,6 +199,7 @@ jobs:
             whoami
             env
             freebsd-version
+            cd ${{ env.SUBDIRECTORY }}
             yarn install
             yarn build
             strip -x *.node
@@ -206,7 +207,6 @@ jobs:
             rm -rf node_modules
             rm -rf target
             rm -rf .yarn/cache
-            ls node-attestation-bindings
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -228,6 +228,9 @@ jobs:
           - "16"
           - "18"
     runs-on: ${{ matrix.settings.host }}
+    defaults:
+      run:
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -263,7 +266,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -299,7 +302,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -337,7 +340,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: actions/checkout@v3
@@ -370,7 +373,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: actions/checkout@v3
@@ -410,7 +413,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
       - uses: actions/checkout@v3
@@ -442,7 +445,7 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -477,7 +480,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./node-attestation-bindings
+        working-directory: ./${{ env.SUBDIRECTORY }}
     if: ${{ startsWith(github.ref,'refs/tags/node/v') }}
     needs:
       - build-freebsd
