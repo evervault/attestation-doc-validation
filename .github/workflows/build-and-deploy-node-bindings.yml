@@ -249,7 +249,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: .
+          path: ${{ env.SUBDIRECTORY }}
       - name: List packages
         run: ls -R .
         shell: bash
@@ -285,7 +285,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-x86_64-unknown-linux-gnu
-          path: .
+          path: ${{ env.SUBDIRECTORY }}
       - name: List packages
         run: ls -R .
         shell: bash
@@ -323,7 +323,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-x86_64-unknown-linux-musl
-          path: .
+          path: ${{ env.SUBDIRECTORY }}
       - name: List packages
         run: ls -R .
         shell: bash
@@ -351,7 +351,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-aarch64-unknown-linux-gnu
-          path: .
+          path: ${{ env.SUBDIRECTORY }}
       - name: List packages
         run: ls -R .
         shell: bash
@@ -384,7 +384,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-aarch64-unknown-linux-musl
-          path: .
+          path: ${{ env.SUBDIRECTORY }}
       - name: List packages
         run: ls -R .
         shell: bash
@@ -424,7 +424,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-armv7-unknown-linux-gnueabihf
-          path: .
+          path: ${{ env.SUBDIRECTORY }}
       - name: List packages
         run: ls -R .
         shell: bash
@@ -464,19 +464,19 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-x86_64-apple-darwin
-          path: artifacts
+          path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Download macOS arm64 artifact
         uses: actions/download-artifact@v3
         with:
           name: bindings-aarch64-apple-darwin
-          path: artifacts
+          path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Combine binaries
         run: yarn universal
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: bindings-universal-apple-darwin
-          path: ${{ env.APP_NAME }}.*.node
+          path: ${{ env.SUBDIRECTORY }}/${{ env.APP_NAME }}.*.node
           if-no-files-found: error
   publish:
     name: Publish
