@@ -107,6 +107,11 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     )
 }
 
+/// Parses `PCRs` from an attestation doc
+///
+/// # Errors
+///
+/// Returns an error if any of the expected PCRs are missing from the attestation document
 pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationDocResult<PCRs> {
     let encoded_measurements = attestation_doc
         .pcrs
