@@ -7,7 +7,6 @@ use super::{
 };
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
 use base64::Engine;
-// use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
 use std::fmt::Write;
 
@@ -146,19 +145,30 @@ pub fn validate_expected_nonce<T: PCRProvider>(
     )
 }
 
-pub(super) fn validate_cose_signature<H: Hash>(
+/// Takes a public key and attestation doc in `CoseSign1` form and returns a result based on it's validity
+///
+/// # Errors
+///
+/// Returns a `InvalidCoseSignature` error if signature is invalid
+pub fn validate_cose_signature<H: Hash>(
     signing_cert_public_key: &dyn SigningPublicKey,
     cose_sign_1_decoded: &CoseSign1,
 ) -> AttestationResult<()> {
     true_or_invalid(
         cose_sign_1_decoded
             .verify_signature::<H>(signing_cert_public_key)
-            .map_err(|err| AttestationError::Cose(err.to_string()))?,
+            .map_err(|err| AttestationError::InvalidCose(err.to_string()))?,
         AttestationError::InvalidCoseSignature,
     )
 }
 
-pub(super) fn validate_expected_challenge(
+/// Takes an `AttestationDoc` and expected challenge and compares them
+///
+/// # Errors
+///
+/// Returns a `MissingUserData` error if user data is not present in attestation doc
+/// Returns a `UserDataMismatch` error if the challenges do not match
+pub fn validate_expected_challenge(
     attestation_doc: &AttestationDoc,
     expected_challenge: &[u8],
 ) -> AttestationResult<()> {
@@ -172,7 +182,24 @@ pub(super) fn validate_expected_challenge(
     )
 }
 
-/// Derived from [AWS attestation process](https://github.com/aws/aws-nitro-enclaves-nsm-api/blob/main/docs/attestation_process.md)
+/// Takes a byte array and parses is as an `AttestationDoc` and `CoseSign1`
+///
+/// # Errors
+///
+/// Returns a `InvalidCose` if the byte array can't be parsed as a `CoseSign1`
+/// Returns a `DocStructureInvalid` if the attestation doc doesn't follow the [AWS criteria](https://github.com/aws/aws-nitro-enclaves-nsm-api/blob/main/docs/attestation_process.md)
+pub fn decode_attestation_document(
+    cose_sign_1_bytes: &[u8],
+) -> AttestationResult<(CoseSign1, AttestationDoc)> {
+    let cose_sign_1_decoded: CoseSign1 = serde_cbor::from_slice(cose_sign_1_bytes)?;
+    let cbor = cose_sign_1_decoded
+        .get_payload::<CryptoClient>(None)
+        .map_err(|err| AttestationError::InvalidCose(err.to_string()))?;
+    let attestation_doc: AttestationDoc = serde_cbor::from_slice(&cbor)?;
+    validate_attestation_document_structure(&attestation_doc)?;
+    Ok((cose_sign_1_decoded, attestation_doc))
+}
+
 pub(super) fn validate_attestation_document_structure(
     attestation_document: &AttestationDoc,
 ) -> AttestationResult<()> {
@@ -205,17 +232,7 @@ pub(super) fn validate_attestation_document_structure(
         .user_data
         .as_ref()
         .map_or(true, |user_data| user_data.len() > 0 && user_data.len() <= 512);
-    true_or_invalid(valid_structure_check, AttestationError::DocStructure)
-}
-
-pub(super) fn decode_attestation_document(
-    cose_sign_1_bytes: &[u8],
-) -> AttestationResult<(CoseSign1, AttestationDoc)> {
-    let cose_sign_1_decoded: CoseSign1 = serde_cbor::from_slice(cose_sign_1_bytes)?;
-    let cbor = cose_sign_1_decoded
-        .get_payload::<CryptoClient>(None)
-        .map_err(|err| AttestationError::Cose(err.to_string()))?;
-    Ok((cose_sign_1_decoded, serde_cbor::from_slice(&cbor)?))
+    true_or_invalid(valid_structure_check, AttestationError::DocStructureInvalid)
 }
 
 #[cfg(test)]
