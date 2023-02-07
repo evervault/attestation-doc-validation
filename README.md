@@ -10,7 +10,7 @@ This repo contains several projects relating to the Remote Attestation Protocol 
 
 This branch uses pure rust libraries for validating the attestation document. The support for the curves used for attestation document signatures is incomplete.
 
-** This crate can not validate Attestation Documents which use p521r1 **
+**This crate can not validate Attestation Documents which use p521r1.**
 
 ## Getting Started
 
