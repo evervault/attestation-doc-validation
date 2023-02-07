@@ -77,6 +77,42 @@ pub fn validate_attestation_doc_in_cert(
     Ok(decoded_attestation_doc)
 }
 
+/// Validates an attestation doc by:
+/// - Validating the cert structure
+/// - Decoding and validating the attestation doc
+/// - Validating the signature on the attestation doc
+/// - Validating that the PCRs of the attestation doc are as expected
+///
+/// # Errors
+///
+/// Will return an error if:
+/// - The cose1 encoded attestation doc fails to parse, or its signature is invalid
+/// - The attestation document is not signed by the nitro cert chain
+/// - Any of the certificates are malformed
+///
+pub fn validate_attestation_doc(
+    attestation_doc_cose_sign_1_bytes: &[u8],
+) -> error::AttestResult<()> {
+    // Parse attestation doc from cose signature and validate structure
+    let (cose_sign_1_decoded, decoded_attestation_doc) =
+        attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
+    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+
+    // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+    let received_certificates =
+        cert::parse_cert_stack_from_cabundle(decoded_attestation_doc.cabundle.as_ref())?;
+
+    cert::validate_cert_trust_chain(&attestation_doc_signing_cert, &received_certificates)?;
+
+    // Validate Cose signature over attestation doc
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+    let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
+    attestation_doc::validate_cose_signature(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
