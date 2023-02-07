@@ -16,24 +16,24 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TestPCRs {
-    pub pcr_0: String,
-    pub pcr_1: String,
-    pub pcr_2: String,
-    pub pcr_8: String,
+    pub pcr_0: Option<String>,
+    pub pcr_1: Option<String>,
+    pub pcr_2: Option<String>,
+    pub pcr_8: Option<String>,
 }
 
 impl PCRProvider for TestPCRs {
-    fn pcr_0(&self) -> Option<&str> {
-        Some(self.pcr_0.as_str())
+    fn pcr_0(&self) -> Option<String> {
+        self.pcr_0.clone()
     }
-    fn pcr_1(&self) -> Option<&str> {
-        Some(self.pcr_1.as_str())
+    fn pcr_1(&self) -> Option<String> {
+        self.pcr_1.clone()
     }
-    fn pcr_2(&self) -> Option<&str> {
-        Some(self.pcr_2.as_str())
+    fn pcr_2(&self) -> Option<String> {
+        self.pcr_2.clone()
     }
-    fn pcr_8(&self) -> Option<&str> {
-        Some(self.pcr_8.as_str())
+    fn pcr_8(&self) -> Option<String> {
+        self.pcr_8.clone()
     }
 }
 
@@ -102,4 +102,9 @@ fn validate_valid_attestation_doc_in_cert_incorrect_pcrs_time_sensitive() {
 #[test]
 fn validate_valid_attestation_doc_in_cert_der_encoding_time_sensitive() {
     evaluate_test_from_spec!("valid_attestation_doc_in_cert_der_encoding_time_sensitive.json");
+}
+
+#[test]
+fn valid_attestation_check_pcr8_only_time_sensitive() {
+    evaluate_test_from_spec!("valid_attestation_doc_check_pcr8_only_time_sensitive.json");
 }

@@ -42,10 +42,10 @@ macro_rules! compare_pcrs {
 
 /// Trait to allow custom implementations of PCR-like types. This helps to make the per language bindings more idiomatic.
 pub trait PCRProvider {
-    fn pcr_0(&self) -> Option<&str>;
-    fn pcr_1(&self) -> Option<&str>;
-    fn pcr_2(&self) -> Option<&str>;
-    fn pcr_8(&self) -> Option<&str>;
+    fn pcr_0(&self) -> Option<String>;
+    fn pcr_1(&self) -> Option<String>;
+    fn pcr_2(&self) -> Option<String>;
+    fn pcr_8(&self) -> Option<String>;
 
     fn to_string(&self) -> String {
         let mut pcrs_str = String::new();
@@ -75,17 +75,17 @@ pub struct PCRs {
 }
 
 impl PCRProvider for PCRs {
-    fn pcr_0(&self) -> Option<&str> {
-        Some(self.pcr_0.as_str())
+    fn pcr_0(&self) -> Option<String> {
+        Some(self.pcr_0.clone())
     }
-    fn pcr_1(&self) -> Option<&str> {
-        Some(self.pcr_1.as_str())
+    fn pcr_1(&self) -> Option<String> {
+        Some(self.pcr_1.clone())
     }
-    fn pcr_2(&self) -> Option<&str> {
-        Some(self.pcr_2.as_str())
+    fn pcr_2(&self) -> Option<String> {
+        Some(self.pcr_2.clone())
     }
-    fn pcr_8(&self) -> Option<&str> {
-        Some(self.pcr_8.as_str())
+    fn pcr_8(&self) -> Option<String> {
+        Some(self.pcr_8.clone())
     }
 }
 
