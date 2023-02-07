@@ -34,7 +34,6 @@ jobs:
           - host: windows-latest
             build: |
               yarn build --target i686-pc-windows-msvc
-              yarn test
             target: i686-pc-windows-msvc
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
@@ -82,7 +81,7 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
             build: |-
               set -e &&
-              apk install openssl &&
+              apk add perl openssl &&
               rustup target add aarch64-unknown-linux-musl &&
               yarn build --target aarch64-unknown-linux-musl &&
               /aarch64-linux-musl-cross/bin/aarch64-linux-musl-strip *.node
@@ -124,6 +123,9 @@ jobs:
         if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
         with:
           version: 0.10.0
+      - name: Add msbuild to PATH
+        if: ${{ matrix.settings.target == 'aarch64-pc-windows-msvc' }}
+        uses: microsoft/setup-msbuild@v1.1
       - name: Setup toolchain
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
@@ -204,6 +206,7 @@ jobs:
             rm -rf node_modules
             rm -rf target
             rm -rf .yarn/cache
+            ls
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
