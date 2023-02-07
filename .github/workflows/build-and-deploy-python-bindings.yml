@@ -22,7 +22,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: python-attestation-bindings/dist
 
   windows:
     runs-on: windows-latest
@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: python-attestation-bindings/dist
 
   macos:
     runs-on: macos-latest
@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: python-attestation-bindings/dist
 
   release:
     name: Release
