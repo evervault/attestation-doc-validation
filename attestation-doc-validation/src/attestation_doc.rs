@@ -293,8 +293,6 @@ mod test {
 
     #[test]
     fn validate_get_pcrs() {
-        // this test only validates the structure of the AD, but not the validity of the Nitro signature over it
-        // so it will pass despite the AD being expired.
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
             "../test-data/valid-attestation-doc-bytes",
         ))
