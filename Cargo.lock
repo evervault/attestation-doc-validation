@@ -96,7 +96,7 @@ dependencies = [
 
 [[package]]
 name = "attestation-doc-validation"
-version = "0.4.2-beta"
+version = "0.5.0-beta"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -802,7 +802,7 @@ dependencies = [
 name = "node-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.5.0-beta",
+ "attestation-doc-validation 0.5.0-beta (registry+https://github.com/rust-lang/crates.io-index)",
  "napi",
  "napi-build",
  "napi-derive",
@@ -1068,7 +1068,7 @@ dependencies = [
 name = "python-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.5.0-beta",
+ "attestation-doc-validation 0.5.0-beta (registry+https://github.com/rust-lang/crates.io-index)",
  "pyo3",
 ]
 
