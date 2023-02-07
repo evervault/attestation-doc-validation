@@ -24,24 +24,20 @@ jobs:
           name: wheels
           path: dist
 
-  # Attestation doc validation crate can't compile on non-unix systems due to a dependency on the AWS NSM crates
-  # windows:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     # Install Openssl
-  #     - run: echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
-  #     - run: vcpkg install openssl:x64-windows-static-md
-  #     - uses: PyO3/maturin-action@v1
-  #       with:
-  #         command: build
-  #         args: --release -o dist --find-interpreter
-  #         working-directory: python-attestation-bindings
-  #     - name: Upload wheels
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: wheels
-  #         path: dist
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release -o dist --find-interpreter
+          working-directory: python-attestation-bindings
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
 
   macos:
     runs-on: macos-latest
@@ -62,8 +58,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
-    # needs: [macos, windows, linux]
-    needs: [macos, linux]
+    needs: [macos, windows, linux]
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -75,3 +70,4 @@ jobs:
         with:
           command: upload
           args: --skip-existing *
+          working-directory: python-attestation-bindings
