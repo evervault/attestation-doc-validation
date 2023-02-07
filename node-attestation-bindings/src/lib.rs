@@ -1,7 +1,5 @@
-use attestation_doc_validation::PCRProvider;
-use attestation_doc_validation::{
-  parse_cert, validate_attestation_doc_in_cert, validate_expected_pcrs,
-};
+use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRProvider};
+use attestation_doc_validation::{parse_cert, validate_attestation_doc_in_cert};
 use napi::JsBuffer;
 use napi_derive::napi;
 

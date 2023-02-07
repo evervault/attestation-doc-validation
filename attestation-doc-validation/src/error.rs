@@ -1,10 +1,14 @@
+//! Module for categorizing errors returned during attestation
 use thiserror::Error;
 
+/// Generic Result type for the top level functions of the library
 pub type AttestResult<T> = Result<T, AttestError>;
+/// Generic Result type for the attestation doc module
 pub type AttestationDocResult<T> = Result<T, AttestationDocError>;
+/// Generic Result type for the cert module
 pub type CertResult<T> = Result<T, CertError>;
 
-/// Top level wrapper to show which step in validation failed.
+/// Top level wrapper to show which step in the attesation process failed.
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum AttestError
@@ -17,7 +21,7 @@ where
     CertError(#[from] CertError),
 }
 
-/// Wrapping type to record the specific error that occurred while validating the attestation document received
+/// Wrapping type to record the specific error that occurred while validating the attestation document.
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum AttestationDocError
@@ -25,11 +29,11 @@ where
     Self: Send + Sync,
 {
     #[error("COSE error: `{0}`")]
-    Cose(String),
+    InvalidCose(String),
     #[error(transparent)]
-    Cbor(#[from] serde_cbor::error::Error),
+    InvalidCbor(#[from] serde_cbor::error::Error),
     #[error("A part of the attestation doc structure was deemed invalid")]
-    DocStructure,
+    DocStructureInvalid,
     #[error("The COSE signature does not match the public key provided in the attestation doc")]
     InvalidCoseSignature,
     #[error(
@@ -49,7 +53,7 @@ where
     },
 }
 
-/// Wrapping type to record the specific error that occurred while validating the TLS Cert received
+/// Wrapping type to record the specific error that occurred while validating the TLS Cert.
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub enum CertError
@@ -57,7 +61,7 @@ where
     Self: Send + Sync,
 {
     #[error(transparent)]
-    CertStacking(#[from] openssl::error::ErrorStack),
+    Openssl(#[from] openssl::error::ErrorStack),
     #[error("The certificate in the attestation doc was detected as not having the NSM as root")]
     UntrustedCert,
     #[error("The received certificate had no Subject Alt Name extension")]

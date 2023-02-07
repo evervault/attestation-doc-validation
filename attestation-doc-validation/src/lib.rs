@@ -1,11 +1,10 @@
-mod attestation_doc;
-mod cert;
-
-use attestation_doc::AttestationDoc;
-use openssl::x509::X509;
-
-pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
+pub mod attestation_doc;
+pub mod cert;
 pub mod error;
+mod nsm;
+
+use nsm::nsm_api::AttestationDoc;
+use openssl::x509::X509;
 
 // Helper function to fail early on any variant of error::AttestError
 fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> Result<(), E> {
@@ -69,6 +68,42 @@ pub fn validate_attestation_doc_in_cert(given_cert: &X509) -> error::AttestResul
     Ok(decoded_attestation_doc)
 }
 
+/// Validates an attestation doc by:
+/// - Validating the cert structure
+/// - Decoding and validating the attestation doc
+/// - Validating the signature on the attestation doc
+/// - Validating that the PCRs of the attestation doc are as expected
+///
+/// # Errors
+///
+/// Will return an error if:
+/// - The cose1 encoded attestation doc fails to parse, or its signature is invalid
+/// - The attestation document is not signed by the nitro cert chain
+/// - Any of the certificates are malformed
+///
+pub fn validate_attestation_doc(
+    attestation_doc_cose_sign_1_bytes: &[u8],
+) -> error::AttestResult<()> {
+    // Parse attestation doc from cose signature and validate structure
+    let (cose_sign_1_decoded, decoded_attestation_doc) =
+        attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
+    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+
+    // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+    let received_certificates =
+        cert::parse_cert_stack_from_cabundle(decoded_attestation_doc.cabundle.as_ref())?;
+
+    cert::validate_cert_trust_chain(&attestation_doc_signing_cert, &received_certificates)?;
+
+    // Validate Cose signature over attestation doc
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+    let attestation_doc_pub_key = cert::get_cert_public_key(&attestation_doc_signing_cert)?;
+    attestation_doc::validate_cose_signature(&attestation_doc_pub_key, &cose_sign_1_decoded)?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -95,7 +130,7 @@ mod test {
     #[test]
     fn test_der_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com";
@@ -118,7 +153,7 @@ mod test {
     #[test]
     fn test_pem_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/valid-attestation-doc-bytes",
+            "../test-data/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com";
@@ -142,7 +177,7 @@ mod test {
     fn validate_debug_mode_attestation_doc() {
         // debug mode attestation docs fail due to an untrusted cert
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "./test-files/debug-mode-attestation-doc-bytes",
+            "../test-data/debug-mode-attestation-doc-bytes",
         ))
         .unwrap();
         let attestable_cert =
