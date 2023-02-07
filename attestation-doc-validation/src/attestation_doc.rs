@@ -1,13 +1,12 @@
 //! Module for parsing and validating attestation documents from AWS Nitro Enclaves.
+use super::nsm::nsm_api::{AttestationDoc, Digest};
 use super::{
-    error::{AttestationDocError, AttestationDocResult},
+    error::{AttestationError, AttestationResult},
+    nsm::{CryptoClient, Hash, SigningPublicKey},
     true_or_invalid,
 };
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
-pub(super) use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
-use aws_nitro_enclaves_nsm_api::api::Digest;
 use base64::Engine;
-use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
 use std::fmt::Write;
 
@@ -16,7 +15,7 @@ macro_rules! extract_pcr {
     ($measurements:expr, $idx:literal) => {{
         $measurements
             .get(&$idx)
-            .ok_or(AttestationDocError::MissingPCR($idx))?
+            .ok_or(AttestationError::MissingPCR($idx))?
             .to_string()
     }};
 }
@@ -98,7 +97,7 @@ impl PCRProvider for PCRs {
 pub fn validate_expected_pcrs<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_pcrs: &T,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let encoded_measurements = attestation_doc
         .pcrs
         .iter()
@@ -115,7 +114,7 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     let same_pcrs = expected_pcrs.eq(&received_pcrs);
     true_or_invalid(
         same_pcrs,
-        AttestationDocError::UnexpectedPCRs(expected_pcrs.to_string(), received_pcrs.to_string()),
+        AttestationError::UnexpectedPCRs(expected_pcrs.to_string(), received_pcrs.to_string()),
     )
 }
 
@@ -127,55 +126,83 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
 pub fn validate_expected_nonce<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_nonce: &str,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let matching_nonce = attestation_doc
         .nonce
         .as_ref()
         .map(|existing_nonce| base64::prelude::BASE64_STANDARD.encode(existing_nonce))
-        .ok_or_else(|| AttestationDocError::NonceMismatch {
+        .ok_or_else(|| AttestationError::NonceMismatch {
             expected: expected_nonce.to_string(),
             received: None,
         })?;
 
     true_or_invalid(
         matching_nonce == expected_nonce,
-        AttestationDocError::NonceMismatch {
+        AttestationError::NonceMismatch {
             expected: expected_nonce.to_string(),
             received: Some(matching_nonce),
         },
     )
 }
 
-pub(super) fn validate_cose_signature(
-    signing_cert_public_key: &PKey<Public>,
+/// Takes a public key and attestation doc in `CoseSign1` form and returns a result based on it's validity
+///
+/// # Errors
+///
+/// Returns a `InvalidCoseSignature` error if signature is invalid
+pub fn validate_cose_signature<H: Hash>(
+    signing_cert_public_key: &dyn SigningPublicKey,
     cose_sign_1_decoded: &CoseSign1,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     true_or_invalid(
         cose_sign_1_decoded
-            .verify_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(signing_cert_public_key)
-            .map_err(|err| AttestationDocError::Cose(err.to_string()))?,
-        AttestationDocError::InvalidCoseSignature,
+            .verify_signature::<H>(signing_cert_public_key)
+            .map_err(|err| AttestationError::InvalidCose(err.to_string()))?,
+        AttestationError::InvalidCoseSignature,
     )
 }
 
-pub(super) fn validate_expected_challenge(
+/// Takes an `AttestationDoc` and expected challenge and compares them
+///
+/// # Errors
+///
+/// Returns a `MissingUserData` error if user data is not present in attestation doc
+/// Returns a `UserDataMismatch` error if the challenges do not match
+pub fn validate_expected_challenge(
     attestation_doc: &AttestationDoc,
     expected_challenge: &[u8],
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let embedded_challenge = attestation_doc
         .user_data
         .as_ref()
-        .ok_or(AttestationDocError::MissingUserData)?;
+        .ok_or(AttestationError::MissingUserData)?;
     true_or_invalid(
         embedded_challenge == expected_challenge,
-        AttestationDocError::UserDataMismatch,
+        AttestationError::UserDataMismatch,
     )
 }
 
-/// Derived from [AWS attestation process](https://github.com/aws/aws-nitro-enclaves-nsm-api/blob/main/docs/attestation_process.md)
+/// Takes a byte array and parses is as an `AttestationDoc` and `CoseSign1`
+///
+/// # Errors
+///
+/// Returns a `InvalidCose` if the byte array can't be parsed as a `CoseSign1`
+/// Returns a `DocStructureInvalid` if the attestation doc doesn't follow the [AWS criteria](https://github.com/aws/aws-nitro-enclaves-nsm-api/blob/main/docs/attestation_process.md)
+pub fn decode_attestation_document(
+    cose_sign_1_bytes: &[u8],
+) -> AttestationResult<(CoseSign1, AttestationDoc)> {
+    let cose_sign_1_decoded: CoseSign1 = serde_cbor::from_slice(cose_sign_1_bytes)?;
+    let cbor = cose_sign_1_decoded
+        .get_payload::<CryptoClient>(None)
+        .map_err(|err| AttestationError::InvalidCose(err.to_string()))?;
+    let attestation_doc: AttestationDoc = serde_cbor::from_slice(&cbor)?;
+    validate_attestation_document_structure(&attestation_doc)?;
+    Ok((cose_sign_1_decoded, attestation_doc))
+}
+
 pub(super) fn validate_attestation_document_structure(
     attestation_document: &AttestationDoc,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let valid_structure_check = !attestation_document.module_id.is_empty()
     && attestation_document.digest == Digest::SHA384
     && !attestation_document.pcrs.is_empty()
@@ -205,17 +232,7 @@ pub(super) fn validate_attestation_document_structure(
         .user_data
         .as_ref()
         .map_or(true, |user_data| user_data.len() > 0 && user_data.len() <= 512);
-    true_or_invalid(valid_structure_check, AttestationDocError::DocStructure)
-}
-
-pub(super) fn decode_attestation_document(
-    cose_sign_1_bytes: &[u8],
-) -> AttestationDocResult<(CoseSign1, AttestationDoc)> {
-    let cose_sign_1_decoded: CoseSign1 = serde_cbor::from_slice(cose_sign_1_bytes)?;
-    let cbor = cose_sign_1_decoded
-        .get_payload::<aws_nitro_enclaves_cose::crypto::Openssl>(None)
-        .map_err(|err| AttestationDocError::Cose(err.to_string()))?;
-    Ok((cose_sign_1_decoded, serde_cbor::from_slice(&cbor)?))
+    true_or_invalid(valid_structure_check, AttestationError::DocStructureInvalid)
 }
 
 #[cfg(test)]

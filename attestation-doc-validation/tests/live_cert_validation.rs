@@ -16,24 +16,24 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TestPCRs {
-    pub pcr_0: String,
-    pub pcr_1: String,
-    pub pcr_2: String,
-    pub pcr_8: String,
+    pub pcr_0: Option<String>,
+    pub pcr_1: Option<String>,
+    pub pcr_2: Option<String>,
+    pub pcr_8: Option<String>,
 }
 
 impl PCRProvider for TestPCRs {
     fn pcr_0(&self) -> Option<&str> {
-        Some(self.pcr_0.as_str())
+        self.pcr_0.as_deref()
     }
     fn pcr_1(&self) -> Option<&str> {
-        Some(self.pcr_1.as_str())
+        self.pcr_1.as_deref()
     }
     fn pcr_2(&self) -> Option<&str> {
-        Some(self.pcr_2.as_str())
+        self.pcr_2.as_deref()
     }
     fn pcr_8(&self) -> Option<&str> {
-        Some(self.pcr_8.as_str())
+        self.pcr_8.as_deref()
     }
 }
 
@@ -61,7 +61,14 @@ macro_rules! evaluate_test_from_spec {
         let input_bytes = std::fs::read(std::path::Path::new(&test_input_file)).unwrap();
 
         // Perform test
-        let cert = parse_cert(&input_bytes).unwrap();
+        let is_pem_cert = test_spec.file.ends_with(".pem");
+        let cert_content = if is_pem_cert {
+            let pem_cert = pem::parse(input_bytes).unwrap();
+            pem_cert.contents.clone()
+        } else {
+            input_bytes
+        };
+        let cert = parse_cert(&cert_content).unwrap();
         let maybe_attestation_doc = validate_attestation_doc_in_cert(&cert);
         if test_spec.is_attestation_doc_valid {
             assert!(maybe_attestation_doc.is_ok());
@@ -73,7 +80,7 @@ macro_rules! evaluate_test_from_spec {
                 let returned_error = pcrs_match.unwrap_err();
                 assert!(matches!(
                     returned_error,
-                    error::AttestationDocError::UnexpectedPCRs(_, _)
+                    error::AttestationError::UnexpectedPCRs(_, _)
                 ));
             }
         } else {
@@ -102,4 +109,9 @@ fn validate_valid_attestation_doc_in_cert_incorrect_pcrs_time_sensitive() {
 #[test]
 fn validate_valid_attestation_doc_in_cert_der_encoding_time_sensitive() {
     evaluate_test_from_spec!("valid_attestation_doc_in_cert_der_encoding_time_sensitive.json");
+}
+
+#[test]
+fn valid_attestation_check_pcr8_only_time_sensitive() {
+    evaluate_test_from_spec!("valid_attestation_doc_check_pcr8_only_time_sensitive.json");
 }
