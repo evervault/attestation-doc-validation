@@ -276,6 +276,13 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+      - name: Setup rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         run: cd ${{ env.SUBDIRECTORY }} ; yarn install
       - name: Download artifacts
@@ -287,7 +294,7 @@ jobs:
         run: cd ${{ env.SUBDIRECTORY }} ; ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd)/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build node:${{ matrix.node }}-slim yarn test
+        run: cd ${{ env.SUBDIRECTORY }} ; cargo make test
   test-linux-x64-musl-binding:
     name: Test bindings on x86_64-unknown-linux-musl - node@${{ matrix.node }}
     needs:
@@ -309,6 +316,13 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+      - name: Setup rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         run: |
           cd ${{ env.SUBDIRECTORY }}
@@ -323,7 +337,7 @@ jobs:
         run: cd ${{ env.SUBDIRECTORY }} ; ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd)/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build node:${{ matrix.node }}-alpine yarn test
+        run: cd ${{ env.SUBDIRECTORY }} ; cargo make test
   test-linux-aarch64-gnu-binding:
     name: Test bindings on aarch64-unknown-linux-gnu - node@${{ matrix.node }}
     needs:
@@ -362,7 +376,9 @@ jobs:
           options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
             set -e
-            yarn test
+            apt-get install -y libfaketime
+            export FAKETIME="2023-01-18 15:15:00" 
+            LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1 yarn test
             ls -la
   test-linux-aarch64-musl-binding:
     name: Test bindings on aarch64-unknown-linux-musl - node@${{ matrix.node }}
@@ -395,8 +411,9 @@ jobs:
           options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
             set -e
-            apk add nodejs npm yarn
-            yarn test
+            apk add nodejs npm yarn libfaketime
+            export FAKETIME="2023-01-18 15:15:00" 
+            LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1yarn test
   test-linux-arm-gnueabihf-binding:
     name: Test bindings on armv7-unknown-linux-gnueabihf - node@${{ matrix.node }}
     needs:
