@@ -61,7 +61,14 @@ macro_rules! evaluate_test_from_spec {
         let input_bytes = std::fs::read(std::path::Path::new(&test_input_file)).unwrap();
 
         // Perform test
-        let cert = parse_cert(&input_bytes).unwrap();
+        let is_pem_cert = test_spec.file.ends_with(".pem");
+        let cert_content = if is_pem_cert {
+            let pem_cert = pem::parse(input_bytes).unwrap();
+            pem_cert.contents.clone()
+        } else {
+            input_bytes
+        };
+        let cert = parse_cert(&cert_content).unwrap();
         let maybe_attestation_doc = validate_attestation_doc_in_cert(&cert);
         if test_spec.is_attestation_doc_valid {
             assert!(maybe_attestation_doc.is_ok());
@@ -73,7 +80,7 @@ macro_rules! evaluate_test_from_spec {
                 let returned_error = pcrs_match.unwrap_err();
                 assert!(matches!(
                     returned_error,
-                    error::AttestationDocError::UnexpectedPCRs(_, _)
+                    error::AttestationError::UnexpectedPCRs(_, _)
                 ));
             }
         } else {
