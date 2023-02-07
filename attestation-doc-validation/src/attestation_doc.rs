@@ -42,10 +42,10 @@ macro_rules! compare_pcrs {
 
 /// Trait to allow custom implementations of PCR-like types. This helps to make the per language bindings more idiomatic.
 pub trait PCRProvider {
-    fn pcr_0(&self) -> Option<String>;
-    fn pcr_1(&self) -> Option<String>;
-    fn pcr_2(&self) -> Option<String>;
-    fn pcr_8(&self) -> Option<String>;
+    fn pcr_0(&self) -> Option<&str>;
+    fn pcr_1(&self) -> Option<&str>;
+    fn pcr_2(&self) -> Option<&str>;
+    fn pcr_8(&self) -> Option<&str>;
 
     fn to_string(&self) -> String {
         let mut pcrs_str = String::new();
@@ -75,17 +75,17 @@ pub struct PCRs {
 }
 
 impl PCRProvider for PCRs {
-    fn pcr_0(&self) -> Option<String> {
-        Some(self.pcr_0.clone())
+    fn pcr_0(&self) -> Option<&str> {
+        Some(self.pcr_0.as_str())
     }
-    fn pcr_1(&self) -> Option<String> {
-        Some(self.pcr_1.clone())
+    fn pcr_1(&self) -> Option<&str> {
+        Some(self.pcr_1.as_str())
     }
-    fn pcr_2(&self) -> Option<String> {
-        Some(self.pcr_2.clone())
+    fn pcr_2(&self) -> Option<&str> {
+        Some(self.pcr_2.as_str())
     }
-    fn pcr_8(&self) -> Option<String> {
-        Some(self.pcr_8.clone())
+    fn pcr_8(&self) -> Option<&str> {
+        Some(self.pcr_8.as_str())
     }
 }
 
@@ -93,12 +93,24 @@ impl PCRProvider for PCRs {
 ///
 /// # Errors
 ///
-/// Returns an error if any of the expected PCRs are missing from the attestation document or if the expected PCRs don't match the values embedded in the doc
+/// Returns an error if any of the expected PCRs are missing from the attestation document, or if the expected PCRs don't match the values embedded in the doc
 pub fn validate_expected_pcrs<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_pcrs: &T,
 ) -> AttestationDocResult<()> {
-    let received_pcrs = get_pcrs(attestation_doc)?;
+    let encoded_measurements = attestation_doc
+        .pcrs
+        .iter()
+        .map(|(&index, buf)| (index, hex::encode(&buf[..])))
+        .collect::<BTreeMap<_, _>>();
+
+    let received_pcrs = PCRs {
+        pcr_0: extract_pcr!(encoded_measurements, 0),
+        pcr_1: extract_pcr!(encoded_measurements, 1),
+        pcr_2: extract_pcr!(encoded_measurements, 2),
+        pcr_8: extract_pcr!(encoded_measurements, 8),
+    };
+
     let same_pcrs = expected_pcrs.eq(&received_pcrs);
     true_or_invalid(
         same_pcrs,
@@ -106,32 +118,12 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     )
 }
 
-/// Parses `PCRs` from an `AttestationDoc`
-///
-/// # Errors
-///
-/// Returns an error if any of the expected PCRs are missing from the attestation document
-pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationDocResult<PCRs> {
-    let encoded_measurements = attestation_doc
-        .pcrs
-        .iter()
-        .map(|(&index, buf)| (index, hex::encode(&buf[..])))
-        .collect::<BTreeMap<_, _>>();
-
-    Ok(PCRs {
-        pcr_0: extract_pcr!(encoded_measurements, 0),
-        pcr_1: extract_pcr!(encoded_measurements, 1),
-        pcr_2: extract_pcr!(encoded_measurements, 2),
-        pcr_8: extract_pcr!(encoded_measurements, 8),
-    })
-}
-
 /// Extracts the nonce embedded in the attestation doc, encodes it to base64 and compares it to the base64 encoded nonce given
 ///
 /// # Errors
 ///
 /// Returns a `NonceMismatch` error if the attestation document contains an unexpected nonce, or does not contain a nonce
-pub fn validate_expected_nonce(
+pub fn validate_expected_nonce<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_nonce: &str,
 ) -> AttestationDocResult<()> {

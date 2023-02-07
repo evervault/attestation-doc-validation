@@ -23,17 +23,17 @@ pub struct TestPCRs {
 }
 
 impl PCRProvider for TestPCRs {
-    fn pcr_0(&self) -> Option<String> {
-        self.pcr_0.clone()
+    fn pcr_0(&self) -> Option<&str> {
+        self.pcr_0.as_deref()
     }
-    fn pcr_1(&self) -> Option<String> {
-        self.pcr_1.clone()
+    fn pcr_1(&self) -> Option<&str> {
+        self.pcr_1.as_deref()
     }
-    fn pcr_2(&self) -> Option<String> {
-        self.pcr_2.clone()
+    fn pcr_2(&self) -> Option<&str> {
+        self.pcr_2.as_deref()
     }
-    fn pcr_8(&self) -> Option<String> {
-        self.pcr_8.clone()
+    fn pcr_8(&self) -> Option<&str> {
+        self.pcr_8.as_deref()
     }
 }
 
