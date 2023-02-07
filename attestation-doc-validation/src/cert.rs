@@ -3,21 +3,32 @@ use super::{
     error::{CertError, CertResult},
     true_or_invalid,
 };
-use openssl::{
-    stack::Stack,
-    x509::{store, X509StoreContext, X509},
-};
 use serde_bytes::ByteBuf;
 use std::str::FromStr;
+use webpki::{EndEntityCert, TrustAnchor};
 use x509_parser::{
     certificate::X509Certificate,
-    extensions::{ParsedExtension, SubjectAlternativeName},
-    pem::Pem,
+    extensions::{GeneralName, ParsedExtension, SubjectAlternativeName},
 };
 
 static NITRO_ROOT_CA_BYTES: &[u8] = include_bytes!("nitro.pem");
 
-const SUBJECT_ALT_NAMES_OID: &'static str = "2.5.29.17";
+const SUBJECT_ALT_NAMES_OID: &str = "2.5.29.17";
+
+static SUPPORTED_SIG_ALGS: &[&webpki::SignatureAlgorithm] = &[
+    &webpki::ECDSA_P256_SHA256,
+    &webpki::ECDSA_P256_SHA384,
+    &webpki::ECDSA_P384_SHA256,
+    &webpki::ECDSA_P384_SHA384,
+    &webpki::ED25519,
+    &webpki::RSA_PSS_2048_8192_SHA256_LEGACY_KEY,
+    &webpki::RSA_PSS_2048_8192_SHA384_LEGACY_KEY,
+    &webpki::RSA_PSS_2048_8192_SHA512_LEGACY_KEY,
+    &webpki::RSA_PKCS1_2048_8192_SHA256,
+    &webpki::RSA_PKCS1_2048_8192_SHA384,
+    &webpki::RSA_PKCS1_2048_8192_SHA512,
+    &webpki::RSA_PKCS1_3072_8192_SHA384,
+];
 
 /// The self signed certificate provided by the enclave embeds the
 /// cose-sign1 structure as a subject alternative name (SAN) in the form `<hex_encoded_cose_sign_1>.<cage_name>.<app_uuid>.cages.evervault.com`.
@@ -31,27 +42,37 @@ const SUBJECT_ALT_NAMES_OID: &'static str = "2.5.29.17";
 pub fn extract_signed_cose_sign_1_from_certificate(
     certificate: &X509Certificate,
 ) -> CertResult<Vec<u8>> {
+    let general_names = get_subject_alt_names_from_cert(certificate)?;
+    let parsed_attestation_bytes = general_names
+        .iter()
+        .filter_map(|alt_name| {
+            let GeneralName::DNSName(dns_name) = alt_name else { return None };
+            dns_name.split('.').next().map(String::from)
+        })
+        .reduce(|a, b| if a.len() > b.len() { a } else { b })
+        .ok_or(CertError::ParseError)?;
+    Ok(hex::decode(parsed_attestation_bytes)?)
+}
+
+pub(super) fn get_subject_alt_names_from_cert<'a>(
+    certificate: &X509Certificate<'a>,
+) -> CertResult<Vec<GeneralName<'a>>> {
     let subject_alt_names_oid = x509_parser::oid_registry::Oid::from_str(SUBJECT_ALT_NAMES_OID)
         .expect("Infallible: hardcoded oid");
     let ParsedExtension::SubjectAlternativeName(SubjectAlternativeName {
-      general_names
-    }) = certificate.get_extension_unique(&subject_alt_names_oid)
+    general_names
+  }) = certificate.get_extension_unique(&subject_alt_names_oid)
         .map_err(|_| CertError::NoSubjectAltNames)?
         .ok_or(CertError::NoSubjectAltNames)?
         .parsed_extension() else {
           return Err(CertError::NoSubjectAltNames)
         };
 
-    let parsed_attestation_bytes = general_names
-        .iter()
-        .filter_map(|x| x.to_string().split('.').next())
-        .reduce(|a, b| if a.len() > b.len() { a } else { b })
-        .ok_or(CertError::ParseError)?;
-    Ok(hex::decode(parsed_attestation_bytes)?)
+    Ok(general_names.clone())
 }
 
-pub(super) fn export_public_key_to_der<'a>(cert: &'a X509Certificate) -> CertResult<&'a [u8]> {
-    Ok(cert.public_key().raw)
+pub(super) fn export_public_key_to_der<'a>(cert: &'a X509Certificate) -> &'a [u8] {
+    cert.public_key().raw
 }
 
 /// Given an end entity certificate and a stack of CAs, attempt to validate that the Cert can be trusted.
@@ -61,33 +82,35 @@ pub(super) fn export_public_key_to_der<'a>(cert: &'a X509Certificate) -> CertRes
 ///
 /// Returns a `CertError::UntrustedCert` when the trust chain fails to validate
 /// Returns a `CertError::Openssl` if an error occurred while preparing the context
-pub fn validate_cert_trust_chain(target: &X509, certificate_stack: &Stack<X509>) -> CertResult<()> {
-    let mut certificate_store_builder = store::X509StoreBuilder::new()?;
-    let nitro_root_ca = X509::from_pem(NITRO_ROOT_CA_BYTES)?;
-    certificate_store_builder.add_cert(nitro_root_ca)?;
-    let certificate_store = certificate_store_builder.build();
-    let mut store_context = X509StoreContext::new()?;
+pub fn validate_cert_trust_chain(target: &[u8], intermediates: &[&[u8]]) -> CertResult<()> {
+    let end_entity_cert = EndEntityCert::try_from(target).map_err(|_| CertError::DecodeError)?;
+
+    let (_, nitro_pem_cert) = x509_parser::pem::parse_x509_pem(NITRO_ROOT_CA_BYTES)
+        .map_err(|_| CertError::DecodeError)?;
+    let nitro_trust_anchor = [TrustAnchor::try_from_cert_der(&nitro_pem_cert.contents)
+        .map_err(|_| CertError::DecodeError)?];
+    let server_trust_anchors = webpki::TlsServerTrustAnchors(&nitro_trust_anchor);
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|time_since_epoch| time_since_epoch.as_secs())
+        .map_err(|_| CertError::TimeError)?;
+    let time = webpki::Time::from_seconds_since_unix_epoch(now);
+
     true_or_invalid(
-        store_context.init(
-            certificate_store.as_ref(),
-            target.as_ref(),
-            certificate_stack,
-            openssl::x509::X509StoreContextRef::verify_cert,
-        )?,
+        end_entity_cert
+            .verify_is_valid_tls_server_cert(
+                SUPPORTED_SIG_ALGS,
+                &server_trust_anchors,
+                intermediates,
+                time,
+            )
+            .is_ok(),
         CertError::UntrustedCert,
     )
 }
 
-pub(super) fn parse_pem_cert<'a>(cert: &'a [u8]) -> CertResult<X509Certificate<'a>> {
-    for pem in Pem::iter_from_buffer(cert) {
-        let cert = pem?;
-        let parsed_cert = cert.parse_x509().map_err(|_| CertError::X509Error)?;
-        return Ok(parsed_cert);
-    }
-    Err(CertError::NoCertGiven)
-}
-
-pub(super) fn parse_der_cert<'a>(cert: &'a [u8]) -> CertResult<X509Certificate<'a>> {
+pub(super) fn parse_der_cert(cert: &[u8]) -> CertResult<X509Certificate<'_>> {
     let (_, parsed_cert) =
         x509_parser::parse_x509_certificate(cert).map_err(|_| CertError::DecodeError)?;
     Ok(parsed_cert)
@@ -98,12 +121,11 @@ pub(super) fn parse_der_cert<'a>(cert: &'a [u8]) -> CertResult<X509Certificate<'
 /// # Errors
 ///
 /// Returns a `CertError::Openssl` if an error occurred while preparing the stack
-pub fn parse_cert_stack_from_cabundle(cabundle: &[ByteBuf]) -> CertResult<Stack<X509>> {
-    let received_certificates: Vec<X509> =
-        cabundle.iter().flat_map(|ca| X509::from_der(ca)).collect();
-    let mut stack = Stack::new()?;
-    for certificate in received_certificates {
-        stack.push(certificate)?;
-    }
-    Ok(stack)
+pub fn parse_cert_stack_from_cabundle(cabundle: &[ByteBuf]) -> CertResult<Vec<TrustAnchor>> {
+    let trusted_certs: Vec<TrustAnchor> = cabundle
+        .iter()
+        .flat_map(|ca| TrustAnchor::try_from_cert_der(ca))
+        .collect();
+
+    Ok(trusted_certs)
 }

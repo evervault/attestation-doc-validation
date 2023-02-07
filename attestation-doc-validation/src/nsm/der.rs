@@ -24,6 +24,7 @@ pub struct SpecifiedCurve<'a> {
     pub cofactor: u8,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 pub enum EcParameters<'a> {
     NamedCurve(ObjectIdentifier),
@@ -109,6 +110,6 @@ impl std::convert::TryFrom<&Curve> for SupportedEcCurve {
         compare_curve!(Self::Secp256r1, value);
         compare_curve!(Self::Secp384r1, value);
         compare_curve!(Self::Secp521r1, value);
-        return Err(());
+        Err(())
     }
 }

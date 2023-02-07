@@ -38,8 +38,7 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
             "1.3.132.0.35" => (SignatureAlgorithm::ES512, MessageDigest::Sha512),
             oid => {
                 return Err(CoseError::UnsupportedError(format!(
-                    "Received unsupported curve: {}",
-                    oid
+                    "Received unsupported curve: {oid}"
                 )))
             }
         };
@@ -82,7 +81,7 @@ macro_rules! impl_signature_verification {
 
 impl<'a> PublicKey<'a> {
     fn public_key(&self) -> &BitString {
-        &self.public_key
+        self.public_key
     }
 
     fn verify_p256_signature(&self, digest: &[u8], signature: &[u8]) -> Result<(), CoseError> {
@@ -93,6 +92,7 @@ impl<'a> PublicKey<'a> {
         impl_signature_verification!(self, p384, digest, signature);
     }
 
+    #[allow(clippy::unused_self)]
     fn verify_p521_signature(&self, _digest: &[u8], _signature: &[u8]) -> Result<(), CoseError> {
         unimplemented!();
     }

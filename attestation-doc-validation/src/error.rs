@@ -64,8 +64,6 @@ pub enum CertError
 where
     Self: Send + Sync,
 {
-    #[error(transparent)]
-    Openssl(#[from] openssl::error::ErrorStack),
     #[error("The certificate in the attestation doc was detected as not having the NSM as root")]
     UntrustedCert,
     #[error("The received certificate had no Subject Alt Name extension")]
