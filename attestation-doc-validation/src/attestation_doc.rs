@@ -290,4 +290,23 @@ mod test {
         let pcrs_match = validate_expected_pcrs(&decoded_ad, &expected_pcrs).is_ok();
         assert!(!pcrs_match);
     }
+
+    #[test]
+    fn validate_get_pcrs() {
+        // this test only validates the structure of the AD, but not the validity of the Nitro signature over it
+        // so it will pass despite the AD being expired.
+        let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
+            "../test-data/valid-attestation-doc-bytes",
+        ))
+        .unwrap();
+        let expected_pcrs = PCRs {
+          pcr_0: "f4d48b81a460c9916d1e685119074bf24660afd3e34fae9fca0a0d28d9d5599936332687e6f66fc890ac8cf150142d8b".to_string(),
+          pcr_1: "bcdf05fefccaa8e55bf2c8d6dee9e79bbff31e34bf28a99aa19e6b29c37ee80b214a414b7607236edf26fcb78654e63f".to_string(),
+          pcr_2: "d8f114da658de5481f8d9ec73907feb553560787522f705c92d7d96beed8e15e2aa611984e098c576832c292e8dc469a".to_string(),
+          pcr_8: "8790eb3cce6c83d07e84b126dc61ca923333d6f66615c4a79157de48c5ab2418bdc60746ea7b7afbff03a1c6210201cb".to_string(),
+        };
+        let (_, decoded_ad) = decode_attestation_document(&sample_cose_sign_1_bytes).unwrap();
+        let pcrs = get_pcrs(&decoded_ad).unwrap();
+        assert_eq!(pcrs, expected_pcrs);
+    }
 }
