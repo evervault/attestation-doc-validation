@@ -2,6 +2,10 @@
 edition = "2021"
 name = "node-attestation-bindings"
 version = "0.0.0"
+license = "Apache-2.0"
+description = "A Node library for attesting Nitro Enclaves according to the Evervault Cages attestation protocol."
+homepage = "https://github.com/evervault/attestation-doc-validation"
+repository = "https://github.com/evervault/attestation-doc-validation"
 
 [lib]
 crate-type = ["cdylib"]
@@ -10,7 +14,7 @@ crate-type = ["cdylib"]
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
 napi = { version = "2.10.6", default-features = false, features = ["napi4"] }
 napi-derive = "2.9.4"
-attestation-doc-validation = "0.4.0"
+attestation-doc-validation = { version = "0.5.0-beta" }
 
 [build-dependencies]
 napi-build = "2.0.1"

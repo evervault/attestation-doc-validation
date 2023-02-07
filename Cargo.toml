@@ -1,5 +1,9 @@
 [workspace]
 members = [
   "attestation-doc-validation",
+  "python-attestation-bindings",
   "node-attestation-bindings"
 ]
+
+[profile.release]
+lto = true
