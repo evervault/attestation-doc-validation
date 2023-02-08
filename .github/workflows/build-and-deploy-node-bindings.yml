@@ -1,7 +1,7 @@
 name: Build and deploy node bindings
 env:
   DEBUG: napi:*
-  APP_NAME: attestation-doc-validation
+  APP_NAME: evervault-attestation-bindings
   SUBDIRECTORY: node-attestation-bindings
   MACOSX_DEPLOYMENT_TARGET: "10.13"
 "on":
