@@ -71,10 +71,10 @@ jobs:
       - name: Assert versions match
         run: |
           cd python-attestation-bindings
-          PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1' ' | tail -n1)
-          if [ "$PACKAGE_VERSION" != "${{ env.TAG_VERSION }}" ]; then
+          PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
             echo "Version in tag does not match package.json"
-            echo "Expected $PACKAGE_VERSION, Found ${{ env.TAG_VERSION }}"
+            echo "Expected $PACKAGE_VERSION, Found $TAG_VERSION"
             exit 1
           fi
         env:

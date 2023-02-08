@@ -516,9 +516,9 @@ jobs:
       - name: Assert versions match
         run: |
           PACKAGE_VERSION=$(cat ./node-attestation-bindings/package.json | jq .version | tr -d '"')
-          if [ "$PACKAGE_VERSION" != "${{ env.TAG_VERSION }}" ]; then
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
             echo "Version in tag does not match package.json"
-            echo "Expected $PACKAGE_VERSION, Found ${{ env.TAG_VERSION }}"
+            echo "Expected $PACKAGE_VERSION, Found $TAG_VERSION"
             exit 1
           fi
         env:
