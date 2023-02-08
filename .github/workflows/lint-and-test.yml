@@ -12,7 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [attestation-doc-validation, node-attestation-bindings]
+        package:
+          [
+            attestation-doc-validation,
+            node-attestation-bindings,
+            python-attestation-bindings,
+          ]
     steps:
       - uses: actions/checkout@v2
       - name: Install latest stable toolchain
