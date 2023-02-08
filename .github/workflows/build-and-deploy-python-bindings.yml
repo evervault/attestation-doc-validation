@@ -81,7 +81,7 @@ jobs:
           TAG_VERSION: steps.get-version.outputs.version
       - uses: actions/download-artifact@v3
         with:
-          name: wheels
+          name: python-attestation-bindings/wheels
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
