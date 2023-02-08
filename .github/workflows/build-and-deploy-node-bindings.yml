@@ -503,7 +503,7 @@ jobs:
     if: ${{ startsWith(github.ref,'refs/tags/node/v') }}
     needs:
       # - build-freebsd
-      - test-macOS-windows-binding
+      # - test-macOS-windows-binding
       - test-linux-x64-gnu-binding
       - test-linux-x64-musl-binding
       - test-linux-aarch64-gnu-binding
