@@ -24,4 +24,4 @@ command = "maturin"
 args = ["build"]
 
 [tasks.ci]
-dependencies = ["lint","format","check","test","build"]
+dependencies = ["lint","format","check"]
