@@ -530,6 +530,7 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          registry-url: https://registry.npmjs.org/
       - name: Install dependencies
         run: cd ${{ env.SUBDIRECTORY }} ; yarn install
       - name: Download all artifacts
