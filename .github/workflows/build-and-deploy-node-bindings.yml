@@ -231,9 +231,6 @@ jobs:
           - "16"
           - "18"
     runs-on: ${{ matrix.settings.host }}
-    defaults:
-      run:
-        working-directory: ${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -244,7 +241,7 @@ jobs:
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
-        run: yarn install
+        run: cd ${{ env.SUBDIRECTORY }} ; yarn install
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -254,7 +251,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: yarn test
+        run: cd ${{ env.SUBDIRECTORY }} ; yarn test
   test-linux-x64-gnu-binding:
     name: Test bindings on Linux-x64-gnu - node@${{ matrix.node }}
     needs:
@@ -291,7 +288,7 @@ jobs:
           name: bindings-x86_64-unknown-linux-gnu
           path: ${{ env.SUBDIRECTORY }}
       - name: List packages
-        run: cd ${{ env.SUBDIRECTORY }} ; ls -R .
+        run: ls -R .
         shell: bash
       - name: Test bindings
         run: cd ${{ env.SUBDIRECTORY }} ; cargo make test
