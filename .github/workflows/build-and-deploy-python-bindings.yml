@@ -78,7 +78,7 @@ jobs:
             exit 1
           fi
         env:
-          TAG_VERSION: steps.get-version.outputs.version
+          TAG_VERSION: ${{ steps.get-version.outputs.version }}
       - uses: actions/download-artifact@v3
         with:
           name: python-attestation-bindings/wheels

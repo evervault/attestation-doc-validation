@@ -523,7 +523,7 @@ jobs:
             exit 1
           fi
         env:
-          TAG_VERSION: steps.get-version.outputs.version
+          TAG_VERSION: ${{ steps.get-version.outputs.version }}
       - name: Setup node
         uses: actions/setup-node@v3
         with:
