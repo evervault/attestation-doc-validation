@@ -496,9 +496,6 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.SUBDIRECTORY }}
     if: ${{ startsWith(github.ref,'refs/tags/node/v') }}
     needs:
       # - build-freebsd
@@ -538,14 +535,14 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
         with:
-          path: artifacts
+          path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Move artifacts
-        run: yarn artifacts
+        run: cd ${{ env.SUBDIRECTORY }} ; yarn artifacts
       - name: List packages
-        run: ls -R ./npm
+        run: cd ${{ env.SUBDIRECTORY }} ; ls -R ./npm
         shell: bash
       - name: Publish
         run: |
-          npm publish --access public
+          cd ${{ env.SUBDIRECTORY }} ; npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
