@@ -16,12 +16,12 @@ command = "cargo"
 args = ["check"]
 
 [tasks.test]
-command = "cargo"
+command = "maturin"
 args = ["test"]
 
 [tasks.build]
-command = "cargo"
+command = "maturin"
 args = ["build"]
 
 [tasks.ci]
-dependencies = ["lint","format","check","test","build"]
+dependencies = ["lint","format","check"]

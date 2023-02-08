@@ -1,5 +1,6 @@
 use attestation_doc_validation::{
-  parse_cert, validate_attestation_doc_in_cert, attestation_doc::{validate_expected_pcrs, PCRProvider},
+    attestation_doc::{validate_expected_pcrs, PCRProvider},
+    parse_cert, validate_attestation_doc_in_cert,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;

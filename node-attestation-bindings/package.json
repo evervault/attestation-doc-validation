@@ -1,10 +1,10 @@
 {
-  "name": "attestation-doc-validation",
-  "version": "0.0.0",
+  "name": "evervault-attestation-bindings",
+  "version": "0.1.0-alpha.1",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
-    "name": "attestation-doc-validation",
+    "name": "evervault-attestation-bindings",
     "triples": {
       "additional": [
         "aarch64-apple-darwin",
@@ -24,7 +24,7 @@
   "license": "MIT",
   "devDependencies": {
     "@napi-rs/cli": "^2.14.3",
-    "ava": "^4.3.3"
+    "ava": "^5.2.0"
   },
   "ava": {
     "timeout": "3m"
