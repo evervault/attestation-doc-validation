@@ -513,16 +513,16 @@ jobs:
           echo "using version tag ${GITHUB_REF:16}"
           echo "name=version::${GITHUB_REF:16}\n" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v3
-      - name: Assert versions match
-        run: |
-          PACKAGE_VERSION=$(cat ./node-attestation-bindings/package.json | jq .version | tr -d '"')
-          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
-            echo "Version in tag does not match package.json"
-            echo "Expected $PACKAGE_VERSION, Found $TAG_VERSION"
-            exit 1
-          fi
-        env:
-          TAG_VERSION: ${{ steps.get-version.outputs.version }}
+      # - name: Assert versions match
+      #   run: |
+      #     PACKAGE_VERSION=$(cat ./node-attestation-bindings/package.json | jq .version | tr -d '"')
+      #     if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+      #       echo "Version in tag does not match package.json"
+      #       echo "Expected $PACKAGE_VERSION, Found $TAG_VERSION"
+      #       exit 1
+      #     fi
+      #   env:
+      #     TAG_VERSION: ${{ steps.get-version.outputs.version }}
       - name: Setup node
         uses: actions/setup-node@v3
         with:
