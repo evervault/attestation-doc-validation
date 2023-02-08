@@ -407,8 +407,8 @@ jobs:
           image: multiarch/alpine:aarch64-latest-stable
           options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
-            set -e
-            apk add nodejs npm yarn libfaketime
+            set -e 
+            apk upgrade ; apk update ; apk add nodejs npm yarn libfaketime
             export FAKETIME="2023-01-18 15:15:00" 
             LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1yarn test
   test-linux-arm-gnueabihf-binding:
@@ -448,7 +448,9 @@ jobs:
           options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
           run: |
             set -e
-            yarn test
+            apt-get install -y libfaketime
+            export FAKETIME="2023-01-18 15:15:00" 
+            LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/faketime/libfaketime.so.1 yarn test
             ls -la
   universal-macOS:
     name: Build universal macOS binary
