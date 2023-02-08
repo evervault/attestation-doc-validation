@@ -1,5 +1,5 @@
 {
-  "name": "node-attestation-bindings-android-arm-eabi",
+  "name": "evervault-attestation-bindings-android-arm-eabi",
   "version": "0.0.0",
   "os": [
     "android"
@@ -7,9 +7,9 @@
   "cpu": [
     "arm"
   ],
-  "main": "node-attestation-bindings.android-arm-eabi.node",
+  "main": "evervault-attestation-bindings.android-arm-eabi.node",
   "files": [
-    "node-attestation-bindings.android-arm-eabi.node"
+    "evervault-attestation-bindings.android-arm-eabi.node"
   ],
   "license": "MIT",
   "engines": {

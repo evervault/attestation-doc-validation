@@ -1,12 +1,12 @@
 {
-  "name": "node-attestation-bindings-darwin-universal",
+  "name": "evervault-attestation-bindings-darwin-universal",
   "version": "0.0.0",
   "os": [
     "darwin"
   ],
-  "main": "node-attestation-bindings.darwin-universal.node",
+  "main": "evervault-attestation-bindings.darwin-universal.node",
   "files": [
-    "node-attestation-bindings.darwin-universal.node"
+    "evervault-attestation-bindings.darwin-universal.node"
   ],
   "license": "MIT",
   "engines": {

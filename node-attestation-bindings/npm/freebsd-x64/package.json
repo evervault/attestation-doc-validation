@@ -1,5 +1,5 @@
 {
-  "name": "node-attestation-bindings-freebsd-x64",
+  "name": "evervault-attestation-bindings-freebsd-x64",
   "version": "0.0.0",
   "os": [
     "freebsd"
@@ -7,9 +7,9 @@
   "cpu": [
     "x64"
   ],
-  "main": "node-attestation-bindings.freebsd-x64.node",
+  "main": "evervault-attestation-bindings.freebsd-x64.node",
   "files": [
-    "node-attestation-bindings.freebsd-x64.node"
+    "evervault-attestation-bindings.freebsd-x64.node"
   ],
   "license": "MIT",
   "engines": {
