@@ -1,5 +1,5 @@
 {
-  "name": "node-attestation-bindings-linux-arm64-gnu",
+  "name": "evervault-attestation-bindings-linux-arm64-gnu",
   "version": "0.0.0",
   "os": [
     "linux"
@@ -7,9 +7,9 @@
   "cpu": [
     "arm64"
   ],
-  "main": "node-attestation-bindings.linux-arm64-gnu.node",
+  "main": "evervault-attestation-bindings.linux-arm64-gnu.node",
   "files": [
-    "node-attestation-bindings.linux-arm64-gnu.node"
+    "evervault-attestation-bindings.linux-arm64-gnu.node"
   ],
   "license": "MIT",
   "engines": {

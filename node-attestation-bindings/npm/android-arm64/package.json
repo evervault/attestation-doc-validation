@@ -1,5 +1,5 @@
 {
-  "name": "node-attestation-bindings-android-arm64",
+  "name": "evervault-attestation-bindings-android-arm64",
   "version": "0.0.0",
   "os": [
     "android"
@@ -7,9 +7,9 @@
   "cpu": [
     "arm64"
   ],
-  "main": "node-attestation-bindings.android-arm64.node",
+  "main": "evervault-attestation-bindings.android-arm64.node",
   "files": [
-    "node-attestation-bindings.android-arm64.node"
+    "evervault-attestation-bindings.android-arm64.node"
   ],
   "license": "MIT",
   "engines": {

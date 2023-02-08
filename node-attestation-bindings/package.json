@@ -1,6 +1,6 @@
 {
   "name": "evervault-attestation-bindings",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -41,5 +41,7 @@
     "universal": "napi universal",
     "version": "napi version"
   },
-  "packageManager": "yarn@3.3.1"
+  "packageManager": "yarn@3.3.1",
+  "repository": "https://github.com/evervault/attestation-doc-validation",
+  "description": "Node bindings to the Evervault attestation doc validation crate"
 }

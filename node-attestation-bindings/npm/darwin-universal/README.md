@@ -1,3 +1,3 @@
-# `node-attestation-bindings-darwin-universal`
+# `evervault-attestation-bindings-darwin-universal`
 
-This is the **universal-apple-darwin** binary for `node-attestation-bindings`
+This is the **universal-apple-darwin** binary for `evervault-attestation-bindings`

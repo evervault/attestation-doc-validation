@@ -1,3 +1,3 @@
-# `node-attestation-bindings-android-arm64`
+# `evervault-attestation-bindings-android-arm64`
 
-This is the **aarch64-linux-android** binary for `node-attestation-bindings`
+This is the **aarch64-linux-android** binary for `evervault-attestation-bindings`

@@ -1,5 +1,5 @@
 {
-  "name": "node-attestation-bindings-linux-arm-gnueabihf",
+  "name": "evervault-attestation-bindings-linux-arm-gnueabihf",
   "version": "0.0.0",
   "os": [
     "linux"
@@ -7,9 +7,9 @@
   "cpu": [
     "arm"
   ],
-  "main": "node-attestation-bindings.linux-arm-gnueabihf.node",
+  "main": "evervault-attestation-bindings.linux-arm-gnueabihf.node",
   "files": [
-    "node-attestation-bindings.linux-arm-gnueabihf.node"
+    "evervault-attestation-bindings.linux-arm-gnueabihf.node"
   ],
   "license": "MIT",
   "engines": {
