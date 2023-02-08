@@ -26,7 +26,7 @@ for (let testSpec of directory) {
     const { file, pcrs, isAttestationDocValid, shouldPcrsMatch } =
       JSON.parse(specText);
 
-    const inputFile = resolveCert(`${BASE_TEST_PATH}/${file}`);
+    const inputFile = resolveCert(file);
     const isConnectionValid = attestConnection(inputFile, pcrs);
     t.deepEqual(isConnectionValid, isAttestationDocValid && shouldPcrsMatch);
   });
