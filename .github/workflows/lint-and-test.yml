@@ -3,6 +3,7 @@ on:
     paths:
       - attestation-doc-validation/**
       - node-attestation-bindings/**
+      - python-attestation-bindings/**
       - .github/workflows/lint-and-test.yml
       - test-data/**
       - test-specs/**
