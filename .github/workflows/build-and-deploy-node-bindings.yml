@@ -531,7 +531,7 @@ jobs:
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
       - name: Install dependencies
-        run: yarn install
+        run: cd ${{ env.SUBDIRECTORY }} ; yarn install
       - name: Download all artifacts
         uses: actions/download-artifact@v3
         with:
