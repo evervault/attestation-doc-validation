@@ -104,7 +104,7 @@ pub fn attest_connection(cert: &[u8], expected_pcrs: &PCRs) -> PyResult<bool> {
 
 /// A small python module offering bindings to the rust attestation doc validation project
 #[pymodule]
-fn python_attestation_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
+fn evervault_attestation_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(attest_connection, m)?)?;
     m.add_class::<PCRs>()?;
     Ok(())

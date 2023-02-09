@@ -9,7 +9,7 @@ repository = "https://github.com/evervault/attestation-doc-validation"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "python_attestation_bindings"
+name = "evervault_attestation_bindings"
 crate-type = ["cdylib"]
 
 [dependencies]
