@@ -185,7 +185,7 @@ jobs:
             npm install --location=global --ignore-scripts yarn
             curl https://sh.rustup.rs -sSf --output rustup.sh
             sh rustup.sh -y --profile minimal --default-toolchain stable
-            source "/usr/local/cargo/env"
+            export PATH="/usr/local/cargo/bin:$PATH"
             echo "~~~~ rustc --version ~~~~"
             rustc --version
             echo "~~~~ node -v ~~~~"
@@ -193,7 +193,8 @@ jobs:
             echo "~~~~ yarn --version ~~~~"
             yarn --version
           run: |
-            source "/usr/local/cargo/env"
+            export PATH="/usr/local/cargo/bin:$PATH"
+            cargo --version
             pwd
             ls -lah
             whoami
@@ -201,10 +202,10 @@ jobs:
             freebsd-version
             cd node-attestation-bindings
             ls
+            cargo metadata --format-version 1 --manifest-path "/Users/runner/work/attestation-doc-validation/attestation-doc-validation/node-attestation-bindings/Cargo.toml"
             yarn install
             yarn build
             ls
-            pwd
             strip -x *.node
             yarn test
             rm -rf node_modules
