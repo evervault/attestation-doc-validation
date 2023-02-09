@@ -3,8 +3,8 @@ requires = ["maturin>=0.13,<0.15"]
 build-backend = "maturin"
 
 [project]
-name = "evervault-attestation-bindings"
-version = "0.1.0a2"
+name = "evervault_attestation_bindings"
+version = "0.1.0a3"
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Rust",
