@@ -156,96 +156,6 @@ jobs:
           name: bindings-${{ matrix.settings.target }}
           path: ./${{ env.SUBDIRECTORY }}/${{ env.APP_NAME }}.*.node
           if-no-files-found: error
-  build-freebsd:
-    runs-on: macos-12
-    name: Build FreeBSD
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        id: build
-        uses: vmactions/freebsd-vm@v0
-        env:
-          DEBUG: napi:*
-          RUSTUP_HOME: /usr/local/rustup
-          CARGO_HOME: /usr/local/cargo
-          RUSTUP_IO_THREADS: 1
-        with:
-          envs: DEBUG RUSTUP_HOME CARGO_HOME RUSTUP_IO_THREADS
-          usesh: true
-          mem: 5000
-          prepare: |
-            pkg install -y -f curl node libnghttp2
-            curl -qL https://www.npmjs.com/install.sh | sh
-            npm install --location=global --ignore-scripts yarn
-            curl https://sh.rustup.rs -sSf --output rustup.sh
-            sh rustup.sh -y --profile minimal --default-toolchain stable
-            export PATH="/usr/local/cargo/bin:$PATH"
-            echo "~~~~ rustc --version ~~~~"
-            rustc --version
-            echo "~~~~ node -v ~~~~"
-            node -v
-            echo "~~~~ yarn --version ~~~~"
-            yarn --version
-          run: |
-            export PATH="/usr/local/cargo/bin:$PATH"
-            pwd
-            ls -lah
-            whoami
-            freebsd-version
-            cd node-attestation-bindings
-            ls
-            cargo build
-            yarn install
-            yarn build
-            ls
-            strip -x *.node
-            rm -rf node_modules
-            rm -rf target
-            rm -rf .yarn/cache
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: bindings-freebsd
-          path: ./${{ env.SUBDIRECTORY }}/${{ env.APP_NAME }}.*.node
-          if-no-files-found: error
-
-  # These windows tests will fail — windows does not support libfaketime
-  # test-macOS-windows-binding:
-  #   name: Test bindings on ${{ matrix.settings.target }} - node@${{ matrix.node }}
-  #   needs:
-  #     - build
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       settings:
-  #         - host: windows-latest
-  #           target: x86_64-pc-windows-msvc
-  #       node:
-  #         - "14"
-  #         - "16"
-  #         - "18"
-  #   runs-on: ${{ matrix.settings.host }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node }}
-  #         check-latest: true
-  #         cache: yarn
-  #         cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
-  #     - name: Install dependencies
-  #       run: cd ${{ env.SUBDIRECTORY }} ; yarn install
-  #     - name: Download artifacts
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: bindings-${{ matrix.settings.target }}
-  #         path: ${{ env.SUBDIRECTORY }}
-  #     - name: List packages
-  #       run: ls -R .
-  #       shell: bash
-  #     - name: Test bindings
-  #       run: cd ${{ env.SUBDIRECTORY }} ; yarn test
 
   # Node version has been descoped to v18 for the following tests. Tests on 14 and 16 are hanging.
   test-linux-x64-gnu-binding:
@@ -490,8 +400,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref,'refs/tags/node/v') }}
     needs:
-      # - build-freebsd
-      # - test-macOS-windows-binding
       - test-linux-x64-gnu-binding
       - test-linux-x64-musl-binding
       - test-linux-aarch64-gnu-binding
