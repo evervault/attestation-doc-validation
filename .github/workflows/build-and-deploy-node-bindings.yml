@@ -200,6 +200,7 @@ jobs:
             freebsd-version
             cd node-attestation-bindings
             ls
+            cargo build
             yarn install
             yarn build
             ls
