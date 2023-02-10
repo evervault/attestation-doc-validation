@@ -85,9 +85,6 @@ jobs:
               rustup target add aarch64-unknown-linux-musl &&
               yarn build --target aarch64-unknown-linux-musl &&
               /aarch64-linux-musl-cross/bin/aarch64-linux-musl-strip *.node
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            build: yarn build --target aarch64-pc-windows-msvc
     name: stable - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
     defaults:
@@ -123,19 +120,6 @@ jobs:
         if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
         with:
           version: 0.10.0
-      - name: Add msbuild to PATH
-        if: ${{ matrix.settings.target == 'aarch64-pc-windows-msvc' }}
-        uses: microsoft/setup-msbuild@v1.1
-      - name: Setup ring dependencies on windows
-        if: ${{ matrix.settings.target == 'aarch64-pc-windows-msvc' }}
-        shell: pwsh
-        run: |
-          choco install activeperl nasm
-          $Env:PATH += ";$Env:ProgramFiles\NASM"
-          $VSINSTALLDIR = $(vswhere.exe -latest -requires Microsoft.VisualStudio.Component.VC.Llvm.Clang -property installationPath)
-          $VCINSTALLDIR = Join-Path $VSINSTALLDIR "VC"
-          $LLVM_ROOT = Join-Path $VCINSTALLDIR "Tools\Llvm\x64"
-          echo "PATH=$Env:PATH;${LLVM_ROOT}\bin" >> $Env:GITHUB_ENV
       - name: Setup toolchain
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
@@ -187,7 +171,7 @@ jobs:
           RUSTUP_IO_THREADS: 1
         with:
           envs: DEBUG RUSTUP_HOME CARGO_HOME RUSTUP_IO_THREADS
-          usesh: true
+          usesh: false
           mem: 5000
           prepare: |
             pkg install -y -f curl node libnghttp2
