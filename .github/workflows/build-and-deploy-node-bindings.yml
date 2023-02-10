@@ -171,7 +171,7 @@ jobs:
           RUSTUP_IO_THREADS: 1
         with:
           envs: DEBUG RUSTUP_HOME CARGO_HOME RUSTUP_IO_THREADS
-          usesh: false
+          usesh: true
           mem: 5000
           prepare: |
             pkg install -y -f curl node libnghttp2
