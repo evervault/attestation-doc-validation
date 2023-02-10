@@ -75,6 +75,36 @@ pub(super) fn export_public_key_to_der<'a>(cert: &'a X509Certificate) -> &'a [u8
     cert.public_key().raw
 }
 
+/// Retrieve a unix epoch to be used while validating the cert trust chain
+///
+/// # Errors
+///
+/// Returns a `CertError::TimeError` when the current timestamp is before the unix epoch...
+#[cfg(not(test))]
+fn get_epoch() -> CertResult<u64> {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|time_since_epoch| time_since_epoch.as_secs())
+        .map_err(|_| CertError::TimeError)
+}
+
+// Testing version of this function attempts to get the timestamp to use from env vars
+#[cfg(test)]
+fn get_epoch() -> CertResult<u64> {
+    match std::env::var("FAKETIME") {
+        Ok(given_epoch) => {
+            let parsed_epoch = given_epoch
+                .parse::<u64>()
+                .expect("Invalid FAKETIME given, epoch expected");
+            Ok(parsed_epoch)
+        }
+        Err(_) => std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|time_since_epoch| time_since_epoch.as_secs())
+            .map_err(|_| CertError::TimeError),
+    }
+}
+
 /// Given an end entity certificate and a stack of CAs, attempt to validate that the Cert can be trusted.
 /// Note that this function will validate the root of trust based solely on the CAs provided.
 ///
@@ -91,10 +121,7 @@ pub fn validate_cert_trust_chain(target: &[u8], intermediates: &[&[u8]]) -> Cert
         .map_err(|_| CertError::DecodeError)?];
     let server_trust_anchors = webpki::TlsServerTrustAnchors(&nitro_trust_anchor);
 
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|time_since_epoch| time_since_epoch.as_secs())
-        .map_err(|_| CertError::TimeError)?;
+    let now = get_epoch()?;
     let time = webpki::Time::from_seconds_since_unix_epoch(now);
 
     true_or_invalid(
