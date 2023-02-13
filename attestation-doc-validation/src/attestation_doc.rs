@@ -212,39 +212,49 @@ pub fn decode_attestation_document(
 pub(super) fn validate_attestation_document_structure(
     attestation_document: &AttestationDoc,
 ) -> AttestationDocResult<()> {
-    let valid_structure_check = !attestation_document.module_id.is_empty()
-    && attestation_document.digest == Digest::SHA384
-    && !attestation_document.pcrs.is_empty()
-    && attestation_document.pcrs.len() <= 32
-    && attestation_document
-        .pcrs
-        .keys()
-        .all(|&pcr_index| pcr_index < 32)
-    && attestation_document
-        .pcrs
-        .values()
-        .all(|pcr| [32, 48, 64].contains(&pcr.len()))
-    && !attestation_document.cabundle.is_empty()
-    && attestation_document
+    let module_id_present = !attestation_document.module_id.is_empty();
+    true_or_invalid(module_id_present, AttestationDocError::MissingModuleId)?;
+
+    let digest_valid = attestation_document.digest == Digest::SHA384;
+    true_or_invalid(digest_valid, AttestationDocError::DigestAlgorithmInvalid)?;
+
+    let pcrs_valid = !attestation_document.pcrs.is_empty()
+        && attestation_document.pcrs.len() <= 32
+        && attestation_document
+            .pcrs
+            .keys()
+            .all(|&pcr_index| pcr_index < 32)
+        && attestation_document
+            .pcrs
+            .values()
+            .all(|pcr| [32, 48, 64].contains(&pcr.len()));
+
+    true_or_invalid(pcrs_valid, AttestationDocError::InvalidCABundle)?;
+
+    let valid_ca_bundle = attestation_document
         .cabundle
         .iter()
-        .all(|cert| cert.len() > 0 && cert.len() <= 1024)
-    && attestation_document
+        .all(|cert| cert.len() > 0 && cert.len() <= 1024);
+    true_or_invalid(valid_ca_bundle, AttestationDocError::InvalidCABundle)?;
+
+    let valid_public_key = attestation_document
         .public_key
         .as_ref()
-        .map_or(true, |key| key.len() > 0 && key.len() <= 1024) // these default to true if not present
-    && attestation_document
+        .map_or(true, |key| key.len() > 0 && key.len() <= 1024); // these default to true if not present
+    true_or_invalid(valid_public_key, AttestationDocError::InvalidPublicKey)?;
+
+    let valid_nonce = attestation_document
         .nonce
         .as_ref()
-        .map_or(true, |nonce| nonce.len() > 0 && nonce.len() <= 512)
-    && attestation_document
+        .map_or(true, |nonce| nonce.len() > 0 && nonce.len() <= 512);
+    true_or_invalid(valid_nonce, AttestationDocError::InvalidNonce)?;
+    let valid_user_data = attestation_document
         .user_data
         .as_ref()
-        .map_or(true, |user_data| user_data.len() > 0 && user_data.len() <= 512);
-    true_or_invalid(
-        valid_structure_check,
-        AttestationDocError::DocStructureInvalid,
-    )
+        .map_or(true, |user_data| {
+            user_data.len() > 0 && user_data.len() <= 512
+        });
+    true_or_invalid(valid_user_data, AttestationDocError::InvalidUserData)
 }
 
 #[cfg(test)]

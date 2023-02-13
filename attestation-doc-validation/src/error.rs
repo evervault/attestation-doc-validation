@@ -51,6 +51,20 @@ where
         expected: String,
         received: Option<String>,
     },
+    #[error("The module id was missing from the attestation doc")]
+    MissingModuleId,
+    #[error("The digest in the attestation was not SHA384")]
+    DigestAlgorithmInvalid,
+    #[error("The PCRs in the attestation doc were invalid")]
+    InvalidPCRs,
+    #[error("The CA bundle length in the attestation doc was invalid")]
+    InvalidCABundle,
+    #[error("The public key length in the attestation doc was invalid")]
+    InvalidPublicKey,
+    #[error("The nonce length in the attestation doc was invalid")]
+    InvalidNonce,
+    #[error("The user data length in the attestation doc was invalid")]
+    InvalidUserData,
 }
 
 /// Wrapping type to record the specific error that occurred while validating the TLS Cert.
