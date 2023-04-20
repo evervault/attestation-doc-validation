@@ -90,18 +90,7 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_pcrs: &T,
 ) -> AttestationResult<()> {
-    let encoded_measurements = attestation_doc
-        .pcrs
-        .iter()
-        .map(|(&index, buf)| (index, hex::encode(&buf[..])))
-        .collect::<BTreeMap<_, _>>();
-
-    let received_pcrs = PCRs {
-        pcr_0: extract_pcr!(encoded_measurements, 0),
-        pcr_1: extract_pcr!(encoded_measurements, 1),
-        pcr_2: extract_pcr!(encoded_measurements, 2),
-        pcr_8: extract_pcr!(encoded_measurements, 8),
-    };
+    let received_pcrs = get_pcrs(attestation_doc)?;
 
     let same_pcrs = expected_pcrs.eq(&received_pcrs);
     true_or_invalid(
@@ -110,12 +99,32 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
     )
 }
 
+/// Parses `PCRs` from an attestation doc
+///
+/// # Errors
+///
+/// Returns an error if any of the expected PCRs are missing from the attestation document
+pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationResult<PCRs> {
+    let encoded_measurements = attestation_doc
+        .pcrs
+        .iter()
+        .map(|(&index, buf)| (index, hex::encode(&buf[..])))
+        .collect::<BTreeMap<_, _>>();
+
+    Ok(PCRs {
+        pcr_0: extract_pcr!(encoded_measurements, 0),
+        pcr_1: extract_pcr!(encoded_measurements, 1),
+        pcr_2: extract_pcr!(encoded_measurements, 2),
+        pcr_8: extract_pcr!(encoded_measurements, 8),
+    })
+}
+
 /// Extracts the nonce embedded in the attestation doc, encodes it to base64 and compares it to the base64 encoded nonce given
 ///
 /// # Errors
 ///
 /// Returns a `NonceMismatch` error if the attestation document contains an unexpected nonce, or does not contain a nonce
-pub fn validate_expected_nonce<T: PCRProvider>(
+pub fn validate_expected_nonce(
     attestation_doc: &AttestationDoc,
     expected_nonce: &str,
 ) -> AttestationResult<()> {
@@ -195,36 +204,49 @@ pub fn decode_attestation_document(
 pub(super) fn validate_attestation_document_structure(
     attestation_document: &AttestationDoc,
 ) -> AttestationResult<()> {
-    let valid_structure_check = !attestation_document.module_id.is_empty()
-    && attestation_document.digest == Digest::SHA384
-    && !attestation_document.pcrs.is_empty()
-    && attestation_document.pcrs.len() <= 32
-    && attestation_document
-        .pcrs
-        .keys()
-        .all(|&pcr_index| pcr_index < 32)
-    && attestation_document
-        .pcrs
-        .values()
-        .all(|pcr| [32, 48, 64].contains(&pcr.len()))
-    && !attestation_document.cabundle.is_empty()
-    && attestation_document
+    let module_id_present = !attestation_document.module_id.is_empty();
+    true_or_invalid(module_id_present, AttestationError::MissingModuleId)?;
+
+    let digest_valid = attestation_document.digest == Digest::SHA384;
+    true_or_invalid(digest_valid, AttestationError::DigestAlgorithmInvalid)?;
+
+    let pcrs_valid = !attestation_document.pcrs.is_empty()
+        && attestation_document.pcrs.len() <= 32
+        && attestation_document
+            .pcrs
+            .keys()
+            .all(|&pcr_index| pcr_index < 32)
+        && attestation_document
+            .pcrs
+            .values()
+            .all(|pcr| [32, 48, 64].contains(&pcr.len()));
+
+    true_or_invalid(pcrs_valid, AttestationError::InvalidCABundle)?;
+
+    let valid_ca_bundle = attestation_document
         .cabundle
         .iter()
-        .all(|cert| cert.len() > 0 && cert.len() <= 1024)
-    && attestation_document
+        .all(|cert| cert.len() > 0 && cert.len() <= 1024);
+    true_or_invalid(valid_ca_bundle, AttestationError::InvalidCABundle)?;
+
+    let valid_public_key = attestation_document
         .public_key
         .as_ref()
-        .map_or(true, |key| key.len() > 0 && key.len() <= 1024) // these default to true if not present
-    && attestation_document
+        .map_or(true, |key| key.len() > 0 && key.len() <= 1024); // these default to true if not present
+    true_or_invalid(valid_public_key, AttestationError::InvalidPublicKey)?;
+
+    let valid_nonce = attestation_document
         .nonce
         .as_ref()
-        .map_or(true, |nonce| nonce.len() > 0 && nonce.len() <= 512)
-    && attestation_document
+        .map_or(true, |nonce| nonce.len() > 0 && nonce.len() <= 512);
+    true_or_invalid(valid_nonce, AttestationError::InvalidNonce)?;
+    let valid_user_data = attestation_document
         .user_data
         .as_ref()
-        .map_or(true, |user_data| user_data.len() > 0 && user_data.len() <= 512);
-    true_or_invalid(valid_structure_check, AttestationError::DocStructureInvalid)
+        .map_or(true, |user_data| {
+            user_data.len() > 0 && user_data.len() <= 512
+        });
+    true_or_invalid(valid_user_data, AttestationError::InvalidUserData)
 }
 
 #[cfg(test)]
@@ -269,5 +291,22 @@ mod test {
         assert!(is_valid_ad);
         let pcrs_match = validate_expected_pcrs(&decoded_ad, &expected_pcrs).is_ok();
         assert!(!pcrs_match);
+    }
+
+    #[test]
+    fn validate_get_pcrs() {
+        let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
+            "../test-data/valid-attestation-doc-bytes",
+        ))
+        .unwrap();
+        let expected_pcrs = PCRs {
+          pcr_0: "f4d48b81a460c9916d1e685119074bf24660afd3e34fae9fca0a0d28d9d5599936332687e6f66fc890ac8cf150142d8b".to_string(),
+          pcr_1: "bcdf05fefccaa8e55bf2c8d6dee9e79bbff31e34bf28a99aa19e6b29c37ee80b214a414b7607236edf26fcb78654e63f".to_string(),
+          pcr_2: "d8f114da658de5481f8d9ec73907feb553560787522f705c92d7d96beed8e15e2aa611984e098c576832c292e8dc469a".to_string(),
+          pcr_8: "8790eb3cce6c83d07e84b126dc61ca923333d6f66615c4a79157de48c5ab2418bdc60746ea7b7afbff03a1c6210201cb".to_string(),
+        };
+        let (_, decoded_ad) = decode_attestation_document(&sample_cose_sign_1_bytes).unwrap();
+        let pcrs = get_pcrs(&decoded_ad).unwrap();
+        assert_eq!(pcrs, expected_pcrs);
     }
 }
