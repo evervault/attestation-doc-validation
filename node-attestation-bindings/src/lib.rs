@@ -31,7 +31,7 @@ impl PCRProvider for NodePCRs {
 }
 
 #[napi]
-fn attest_connection(cert: JsBuffer, expected_pcrs: Option<NodePCRs>) -> bool {
+fn attest_connection(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>) -> bool {
   let cert_val = match cert.into_value() {
     Ok(cert_value) => cert_value,
     Err(e) => {
@@ -48,7 +48,7 @@ fn attest_connection(cert: JsBuffer, expected_pcrs: Option<NodePCRs>) -> bool {
     }
   };
 
-  let attestation_doc = match validate_attestation_doc_in_cert(&parsed_cert) {
+  let validated_attestation_doc = match validate_attestation_doc_in_cert(&parsed_cert) {
     Ok(attestation_doc) => attestation_doc,
     Err(e) => {
       eprintln!("An error occurred while validating the connection to this Cage: {e}");
@@ -56,16 +56,19 @@ fn attest_connection(cert: JsBuffer, expected_pcrs: Option<NodePCRs>) -> bool {
     }
   };
 
-  let maybe_validated_pcrs = expected_pcrs
-    .as_ref()
-    .map(|given_pcrs| validate_expected_pcrs(&attestation_doc, given_pcrs))
-    .transpose();
-  match maybe_validated_pcrs {
-    // Mismatched PCRs will always return an error
-    Ok(_) => true,
-    Err(e) => {
-      eprintln!("Failed to validate that PCRs are as expected: {e}");
-      false
-    }
+  let mut result = Ok(true);
+  for expected_pcrs in expected_pcrs_list {
+      match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+          Ok(_) => return true,
+          Err(err) => result = Err(err),
+      }
+  }
+  
+  match result {
+      Ok(_) => true,
+      Err(e) => {
+          eprintln!("Failed to validate that PCRs are as expected: {e}");
+          false
+      }
   }
 }
