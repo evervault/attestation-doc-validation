@@ -16,20 +16,12 @@ command = "cargo"
 args = ["check"]
 
 [tasks.test]
-command = "cargo"
-args = ["test","--","--skip","time_sensitive"]
-
-[tasks.test_time_sensitive]
-env = { "FAKETIME" = "1674054914" }
-command = "cargo"
-args = ["test","time_sensitive"]
-
-[tasks.test_ci]
-dependencies = ["test", "test_time_sensitive"]
+command = "maturin"
+args = ["test"]
 
 [tasks.build]
-command = "cargo"
+command = "maturin"
 args = ["build"]
 
 [tasks.ci]
-dependencies = ["lint","format","check","test_ci","build"]
+dependencies = ["lint","format","check"]

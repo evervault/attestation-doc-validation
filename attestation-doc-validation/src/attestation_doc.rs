@@ -1,31 +1,22 @@
 //! Module for parsing and validating attestation documents from AWS Nitro Enclaves.
 use super::nsm::nsm_api::{AttestationDoc, Digest};
 use super::{
-    error::{AttestationDocError, AttestationDocResult},
+    error::{AttestationError, AttestationResult},
+    nsm::{CryptoClient, Hash, SigningPublicKey},
     true_or_invalid,
 };
 pub(super) use aws_nitro_enclaves_cose::CoseSign1;
 use base64::Engine;
-use openssl::pkey::{PKey, Public};
 use std::collections::BTreeMap;
-use std::fmt::Write;
 
 // Helper macros to get, write and compare PCRs
 macro_rules! extract_pcr {
     ($measurements:expr, $idx:literal) => {{
         $measurements
             .get(&$idx)
-            .ok_or(AttestationDocError::MissingPCR($idx))?
+            .ok_or(AttestationError::MissingPCR($idx))?
             .to_string()
     }};
-}
-
-macro_rules! write_pcr {
-    ($provider:ident, $writer:expr, $pcr:ident, $label:expr) => {
-        if let Some(pcr_val) = $provider.$pcr() {
-            let _ = writeln!($writer, "{}: {}", $label, pcr_val);
-        }
-    };
 }
 
 macro_rules! compare_pcrs {
@@ -48,12 +39,13 @@ pub trait PCRProvider {
     fn pcr_8(&self) -> Option<&str>;
 
     fn to_string(&self) -> String {
-        let mut pcrs_str = String::new();
-        write_pcr!(self, &mut pcrs_str, pcr_0, "PCR0");
-        write_pcr!(self, &mut pcrs_str, pcr_1, "PCR1");
-        write_pcr!(self, &mut pcrs_str, pcr_2, "PCR2");
-        write_pcr!(self, &mut pcrs_str, pcr_8, "PCR8");
-        pcrs_str
+        format!(
+            "PCRS {{ PCR0: {:?}, PCR1: {:?}, PCR2: {:?}, PCR8: {:?} }}",
+            self.pcr_0(),
+            self.pcr_1(),
+            self.pcr_2(),
+            self.pcr_8()
+        )
     }
 
     fn eq<T: PCRProvider>(&self, rhs: &T) -> bool {
@@ -97,13 +89,13 @@ impl PCRProvider for PCRs {
 pub fn validate_expected_pcrs<T: PCRProvider>(
     attestation_doc: &AttestationDoc,
     expected_pcrs: &T,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let received_pcrs = get_pcrs(attestation_doc)?;
 
     let same_pcrs = expected_pcrs.eq(&received_pcrs);
     true_or_invalid(
         same_pcrs,
-        AttestationDocError::UnexpectedPCRs(expected_pcrs.to_string(), received_pcrs.to_string()),
+        AttestationError::UnexpectedPCRs(expected_pcrs.to_string(), received_pcrs.to_string()),
     )
 }
 
@@ -112,7 +104,7 @@ pub fn validate_expected_pcrs<T: PCRProvider>(
 /// # Errors
 ///
 /// Returns an error if any of the expected PCRs are missing from the attestation document
-pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationDocResult<PCRs> {
+pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationResult<PCRs> {
     let encoded_measurements = attestation_doc
         .pcrs
         .iter()
@@ -135,19 +127,19 @@ pub fn get_pcrs(attestation_doc: &AttestationDoc) -> AttestationDocResult<PCRs> 
 pub fn validate_expected_nonce(
     attestation_doc: &AttestationDoc,
     expected_nonce: &str,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let matching_nonce = attestation_doc
         .nonce
         .as_ref()
         .map(|existing_nonce| base64::prelude::BASE64_STANDARD.encode(existing_nonce))
-        .ok_or_else(|| AttestationDocError::NonceMismatch {
+        .ok_or_else(|| AttestationError::NonceMismatch {
             expected: expected_nonce.to_string(),
             received: None,
         })?;
 
     true_or_invalid(
         matching_nonce == expected_nonce,
-        AttestationDocError::NonceMismatch {
+        AttestationError::NonceMismatch {
             expected: expected_nonce.to_string(),
             received: Some(matching_nonce),
         },
@@ -159,15 +151,15 @@ pub fn validate_expected_nonce(
 /// # Errors
 ///
 /// Returns a `InvalidCoseSignature` error if signature is invalid
-pub fn validate_cose_signature(
-    signing_cert_public_key: &PKey<Public>,
+pub fn validate_cose_signature<H: Hash>(
+    signing_cert_public_key: &dyn SigningPublicKey,
     cose_sign_1_decoded: &CoseSign1,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     true_or_invalid(
         cose_sign_1_decoded
-            .verify_signature::<aws_nitro_enclaves_cose::crypto::Openssl>(signing_cert_public_key)
-            .map_err(|err| AttestationDocError::InvalidCose(err.to_string()))?,
-        AttestationDocError::InvalidCoseSignature,
+            .verify_signature::<H>(signing_cert_public_key)
+            .map_err(|err| AttestationError::InvalidCose(err.to_string()))?,
+        AttestationError::InvalidCoseSignature,
     )
 }
 
@@ -180,14 +172,14 @@ pub fn validate_cose_signature(
 pub fn validate_expected_challenge(
     attestation_doc: &AttestationDoc,
     expected_challenge: &[u8],
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let embedded_challenge = attestation_doc
         .user_data
         .as_ref()
-        .ok_or(AttestationDocError::MissingUserData)?;
+        .ok_or(AttestationError::MissingUserData)?;
     true_or_invalid(
         embedded_challenge == expected_challenge,
-        AttestationDocError::UserDataMismatch,
+        AttestationError::UserDataMismatch,
     )
 }
 
@@ -199,11 +191,11 @@ pub fn validate_expected_challenge(
 /// Returns a `DocStructureInvalid` if the attestation doc doesn't follow the [AWS criteria](https://github.com/aws/aws-nitro-enclaves-nsm-api/blob/main/docs/attestation_process.md)
 pub fn decode_attestation_document(
     cose_sign_1_bytes: &[u8],
-) -> AttestationDocResult<(CoseSign1, AttestationDoc)> {
+) -> AttestationResult<(CoseSign1, AttestationDoc)> {
     let cose_sign_1_decoded: CoseSign1 = serde_cbor::from_slice(cose_sign_1_bytes)?;
     let cbor = cose_sign_1_decoded
-        .get_payload::<aws_nitro_enclaves_cose::crypto::Openssl>(None)
-        .map_err(|err| AttestationDocError::InvalidCose(err.to_string()))?;
+        .get_payload::<CryptoClient>(None)
+        .map_err(|err| AttestationError::InvalidCose(err.to_string()))?;
     let attestation_doc: AttestationDoc = serde_cbor::from_slice(&cbor)?;
     validate_attestation_document_structure(&attestation_doc)?;
     Ok((cose_sign_1_decoded, attestation_doc))
@@ -211,12 +203,12 @@ pub fn decode_attestation_document(
 
 pub(super) fn validate_attestation_document_structure(
     attestation_document: &AttestationDoc,
-) -> AttestationDocResult<()> {
+) -> AttestationResult<()> {
     let module_id_present = !attestation_document.module_id.is_empty();
-    true_or_invalid(module_id_present, AttestationDocError::MissingModuleId)?;
+    true_or_invalid(module_id_present, AttestationError::MissingModuleId)?;
 
     let digest_valid = attestation_document.digest == Digest::SHA384;
-    true_or_invalid(digest_valid, AttestationDocError::DigestAlgorithmInvalid)?;
+    true_or_invalid(digest_valid, AttestationError::DigestAlgorithmInvalid)?;
 
     let pcrs_valid = !attestation_document.pcrs.is_empty()
         && attestation_document.pcrs.len() <= 32
@@ -229,32 +221,32 @@ pub(super) fn validate_attestation_document_structure(
             .values()
             .all(|pcr| [32, 48, 64].contains(&pcr.len()));
 
-    true_or_invalid(pcrs_valid, AttestationDocError::InvalidCABundle)?;
+    true_or_invalid(pcrs_valid, AttestationError::InvalidCABundle)?;
 
     let valid_ca_bundle = attestation_document
         .cabundle
         .iter()
         .all(|cert| cert.len() > 0 && cert.len() <= 1024);
-    true_or_invalid(valid_ca_bundle, AttestationDocError::InvalidCABundle)?;
+    true_or_invalid(valid_ca_bundle, AttestationError::InvalidCABundle)?;
 
     let valid_public_key = attestation_document
         .public_key
         .as_ref()
         .map_or(true, |key| key.len() > 0 && key.len() <= 1024); // these default to true if not present
-    true_or_invalid(valid_public_key, AttestationDocError::InvalidPublicKey)?;
+    true_or_invalid(valid_public_key, AttestationError::InvalidPublicKey)?;
 
     let valid_nonce = attestation_document
         .nonce
         .as_ref()
         .map_or(true, |nonce| nonce.len() > 0 && nonce.len() <= 512);
-    true_or_invalid(valid_nonce, AttestationDocError::InvalidNonce)?;
+    true_or_invalid(valid_nonce, AttestationError::InvalidNonce)?;
     let valid_user_data = attestation_document
         .user_data
         .as_ref()
         .map_or(true, |user_data| {
             user_data.len() > 0 && user_data.len() <= 512
         });
-    true_or_invalid(valid_user_data, AttestationDocError::InvalidUserData)
+    true_or_invalid(valid_user_data, AttestationError::InvalidUserData)
 }
 
 #[cfg(test)]

@@ -15,7 +15,7 @@ jobs:
         id: get-version
         run: |
           echo "using version tag ${GITHUB_REF:16}"
-          echo ::set-output name=version::${GITHUB_REF:16}
+          echo "version=${GITHUB_REF:16}\n" >> $GITHUB_OUTPUT
   assert-matching-version:
     runs-on: ubuntu-latest
     needs: [get-version]

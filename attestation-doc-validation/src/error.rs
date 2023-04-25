@@ -1,10 +1,12 @@
 //! Module for categorizing errors returned during attestation
 use thiserror::Error;
 
+use crate::nsm::error::NsmError as InnerNsm;
+
 /// Generic Result type for the top level functions of the library
 pub type AttestResult<T> = Result<T, AttestError>;
 /// Generic Result type for the attestation doc module
-pub type AttestationDocResult<T> = Result<T, AttestationDocError>;
+pub type AttestationResult<T> = Result<T, AttestationError>;
 /// Generic Result type for the cert module
 pub type CertResult<T> = Result<T, CertError>;
 
@@ -15,16 +17,18 @@ pub enum AttestError
 where
     Self: Send + Sync,
 {
-    #[error("An error occurred while validating the attestation document received: {0}")]
-    AttestationDocError(#[from] AttestationDocError),
+    #[error("An error occurred while attesting the connection received: {0}")]
+    AttestationError(#[from] AttestationError),
     #[error("An error occurred while validating the TLS Certificate received: {0}")]
     CertError(#[from] CertError),
+    #[error("An error occurred interfacing with the Nitro Security Module: {0}")]
+    NsmError(#[from] InnerNsm),
 }
 
 /// Wrapping type to record the specific error that occurred while validating the attestation document.
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
-pub enum AttestationDocError
+pub enum AttestationError
 where
     Self: Send + Sync,
 {
@@ -74,8 +78,6 @@ pub enum CertError
 where
     Self: Send + Sync,
 {
-    #[error(transparent)]
-    Openssl(#[from] openssl::error::ErrorStack),
     #[error("The certificate in the attestation doc was detected as not having the NSM as root")]
     UntrustedCert,
     #[error("The received certificate had no Subject Alt Name extension")]
@@ -88,4 +90,10 @@ where
     HexError(#[from] hex::FromHexError),
     #[error("Failed to compute seconds since the unix epoch")]
     TimeError,
+    #[error("Failed to parse cert from pem encoding")]
+    PemError(#[from] x509_parser::error::PEMError),
+    #[error("Failed to parse x509 cert from pem encoding")]
+    X509Error,
+    #[error("No cert given")]
+    NoCertGiven,
 }

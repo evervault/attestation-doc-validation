@@ -1,5 +1,5 @@
 {
-  "name": "node-attestation-bindings-linux-x64-musl",
+  "name": "evervault-attestation-bindings-linux-x64-musl",
   "version": "0.0.0",
   "os": [
     "linux"
@@ -7,9 +7,9 @@
   "cpu": [
     "x64"
   ],
-  "main": "node-attestation-bindings.linux-x64-musl.node",
+  "main": "evervault-attestation-bindings.linux-x64-musl.node",
   "files": [
-    "node-attestation-bindings.linux-x64-musl.node"
+    "evervault-attestation-bindings.linux-x64-musl.node"
   ],
   "license": "MIT",
   "engines": {
