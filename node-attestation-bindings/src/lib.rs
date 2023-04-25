@@ -30,6 +30,8 @@ impl PCRProvider for NodePCRs {
   }
 }
 
+// tmp
+
 #[napi]
 fn attest_connection(cert: JsBuffer, expected_pcrs: Option<NodePCRs>) -> bool {
   let cert_val = match cert.into_value() {
