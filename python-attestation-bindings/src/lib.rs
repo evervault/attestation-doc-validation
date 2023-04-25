@@ -87,19 +87,28 @@ impl PCRProvider for PCRs {
     }
 }
 
-/// Top level function to attest the Cage being connected to. Returns true on successful attestation, or errors if attestation fails.
+/// Top level function to attest the Cage being connected to.
+/// * If the cert fails to parse, return an error
+/// * If the attestation doc fails to validate, return an error
+/// * If the list of PCRs to check is empty, return true
+/// * If any of the PCRs in the list match, return true
+/// * If they all fail, return the last error
 #[pyfunction]
-pub fn attest_connection(cert: &[u8], expected_pcrs: &PCRs) -> PyResult<bool> {
+pub fn attest_connection(cert: &[u8], expected_pcrs_list: Vec<PCRs>) -> PyResult<bool> {
     let cert =
         parse_cert(cert).map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
 
     let validated_attestation_doc = validate_attestation_doc_in_cert(&cert)
         .map_err(|cert_err| PyValueError::new_err(format!("{cert_err}")))?;
 
-    validate_expected_pcrs(&validated_attestation_doc, expected_pcrs)
-        .map_err(|pcr_err| PyValueError::new_err(format!("{pcr_err}")))?;
-
-    Ok(true)
+    let mut result = Ok(true);
+    for expected_pcrs in expected_pcrs_list {
+        match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+            Ok(_) => return Ok(true),
+            Err(err) => result = Err(PyValueError::new_err(format!("{err}"))),
+        }
+    }
+    result
 }
 
 /// A small python module offering bindings to the rust attestation doc validation project
