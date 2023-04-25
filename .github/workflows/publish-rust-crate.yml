@@ -15,7 +15,6 @@ jobs:
         id: get-version
         run: |
           echo "using version tag ${GITHUB_REF:16}"
-          echo "version=${GITHUB_REF:16}\n" >> $GITHUB_OUTPUT
   assert-matching-version:
     runs-on: ubuntu-latest
     needs: [get-version]
@@ -30,13 +29,11 @@ jobs:
         id: get-cargo-version
         run: |
           CARGO_VERSION=$(cargo metadata --no-deps --format-version 1 | jq '.packages[] | select( .name == "attestation-doc-validation" ) | .version' | tr -d '"')
-          if [ "$CARGO_VERSION" != "${{ env.TAG_VERSION }}" ]; then
+          if [ "$CARGO_VERSION" != "${GITHUB_REF:16}" ]; then
             echo "Version in tag does not match cargo.toml"
-            echo "Expected $CARGO_VERSION, Found ${{ env.TAG_VERSION }}"
+            echo "Expected $CARGO_VERSION, Found ${GITHUB_REF:16}"
             exit 1
           fi
-        env:
-          TAG_VERSION: ${{ needs.get-version.outputs.version }}
   # Before publishing, validate that all tests pass
   run-ci-checks:
     runs-on: ubuntu-latest
