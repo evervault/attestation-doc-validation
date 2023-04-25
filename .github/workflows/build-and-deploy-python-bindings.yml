@@ -66,19 +66,16 @@ jobs:
         id: get-version
         run: |
           echo "using version tag ${GITHUB_REF:16}"
-          echo "name=version::${GITHUB_REF:18}\n" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v3
-      # - name: Assert versions match
-      #   run: |
-      #     cd python-attestation-bindings
-      #     PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
-      #     if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
-      #       echo "Version in tag does not match package.json"
-      #       echo "Expected $PACKAGE_VERSION, Found $TAG_VERSION"
-      #       exit 1
-      #     fi
-      #   env:
-      #     TAG_VERSION: ${{ steps.get-version.outputs.version }}
+      - name: Assert versions match
+        run: |
+          cd python-attestation-bindings
+          PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
+          if [ "$PACKAGE_VERSION" != "${GITHUB_REF:16}" ]; then
+            echo "Version in tag does not match package.json"
+            echo "Expected $PACKAGE_VERSION, Found ${GITHUB_REF:16}"
+            exit 1
+          fi
       - name: Guarantee wheels dir exists
         run: mkdir python-attestation-bindings/wheels
       - uses: actions/download-artifact@v3
