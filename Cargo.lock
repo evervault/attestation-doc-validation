@@ -96,32 +96,6 @@ dependencies = [
 
 [[package]]
 name = "attestation-doc-validation"
-version = "0.5.0-beta"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33c1d46e832e4a525c36b005cda831994d00cabf5842ff4c07078a0f8a2b9398"
-dependencies = [
- "aes",
- "aes-gcm",
- "aws-nitro-enclaves-cose",
- "base64 0.21.0",
- "der",
- "ecdsa",
- "hex",
- "p256",
- "p384",
- "rand",
- "serde",
- "serde_bytes",
- "serde_cbor",
- "serde_with 2.2.0",
- "sha2",
- "thiserror",
- "webpki",
- "x509-parser",
-]
-
-[[package]]
-name = "attestation-doc-validation"
 version = "0.6.0"
 dependencies = [
  "aes",
@@ -140,6 +114,32 @@ dependencies = [
  "serde_bytes",
  "serde_cbor",
  "serde_json",
+ "serde_with 2.2.0",
+ "sha2",
+ "thiserror",
+ "webpki",
+ "x509-parser",
+]
+
+[[package]]
+name = "attestation-doc-validation"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "07f41a9d17e59a15b9208f55985f3f0eea9830695cd6280acce32e9619ded698"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "aws-nitro-enclaves-cose",
+ "base64 0.21.0",
+ "der",
+ "ecdsa",
+ "hex",
+ "p256",
+ "p384",
+ "rand",
+ "serde",
+ "serde_bytes",
+ "serde_cbor",
  "serde_with 2.2.0",
  "sha2",
  "thiserror",
@@ -802,7 +802,7 @@ dependencies = [
 name = "node-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.5.0-beta",
+ "attestation-doc-validation 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "napi",
  "napi-build",
  "napi-derive",
@@ -1068,7 +1068,7 @@ dependencies = [
 name = "python-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.5.0-beta",
+ "attestation-doc-validation 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pyo3",
 ]
 

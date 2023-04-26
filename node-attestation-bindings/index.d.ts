@@ -10,4 +10,4 @@ export interface NodePcRs {
   pcr2?: string
   pcr8?: string
 }
-export function attestConnection(cert: Buffer, expectedPcrs?: NodePcRs | undefined | null): boolean
+export function attestConnection(cert: Buffer, expectedPcrsList: Array<NodePcRs>): boolean
