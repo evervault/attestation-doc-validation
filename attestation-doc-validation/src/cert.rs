@@ -81,6 +81,11 @@ pub(super) fn export_public_key_to_der<'a>(cert: &'a X509Certificate) -> &'a [u8
 ///
 /// Returns a `CertError::TimeError` when the current timestamp is before the unix epoch...
 #[cfg(not(test))]
+/// /// This function returns the number of seconds since the UNIX Epoch (January 1, 1970).
+/// It uses the `SystemTime` trait from the `std::time` module to get the current time.
+/// The `duration_since` method is called on this time to calculate the duration since the UNIX Epoch.
+/// Finally, the `as_secs` method is called to get the number of seconds since the UNIX Epoch.
+/// If an error occurs during the process, a `CertError` with the `TimeError` variant is returned.
 fn get_epoch() -> CertResult<u64> {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -90,6 +95,7 @@ fn get_epoch() -> CertResult<u64> {
 
 // Testing version of this function attempts to get the timestamp to use from env vars
 #[cfg(test)]
+/// This function returns the current epoch in seconds since Unix epoch (January 1, 1970, 00:00:00 UTC). If the FAKETIME environment variable is set, it returns the epoch specified in the variable. If the variable is invalid or not set, it returns the current epoch. If an error occurs during the calculation, it returns an error of type CertError::TimeError.
 fn get_epoch() -> CertResult<u64> {
     match std::env::var("FAKETIME") {
         Ok(given_epoch) => {

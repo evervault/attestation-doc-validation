@@ -38,6 +38,26 @@ pub trait PCRProvider {
     fn pcr_2(&self) -> Option<&str>;
     fn pcr_8(&self) -> Option<&str>;
 
+    /// Returns a string representation of the PCRS struct.
+    ///
+    /// The returned string includes the values of PCR0, PCR1, PCR2 and PCR8
+    /// in a formatted string.
+    ///
+    /// # Arguments
+    ///
+    /// * `self` - A reference to the PCRS struct
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use my_crate::PCRS;
+    ///
+    /// let pcrs = PCRS::new();
+    ///
+    /// let pcrs_str = pcrs.to_string();
+    ///
+    /// println!("{}", pcrs_str); // prints "PCRS { PCR0: ..., PCR1: ..., PCR2: ..., PCR8: ... }"
+    /// ```
     fn to_string(&self) -> String {
         format!(
             "PCRS {{ PCR0: {:?}, PCR1: {:?}, PCR2: {:?}, PCR8: {:?} }}",
@@ -67,15 +87,32 @@ pub struct PCRs {
 }
 
 impl PCRProvider for PCRs {
+    /// Returns an optional reference to a string slice representing the value of PCR_0. If the value of PCR_0 is present, it will be returned as `Some(&str)`. If it is absent, `None` will be returned. This method is immutable and does not modify the current state of the struct.
     fn pcr_0(&self) -> Option<&str> {
         Some(self.pcr_0.as_str())
     }
+    /// Returns an optional reference to a string slice that represents the value of PCR 1. If the value of PCR 1 is present, it is returned as a Some. If the value of PCR 1 is absent, it is returned as a None.
     fn pcr_1(&self) -> Option<&str> {
         Some(self.pcr_1.as_str())
     }
+    /// Returns an optional reference to the second Platform Configuration Register (PCR 2).
+    ///
+    /// If the reference to the string is present, it contains the value of the PCR 2.
+    /// If it is not present, it means that the PCR 2 has not been set or has been deleted.
+    /// This function allows for safe access to the PCR 2 value without risking modifying the original
+    /// value.
     fn pcr_2(&self) -> Option<&str> {
         Some(self.pcr_2.as_str())
     }
+    /// Returns an optional reference to a string slice containing the PCR-8 value. If the value is present, it is returned as a `Some(&str)`. If the value is missing, this function returns `None`.
+    ///
+    /// # Arguments
+    ///
+    /// - `&self`: A reference to a `Self` struct instance.
+    ///
+    /// # Returns
+    ///
+    /// An optional immutable reference to a string slice representing the PCR-8 value.
     fn pcr_8(&self) -> Option<&str> {
         Some(self.pcr_8.as_str())
     }

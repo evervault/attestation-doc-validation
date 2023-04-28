@@ -115,6 +115,23 @@ mod test {
 
     use rcgen::generate_simple_self_signed;
 
+    /// Embeds attestation document in the certificate for the provided hostname and cose bytes.
+    ///
+    /// # Arguments
+    /// * `hostname`: A string slice representing the hostname for which the certificate is being generated.
+    /// * `cose_bytes`: A slice of `u8` representing the cose bytes to be embedded in the certificate.
+    ///
+    /// # Returns
+    /// A newly generated `rcgen::Certificate` containing the attestation document embedded within the provided hostname.
+    ///
+    /// # Example
+    /// ```
+    /// use rcgen::Certificate;
+    ///
+    /// let hostname = "example.com";
+    /// let cose_bytes: [u8; 4] = [0x1, 0x2, 0x3, 0x4];
+    /// let cert = embed_attestation_doc_in_cert(hostname, &cose_bytes);
+    /// ```
     fn embed_attestation_doc_in_cert(hostname: &str, cose_bytes: &[u8]) -> rcgen::Certificate {
         let subject_alt_names = vec![
             hostname.to_string(),
@@ -124,6 +141,25 @@ mod test {
         generate_simple_self_signed(subject_alt_names).unwrap()
     }
 
+    /// Converts an RCgen certificate to DER encoding and returns the resulting byte vector.
+    
+    ///
+    /// # Arguments
+    ///
+    /// * `cert` - An RCgen certificate to be serialized to DER format.
+    ///
+    /// # Returns
+    ///
+    /// The byte vector representing the serialized certificate in DER format.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rcgen::generate_simple_self_signed;
+    ///
+    /// let cert = generate_simple_self_signed(vec!["localhost".into()]).unwrap();
+    /// let der_cert = rcgen_cert_to_der(cert);
+    /// ```
     fn rcgen_cert_to_der(cert: rcgen::Certificate) -> Vec<u8> {
         cert.serialize_der().unwrap()
     }

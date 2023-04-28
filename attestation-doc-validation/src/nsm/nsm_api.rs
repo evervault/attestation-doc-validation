@@ -66,6 +66,19 @@ impl AttestationDoc {
     /// * nonce: optional cryptographic nonce that will be included in the `AttestationDoc`
     /// * `public_key`: optional DER-encoded public key that will be included in the `AttestationDoc`
     #[allow(clippy::too_many_arguments)]
+    /// Creates a new AttestationDoc struct with the given parameters.
+    ///
+    /// # Arguments
+    ///
+    /// * `module_id` - A String representing the ID of the module.
+    /// * `digest` - A Digest representing the hash of the module.
+    /// * `timestamp` - An unsigned 64-bit integer representing the timestamp of the attestation.
+    /// * `pcrs` - A BTreeMap of unsigned integers to byte vectors representing the values of the platform configuration registers.
+    /// * `certificate` - A byte vector representing the certificate used for the attestation.
+    /// * `cabundle` - A vector of byte vectors representing the chain of trust for the certificate.
+    /// * `user_data` - An optional byte vector representing user data to include in the attestation.
+    /// * `nonce` - An optional byte vector representing a nonce to include in the attestation.
+    /// * `public_key` - An optional byte vector representing the public key used for the attestation.
     pub fn new(
         module_id: String,
         digest: Digest,

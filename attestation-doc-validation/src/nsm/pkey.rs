@@ -16,6 +16,48 @@ pub struct PublicKey<'a> {
 impl<'a> std::convert::TryFrom<&'a SubjectPublicKeyInfo<'a>> for PublicKey<'a> {
     type Error = super::error::NsmError;
 
+    /// Converts a DER-encoded SubjectPublicKeyInfo value into a 'PublicKey' instance.
+    
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - A reference to the DER-encoded SubjectPublicKeyInfo value.
+    ///
+    /// # Returns
+    ///
+    /// Returns a result containing a 'PublicKey' instance or an error of 'Self::Error' type.
+    /// A 'Self::Error::DerDecodeError' is returned if the value cannot be decoded from DER.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use crate::PublicKey;
+    /// use ring::error::Unspecified;
+    /// use ring::io::DerParser;
+    /// use ring::io::parse_der;
+    /// use ring::io::positive;
+    /// use ring::io::ASN1;
+    /// use ring::io::SPKI;
+    ///
+    /// #[cfg(test)]
+    /// mod tests {
+    ///     use super::*;
+    ///
+    ///     #[test]
+    ///     fn test_try_from() {
+    ///         let der_encoded_spki = vec![48, 129, 143, 48, 13, 6, 9, 42, 134, 72, 206, 61, 4, 1,
+    ///             6, 5, 43, 129, 4, 0, 33, 3, 129, 129, 0, 200, 17, 117, 174, 128, 162, 218,
+    ///             62, 23, 107, 162, 234, 231, 30, 113, 252, 230, 73, 96, 80, 159, 177, 47, 91,
+    ///             186, 62, 106, 186, 0, 67, 232, 19, 0, 142, 145, 112, 241, 167, 149, 163, 109,
+    ///             88, 132, 140, 19, 67, 248, 201, 160, 150, 199, 15, 225, 79, 204, 49, 1, 1];
+    ///
+    ///         let public_key_info = parse_der(DerParser::new(&der_encoded_spki)).unwrap();
+    ///
+    ///         let result = PublicKey::try_from(&public_key_info);
+    ///         assert!(result.is_ok());
+    ///     }
+    /// }
+    /// ```
     fn try_from(value: &'a SubjectPublicKeyInfo<'a>) -> Result<Self, Self::Error> {
         let public_key_info = Spki::from_der(value.raw).map_err(|_| Self::Error::DerDecodeError)?;
         Ok(Self {
@@ -26,6 +68,26 @@ impl<'a> std::convert::TryFrom<&'a SubjectPublicKeyInfo<'a>> for PublicKey<'a> {
 }
 
 impl<'a> SigningPublicKey for PublicKey<'a> {
+    /// Returns a tuple containing the signature algorithm and message digest used for the given EC key. Only named curves are supported, and the algorithm and digest are determined based on the curve name. 
+    
+    /// 
+    ///
+    /// # Arguments 
+    ///
+    /// * `self` - A reference to the given EC key.
+    ///
+    /// # Errors 
+    ///
+    /// Returns a `CoseError` indicating that only named curves are supported, or that an unsupported curve was received. 
+    ///
+    /// # Example 
+    ///
+    /// ```
+    /// use crate::get_parameters;
+    ///
+    /// let (alg, dig) = get_parameters(&my_key).unwrap();
+    /// ```
+    ///
     fn get_parameters(&self) -> Result<(SignatureAlgorithm, MessageDigest), CoseError> {
         let EcParameters::NamedCurve(curve_name) = self.spki.algorithm.parameters else {
           return Err(CoseError::UnsupportedError("Only named curves are supported".to_string()));
@@ -45,6 +107,31 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
         Ok(params)
     }
 
+    /// Verifies the COSE signature against the provided message digest.
+    ///
+    /// # Arguments
+    ///
+    /// * `digest` - A slice of bytes representing the message digest to verify against the signature.
+    /// * `signature` - A slice of bytes representing the signature to be verified.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` with a boolean value indicating if the signature is valid or not. An error is returned if operation fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cose::errors::CoseError;
+    /// use cose::sign::{SignatureAlgorithm, CoseSign0};
+    ///
+    /// let cose_sign = CoseSign0::new();
+    /// let digest = vec![1, 2, 3];
+    /// let signature = vec![4, 5, 6];
+    ///
+    /// let verification_result = cose_sign.verify(&digest, &signature);
+    ///
+    /// assert_eq!(verification_result, Err(CoseError::InvalidState("missing key data".into())));
+    /// ```
     fn verify(&self, digest: &[u8], signature: &[u8]) -> Result<bool, CoseError> {
         let (sig_alg, _) = self.get_parameters()?;
         let signature_verification_result = match sig_alg {
@@ -80,19 +167,54 @@ macro_rules! impl_signature_verification {
 }
 
 impl<'a> PublicKey<'a> {
+    /// Returns a reference to the public key associated with this instance of the struct.
+    ///
+    /// The public key is stored as a `BitString`. This function returns a reference to that `BitString`, thus ensuring that the key cannot be modified without going through the correct channels.
     fn public_key(&self) -> &BitString {
         self.public_key
     }
 
+    /// Verifies the P256 signature for the given digest and signature data.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - A reference to the struct implementing signature verification.
+    /// * `digest` - A slice of bytes representing the digest data.
+    /// * `signature` - A slice of bytes representing the signature data.
+    /// 
+    /// # Returns
+    ///
+    /// `Result<(), CoseError>` - An empty Ok result if the signature is valid.
+    ///                         - An Err result containing a CoseError if the signature is invalid.
     fn verify_p256_signature(&self, digest: &[u8], signature: &[u8]) -> Result<(), CoseError> {
         impl_signature_verification!(self, p256, digest, signature);
     }
 
+    /// Verifies the signature of a given digest using the p384 algorithm.
+    
+    ///
+    /// * `digest` - A reference to a byte slice that contains the digest to be verified.
+    /// * `signature` - A reference to a byte slice that contains the signature to be verified.
+    ///
+    /// Returns a `Result` with an empty tuple `()` if the verification is successful. If the verification fails, `CoseError` is returned
+    /// with a description of the error.
     fn verify_p384_signature(&self, digest: &[u8], signature: &[u8]) -> Result<(), CoseError> {
         impl_signature_verification!(self, p384, digest, signature);
     }
 
     #[allow(clippy::unused_self)]
+    /// Verifies a P-521 signature using the provided digest and signature bytes.
+    
+    ///
+    /// # Arguments
+    ///
+    /// * `_digest`: A slice of bytes representing the digest being signed.
+    /// * `_signature`: A slice of bytes representing the signature to be verified.
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` if the signature is valid.
+    /// * `Err(CoseError)` if the signature is invalid or cannot be verified.
     fn verify_p521_signature(&self, _digest: &[u8], _signature: &[u8]) -> Result<(), CoseError> {
         unimplemented!();
     }

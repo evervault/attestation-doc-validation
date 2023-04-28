@@ -44,6 +44,26 @@ pub struct SubjectPublicKeyInfo<'a> {
     pub subject_public_key: BitString,
 }
 
+/// Converts a hexadecimal string into an OctetString.
+///
+/// # Arguments
+///
+/// * `hex_str` - a string slice that contains the hexadecimal representation of the octet string.
+///
+/// # Returns
+///
+/// * A `Result<OctetString, hex::FromHexError>` where the success variant contains the OctetString decoded from the hexadecimal string,
+/// and the error variant indicates that the string could not be parsed as hexadecimal.
+///
+/// # Examples
+///
+/// ```
+/// use my_crate::OctetString;
+///
+/// let hex_str = "68656c6c6f20776f726c64"; // "hello world" in hex
+/// let octet_string = OctetString::from_hex(hex_str).unwrap();
+/// assert_eq!(octet_string.to_string(), "hello world");
+/// ```
 pub fn octet_string_from_hex(hex_str: &str) -> Result<OctetString, hex::FromHexError> {
     let octet_string = OctetString::new(hex::decode(hex_str)?).unwrap();
     Ok(octet_string)
@@ -56,6 +76,7 @@ pub enum SupportedEcCurve {
 }
 
 impl SupportedEcCurve {
+    /// Returns a `Curve` object based on the selected elliptic curve. The available options are `Secp256r1`, `Secp384r1`, and `Secp521r1`, each with their respective parameters sourced from official standards. The `Curve` object contains the `a` and `b` parameters of the curve, as well as a `BitString` seed value.
     fn to_curve(&self) -> Curve {
         match self {
             // Parameters from: https://neuromancer.sk/std/secg/secp256r1#
@@ -106,6 +127,18 @@ macro_rules! compare_curve {
 
 impl std::convert::TryFrom<&Curve> for SupportedEcCurve {
     type Error = ();
+    /// Attempts to convert the given reference to a Curve into Self, the concrete type implementing TryFrom<Curve>.
+    ///
+    /// If the given reference to a Curve is not one of the supported curves - Secp256r1, Secp384r1 or Secp521r1 - the function will return an error.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - A reference to a Curve that needs to be converted to Self.
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(Self)` - If `value` is successfully converted to Self.
+    /// * `Err(())` - If `value` is not one of the supported curves.
     fn try_from(value: &Curve) -> Result<Self, Self::Error> {
         compare_curve!(Self::Secp256r1, value);
         compare_curve!(Self::Secp384r1, value);

@@ -36,6 +36,25 @@ where
 // Impl to support casting errors from AWS types to ours
 use aws_nitro_enclaves_cose::error::CoseError;
 impl std::convert::From<CoseError> for NsmError {
+    /// Converts a `CoseError` into an `NsmError`.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - A `CoseError` that needs to be converted into an `NsmError`.
+    ///
+    /// # Returns
+    ///
+    /// An `NsmError` that corresponds to the input `CoseError`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_crate::{CoseError, NsmError, from};
+    ///
+    /// let cose_err = CoseError::EntropyError("Failed to generate entropy".to_string());
+    /// let nsm_err = from(cose_err);
+    /// assert_eq!(nsm_err, NsmError::EntropyError("Failed to generate entropy".to_string()));
+    /// ```
     fn from(value: CoseError) -> NsmError {
         match value {
             CoseError::EntropyError(inner) => NsmError::EntropyError(inner.to_string()),
