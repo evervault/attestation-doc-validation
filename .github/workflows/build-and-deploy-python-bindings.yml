@@ -70,7 +70,7 @@ jobs:
       - name: Assert versions match
         run: |
           cd python-attestation-bindings
-          PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
+          PACKAGE_VERSION=$(cat pyproject.toml | awk -F '=' '/version/ {gsub(/"/, "", $2); gsub(/ /, "", $2); print $2}')
           if [ "$PACKAGE_VERSION" != "${GITHUB_REF:18}" ]; then
             echo "Version in tag does not match package.json"
             echo "Expected $PACKAGE_VERSION, Found ${GITHUB_REF:18}"
