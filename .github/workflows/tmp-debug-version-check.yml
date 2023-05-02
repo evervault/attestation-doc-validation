@@ -1,0 +1,18 @@
+name: Debug version check
+
+on:
+  push:
+    branches:
+      fix-python-bindings-version-check
+
+jobs:
+  release:
+    name: Debug version check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Assert versions match
+        run: |
+          cd python-attestation-bindings
+          PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
+          echo $PACKAGE_VERSION

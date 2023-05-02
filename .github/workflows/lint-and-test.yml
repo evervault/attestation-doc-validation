@@ -1,59 +1,59 @@
-on:
-  push:
-    paths:
-      - attestation-doc-validation/**
-      - node-attestation-bindings/**
-      - python-attestation-bindings/**
-      - .github/workflows/lint-and-test.yml
-      - test-data/**
-      - test-specs/**
-name: Lint and Test
-jobs:
-  lint_and_test_rust:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install latest stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
-      - name: Run CI Tasks with backtrace
-        run: cd attestation-doc-validation ; cargo make ci
-        env:
-          RUST_BACKTRACE: full
-  lint_and_test_node:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          check-latest: true
-          cache: yarn
-          cache-dependency-path: ./node-attestation-bindings/yarn.lock
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
-      - name: Install dependencies
-        run: |
-          cd node-attestation-bindings
-          yarn install
-      - name: Test node bindings
-        run: cd node-attestation-bindings ; cargo make test
-  build_and_test_python:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: PyO3/maturin-action@v1
-        with:
-          command: build
-          args: --release -o dist --universal2 --find-interpreter
-          working-directory: python-attestation-bindings
+# on:
+#   push:
+#     paths:
+#       - attestation-doc-validation/**
+#       - node-attestation-bindings/**
+#       - python-attestation-bindings/**
+#       - .github/workflows/lint-and-test.yml
+#       - test-data/**
+#       - test-specs/**
+# name: Lint and Test
+# jobs:
+#   lint_and_test_rust:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Install latest stable toolchain
+#         uses: actions-rs/toolchain@v1
+#         with:
+#           toolchain: stable
+#           override: true
+#           components: rustfmt, clippy
+#       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+#       - name: Run CI Tasks with backtrace
+#         run: cd attestation-doc-validation ; cargo make ci
+#         env:
+#           RUST_BACKTRACE: full
+#   lint_and_test_node:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Setup node
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: "18"
+#           check-latest: true
+#           cache: yarn
+#           cache-dependency-path: ./node-attestation-bindings/yarn.lock
+#       - name: Setup rust toolchain
+#         uses: actions-rs/toolchain@v1
+#         with:
+#           toolchain: stable
+#           override: true
+#           components: rustfmt, clippy
+#       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+#       - name: Install dependencies
+#         run: |
+#           cd node-attestation-bindings
+#           yarn install
+#       - name: Test node bindings
+#         run: cd node-attestation-bindings ; cargo make test
+#   build_and_test_python:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: PyO3/maturin-action@v1
+#         with:
+#           command: build
+#           args: --release -o dist --universal2 --find-interpreter
+#           working-directory: python-attestation-bindings

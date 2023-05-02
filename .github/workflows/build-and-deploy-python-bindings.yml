@@ -1,92 +1,92 @@
-name: Build and deploy python bindings
+# name: Build and deploy python bindings
 
-on:
-  push:
-    branches:
-      - main
-    tags:
-      - "python/v*"
-  pull_request:
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#     tags:
+#       - "python/v*"
+#   pull_request:
+#   workflow_dispatch:
 
-jobs:
-  linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: PyO3/maturin-action@v1
-        with:
-          manylinux: auto
-          command: build
-          args: --release --sdist -o dist --find-interpreter
-          working-directory: python-attestation-bindings
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: python-attestation-bindings/dist
+# jobs:
+#   linux:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: PyO3/maturin-action@v1
+#         with:
+#           manylinux: auto
+#           command: build
+#           args: --release --sdist -o dist --find-interpreter
+#           working-directory: python-attestation-bindings
+#       - name: Upload wheels
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: wheels
+#           path: python-attestation-bindings/dist
 
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: PyO3/maturin-action@v1
-        with:
-          command: build
-          args: --release -o dist --find-interpreter
-          working-directory: python-attestation-bindings
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: python-attestation-bindings/dist
+#   windows:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: PyO3/maturin-action@v1
+#         with:
+#           command: build
+#           args: --release -o dist --find-interpreter
+#           working-directory: python-attestation-bindings
+#       - name: Upload wheels
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: wheels
+#           path: python-attestation-bindings/dist
 
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: PyO3/maturin-action@v1
-        with:
-          command: build
-          args: --release -o dist --universal2 --find-interpreter
-          working-directory: python-attestation-bindings
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: python-attestation-bindings/dist
+#   macos:
+#     runs-on: macos-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: PyO3/maturin-action@v1
+#         with:
+#           command: build
+#           args: --release -o dist --universal2 --find-interpreter
+#           working-directory: python-attestation-bindings
+#       - name: Upload wheels
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: wheels
+#           path: python-attestation-bindings/dist
 
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref,'refs/tags/python/v') }}
-    needs: [macos, windows, linux]
-    steps:
-      - name: Get version from tag
-        id: get-version
-        run: |
-          echo "using version tag ${GITHUB_REF:18}"
-      - uses: actions/checkout@v3
-      - name: Assert versions match
-        run: |
-          cd python-attestation-bindings
-          PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
-          if [ "$PACKAGE_VERSION" != "${GITHUB_REF:18}" ]; then
-            echo "Version in tag does not match package.json"
-            echo "Expected $PACKAGE_VERSION, Found ${GITHUB_REF:18}"
-            exit 1
-          fi
-      - name: Guarantee wheels dir exists
-        run: mkdir python-attestation-bindings/wheels
-      - uses: actions/download-artifact@v3
-        with:
-          path: python-attestation-bindings/wheels
-          name: wheels
-      - name: Publish to PyPI
-        uses: PyO3/maturin-action@v1
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        with:
-          command: upload
-          args: --skip-existing *
-          working-directory: python-attestation-bindings/wheels
+#   release:
+#     name: Release
+#     runs-on: ubuntu-latest
+#     if: ${{ startsWith(github.ref,'refs/tags/python/v') }}
+#     needs: [macos, windows, linux]
+#     steps:
+#       - name: Get version from tag
+#         id: get-version
+#         run: |
+#           echo "using version tag ${GITHUB_REF:18}"
+#       - uses: actions/checkout@v3
+#       - name: Assert versions match
+#         run: |
+#           cd python-attestation-bindings
+#           PACKAGE_VERSION=$(cat pyproject.toml | grep "version" | xargs -n1 -d ' ' | tail -n1)
+#           if [ "$PACKAGE_VERSION" != "${GITHUB_REF:18}" ]; then
+#             echo "Version in tag does not match package.json"
+#             echo "Expected $PACKAGE_VERSION, Found ${GITHUB_REF:18}"
+#             exit 1
+#           fi
+#       - name: Guarantee wheels dir exists
+#         run: mkdir python-attestation-bindings/wheels
+#       - uses: actions/download-artifact@v3
+#         with:
+#           path: python-attestation-bindings/wheels
+#           name: wheels
+#       - name: Publish to PyPI
+#         uses: PyO3/maturin-action@v1
+#         env:
+#           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+#         with:
+#           command: upload
+#           args: --skip-existing *
+#           working-directory: python-attestation-bindings/wheels
