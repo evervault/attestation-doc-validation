@@ -1,8 +1,11 @@
 extern crate libc;
 
-use sha256::digest_bytes;
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr};
 use std::slice;
+use attestation_doc_validation::{
+    attestation_doc::{validate_expected_pcrs, PCRProvider},
+    parse_cert, validate_attestation_doc_in_cert,
+};
 
 #[repr(C)]
 pub struct GoPCRs {
@@ -13,8 +16,8 @@ pub struct GoPCRs {
     pub pcr_8: *const libc::c_char,
 }
 
-#[no_mangle] 
-pub extern "C" fn rustdemo(cert: *const u32, cert_len: libc::size_t, pcrs: *const GoPCRs) -> *const libc::c_char {
+#[no_mangle]
+pub extern "C" fn attest_connection(cert: *const u32, cert_len: libc::size_t, pcrs: *const GoPCRs) -> *const libc::c_char {
 
     let hash_alg = unsafe { CStr::from_ptr((*pcrs).hash_alg).to_string_lossy().into_owned() };
     let pcr_0 = unsafe { CStr::from_ptr((*pcrs).pcr_0).to_string_lossy().into_owned() };
@@ -35,7 +38,26 @@ pub extern "C" fn rustdemo(cert: *const u32, cert_len: libc::size_t, pcrs: *cons
         slice::from_raw_parts(cert, cert_len as usize)
     };
 
-    println!("cert_len: {:?}", cert_as_slice.len());
+    let parsed_cert = convert_u32_to_u8(cert_as_slice);
 
-    1 as *const libc::c_char
+    let cert_result = parse_cert(parsed_cert);
+    match cert_result {
+        Ok(_) => return 1 as *const libc::c_char,
+        Err(error) => {
+            println!("Error parsing certificate: {:?}", error);
+            return 0 as *const libc::c_char
+        }
+    };
+}
+
+fn convert_u32_to_u8(slice: &[u32]) -> &[u8] {
+    let len_u32 = slice.len();
+    let len_u8 = len_u32 * 4; // Each u32 takes 4 bytes
+
+    // Get a raw byte representation of the u32 slice
+    let slice_u8: &[u8] = unsafe {
+        std::slice::from_raw_parts(slice.as_ptr() as *const u8, len_u8)
+    };
+
+    slice_u8
 }

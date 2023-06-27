@@ -8,7 +8,7 @@ typedef struct {
     const char* pcr_1;
     const char* pcr_2;
     const char* pcr_8;
-} GoPCRs; 
+} GoPCRs;
 
 extern uint32_t
-rustdemo(const unsigned char cert, size_t cert_length, GoPCRs* expected_pcrs_list);
+attest_connection(const unsigned char cert, size_t cert_length, GoPCRs* expected_pcrs_list);

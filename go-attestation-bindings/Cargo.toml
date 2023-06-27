@@ -1,5 +1,5 @@
 [package]
-name = "rustdemo"
+name = "go-attestation-bindings"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,4 +10,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 libc = "0.2"
-sha256 = "1.0.3"
+attestation-doc-validation = { version = "0.6.0" }
