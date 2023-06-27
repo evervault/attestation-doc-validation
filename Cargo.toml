@@ -2,7 +2,8 @@
 members = [
   "attestation-doc-validation",
   "python-attestation-bindings",
-  "node-attestation-bindings"
+  "node-attestation-bindings",
+  "go-attestation-bindings"
 ]
 
 [profile.release]
