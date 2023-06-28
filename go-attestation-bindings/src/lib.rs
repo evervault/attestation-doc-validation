@@ -2,7 +2,7 @@ extern crate libc;
 
 use std::os::raw::{c_uchar};
 use std::ffi::{CStr};
-use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRProvider, get_pcrs};
+use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRProvider};
 use attestation_doc_validation::{parse_cert, validate_attestation_doc_in_cert};
 
 #[repr(C)]
