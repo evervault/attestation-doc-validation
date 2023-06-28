@@ -1,4 +1,4 @@
-package main
+package go_attestation_bindings
 
 /*
 #cgo LDFLAGS: -L./lib -lgo_attestation_bindings
@@ -13,9 +13,14 @@ import (
 	"unsafe"
 )
 
-func main() {
-	cert := cert_cage_cert()
-	// Prepare the input data
+type ExpectedPCRs struct {
+	Pcr_0 string
+	Pcr_1 string
+	Pcr_2 string
+	Pcr_8 string
+}
+
+func serializeToCLayout() []C.GoPCRs {
 	var expectedPCRs []C.GoPCRs
 	expectedPCRs = append(expectedPCRs, C.GoPCRs{
 		pcr_0: C.CString("2f1d96a6a897cf7b9d15f2198355ac4cf13ab1b5e4f06b249e5b91bb3e1637b8d6d071f29c64ce89825a5b507c6656a9"),
@@ -31,6 +36,12 @@ func main() {
 		expectedPCRsArr[i].pcr_2 = pcrs.pcr_2
 		expectedPCRsArr[i].pcr_8 = pcrs.pcr_8
 	}
+	return expectedPCRsArr
+}
+
+func AttestConnection(newExpectedPCRs []ExpectedPCRs) bool {
+	cert := cert_cage_cert()
+	expectedPCRsArr := serializeToCLayout()
 	defer func() {
 		for _, pcrs := range expectedPCRsArr {
 			C.free(unsafe.Pointer(pcrs.pcr_0))
@@ -39,10 +50,9 @@ func main() {
 			C.free(unsafe.Pointer(pcrs.pcr_8))
 		}
 	}()
-
 	result := C.attest_connection((*C.uchar)(&cert[0]), C.size_t(len(cert)), (*C.GoPCRs)(&expectedPCRsArr[0]), C.size_t(len(expectedPCRsArr)))
-
 	fmt.Printf("Result: %v\n", bool(result))
+	return bool(result)
 }
 
 func cert_cage_cert() []byte {

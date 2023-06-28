@@ -46,8 +46,6 @@ pub extern "C" fn attest_connection(cert: *const c_uchar, cert_len: usize, expec
         })
         .collect();
 
-    println!("cert: {}", cert_slice.len());
-
     let parsed_cert = match parse_cert(cert_slice) {
         Ok(parsed_cert) => parsed_cert,
         Err(e) => {
