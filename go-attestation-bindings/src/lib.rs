@@ -33,10 +33,20 @@ impl PCRProvider for GoPCRs {
 }
 
 #[no_mangle]
-pub extern "C" fn attest_connection(cert: *const c_uchar, cert_len: usize, expected_pcs: *const GoPCRs) -> bool {
+pub extern "C" fn attest_connection(cert: *const c_uchar, cert_len: usize, expected_pcrs: *const GoPCRs, expected_pcrs_len: usize) -> bool {
 
     let cert_slice = unsafe { std::slice::from_raw_parts(cert, cert_len) };
-    let expected_pcs_ref = unsafe { &*expected_pcs };
+    // let expected_pcs_ref = unsafe { &*expected_pcrs };
+    let expected_pcrs_ref = unsafe { std::slice::from_raw_parts(expected_pcrs, expected_pcrs_len) };
+    let expected_pcrs_vec: Vec<GoPCRs> = expected_pcrs_ref
+        .iter()
+        .map(|pcrs| GoPCRs {
+            pcr_0: pcrs.pcr_0.clone(),
+            pcr_1: pcrs.pcr_1.clone(),
+            pcr_2: pcrs.pcr_2.clone(),
+            pcr_8: pcrs.pcr_8.clone(),
+        })
+        .collect();
 
     println!("cert: {}", cert_slice.len());
 
@@ -56,18 +66,19 @@ pub extern "C" fn attest_connection(cert: *const c_uchar, cert_len: usize, expec
         }
       };
 
-    let mut result = Ok(true);
-    println!("PCRS: {}", get_pcrs(&validated_attestation_doc).unwrap().pcr_0);
-    match validate_expected_pcrs(&validated_attestation_doc, expected_pcs_ref) {
-        Ok(_) => return true,
-        Err(err) => result = Err(err),
-    }
+      let mut result = Ok(true);
+      for expected_pcrs in expected_pcrs_vec {
+          match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+              Ok(_) => return true,
+              Err(err) => result = Err(err),
+          }
+      }
 
-    match result {
-        Ok(_) => true,
-        Err(e) => {
-            eprintln!("Failed to validate that PCRs are as expected: {e}");
-            false
-        }
-    }
+      match result {
+          Ok(_) => true,
+          Err(e) => {
+              eprintln!("Failed to validate that PCRs are as expected: {e}");
+              false
+          }
+      }
 }

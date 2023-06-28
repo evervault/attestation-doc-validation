@@ -8,4 +8,4 @@ typedef struct {
     const char* pcr_8;
 } GoPCRs;
 
-extern bool attest_connection(const unsigned char* cert, size_t cert_len, const GoPCRs* expected_pcs);
+extern bool attest_connection(const unsigned char* cert, size_t cert_len, const GoPCRs* expected_pcs, size_t expected_pcrs_len);
