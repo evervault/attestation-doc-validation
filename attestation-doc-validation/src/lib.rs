@@ -11,7 +11,6 @@ use nsm::CryptoClient;
 use serde_bytes::ByteBuf;
 use x509_parser::certificate::X509Certificate;
 
-use std::ffi::CStr;
 
 // Helper function to fail early on any variant of error::AttestError
 fn true_or_invalid<E: Into<error::AttestError>>(check: bool, err: E) -> std::result::Result<(), E> {
