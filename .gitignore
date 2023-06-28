@@ -1,4 +1,4 @@
 /target
 /go-attestation-bindings/bin
 /go-attestation-bindings/lib/*.dylib
-.vscode
+.vscode/*
