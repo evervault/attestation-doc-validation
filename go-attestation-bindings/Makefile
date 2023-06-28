@@ -16,3 +16,4 @@ run: build-dynamic
 .PHONY: clean
 clean:
 	rm -rf bin main_static lib/*.dylib
+	go clean -cache
