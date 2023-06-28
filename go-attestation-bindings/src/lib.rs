@@ -34,9 +34,7 @@ impl PCRProvider for GoPCRs {
 
 #[no_mangle]
 pub extern "C" fn attest_connection(cert: *const c_uchar, cert_len: usize, expected_pcrs: *const GoPCRs, expected_pcrs_len: usize) -> bool {
-
     let cert_slice = unsafe { std::slice::from_raw_parts(cert, cert_len) };
-    // let expected_pcs_ref = unsafe { &*expected_pcrs };
     let expected_pcrs_ref = unsafe { std::slice::from_raw_parts(expected_pcrs, expected_pcrs_len) };
     let expected_pcrs_vec: Vec<GoPCRs> = expected_pcrs_ref
         .iter()
