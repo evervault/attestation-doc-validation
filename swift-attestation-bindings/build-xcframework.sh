@@ -74,7 +74,6 @@ esac
 
 cargo_build () {
   TARGET=$1
-  #env -i \
     "$CARGO" "${BUILD_ARGS[@]}" --target "$TARGET"
 }
 
@@ -122,7 +121,6 @@ cp "$WORKING_DIR/$FRAMEWORK_NAME.h" "$COMMON/Headers"
 cp "$REPO_ROOT/swift-attestation-bindings/ios/AttestationBindingsRustFFI.h" "$COMMON/Headers"
 cp "$REPO_ROOT/swift-attestation-bindings/ios/Info.plist" "$COMMON"
 rm -rf "$COMMON"/Headers/*.swift
-
 
 # Flesh out the framework for each architecture based on the common files.
 # It's a little fiddly, because we apparently need to put all the simulator targets
