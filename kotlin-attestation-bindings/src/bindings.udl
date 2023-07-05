@@ -1,0 +1,4 @@
+namespace bindings {
+  string reverse_string([ByRef] string input_string);
+  i32 reverse_integer(i32 input_integer);
+};
