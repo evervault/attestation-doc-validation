@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ANDROID_SDK_PATH=$1
 
-cargo build --release --lib \
+cross build --release --lib \
     --target x86_64-linux-android  \
     --target i686-linux-android \
     --target armv7-linux-androideabi \
