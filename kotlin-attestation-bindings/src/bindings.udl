@@ -1,4 +1,12 @@
 namespace bindings {
   string reverse_string([ByRef] string input_string);
   i32 reverse_integer(i32 input_integer);
+  boolean attest_connection(bytes cert, sequence<PCRs> expected_pcrs_list);
+};
+
+dictionary PCRs {
+  string pcr0;
+  string pcr1;
+  string pcr2;
+  string pcr8;
 };

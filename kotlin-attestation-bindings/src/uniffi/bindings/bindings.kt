@@ -368,6 +368,8 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_bindings_fn_func_reverse_integer(`inputInteger`: Int,_uniffi_out_err: RustCallStatus, 
     ): Int
+    fun uniffi_bindings_fn_func_attest_connection(`cert`: RustBuffer.ByValue,`expectedPcrsList`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): Byte
     fun ffi_bindings_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_bindings_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -379,6 +381,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_bindings_checksum_func_reverse_string(
     ): Short
     fun uniffi_bindings_checksum_func_reverse_integer(
+    ): Short
+    fun uniffi_bindings_checksum_func_attest_connection(
     ): Short
     fun ffi_bindings_uniffi_contract_version(
     ): Int
@@ -403,6 +407,9 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
     if (lib.uniffi_bindings_checksum_func_reverse_integer() != 15443.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_bindings_checksum_func_attest_connection() != 58635.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
 }
 
 // Public interface members begin here.
@@ -425,6 +432,26 @@ public object FfiConverterInt: FfiConverter<Int, Int> {
 
     override fun write(value: Int, buf: ByteBuffer) {
         buf.putInt(value)
+    }
+}
+
+public object FfiConverterBoolean: FfiConverter<Boolean, Byte> {
+    override fun lift(value: Byte): Boolean {
+        return value.toInt() != 0
+    }
+
+    override fun read(buf: ByteBuffer): Boolean {
+        return lift(buf.get())
+    }
+
+    override fun lower(value: Boolean): Byte {
+        return if (value) 1.toByte() else 0.toByte()
+    }
+
+    override fun allocationSize(value: Boolean) = 1
+
+    override fun write(value: Boolean, buf: ByteBuffer) {
+        buf.put(lower(value))
     }
 }
 
@@ -474,6 +501,84 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
     }
 }
 
+public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
+    override fun read(buf: ByteBuffer): ByteArray {
+        val len = buf.getInt()
+        val byteArr = ByteArray(len)
+        buf.get(byteArr)
+        return byteArr
+    }
+    override fun allocationSize(value: ByteArray): Int {
+        return 4 + value.size
+    }
+    override fun write(value: ByteArray, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        buf.put(value)
+    }
+}
+
+
+
+
+data class PcRs (
+    var `pcr0`: String, 
+    var `pcr1`: String, 
+    var `pcr2`: String, 
+    var `pcr8`: String
+) {
+    
+}
+
+public object FfiConverterTypePCRs: FfiConverterRustBuffer<PcRs> {
+    override fun read(buf: ByteBuffer): PcRs {
+        return PcRs(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PcRs) = (
+            FfiConverterString.allocationSize(value.`pcr0`) +
+            FfiConverterString.allocationSize(value.`pcr1`) +
+            FfiConverterString.allocationSize(value.`pcr2`) +
+            FfiConverterString.allocationSize(value.`pcr8`)
+    )
+
+    override fun write(value: PcRs, buf: ByteBuffer) {
+            FfiConverterString.write(value.`pcr0`, buf)
+            FfiConverterString.write(value.`pcr1`, buf)
+            FfiConverterString.write(value.`pcr2`, buf)
+            FfiConverterString.write(value.`pcr8`, buf)
+    }
+}
+
+
+
+
+public object FfiConverterSequenceTypePCRs: FfiConverterRustBuffer<List<PcRs>> {
+    override fun read(buf: ByteBuffer): List<PcRs> {
+        val len = buf.getInt()
+        return List<PcRs>(len) {
+            FfiConverterTypePCRs.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PcRs>): Int {
+        val sizeForLength = 4
+        val sizeForItems = value.map { FfiConverterTypePCRs.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PcRs>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.forEach {
+            FfiConverterTypePCRs.write(it, buf)
+        }
+    }
+}
+
 fun `reverseString`(`inputString`: String): String {
     return FfiConverterString.lift(
     rustCall() { _status ->
@@ -486,6 +591,14 @@ fun `reverseInteger`(`inputInteger`: Int): Int {
     return FfiConverterInt.lift(
     rustCall() { _status ->
     _UniFFILib.INSTANCE.uniffi_bindings_fn_func_reverse_integer(FfiConverterInt.lower(`inputInteger`),_status)
+})
+}
+
+
+fun `attestConnection`(`cert`: ByteArray, `expectedPcrsList`: List<PcRs>): Boolean {
+    return FfiConverterBoolean.lift(
+    rustCall() { _status ->
+    _UniFFILib.INSTANCE.uniffi_bindings_fn_func_attest_connection(FfiConverterByteArray.lower(`cert`),FfiConverterSequenceTypePCRs.lower(`expectedPcrsList`),_status)
 })
 }
 
