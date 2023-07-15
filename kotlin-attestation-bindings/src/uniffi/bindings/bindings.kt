@@ -364,10 +364,6 @@ internal interface _UniFFILib : Library {
         }
     }
 
-    fun uniffi_bindings_fn_func_reverse_string(`inputString`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_bindings_fn_func_reverse_integer(`inputInteger`: Int,_uniffi_out_err: RustCallStatus, 
-    ): Int
     fun uniffi_bindings_fn_func_attest_connection(`cert`: RustBuffer.ByValue,`expectedPcrsList`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): Byte
     fun ffi_bindings_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
@@ -378,10 +374,6 @@ internal interface _UniFFILib : Library {
     ): Unit
     fun ffi_bindings_rustbuffer_reserve(`buf`: RustBuffer.ByValue,`additional`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_bindings_checksum_func_reverse_string(
-    ): Short
-    fun uniffi_bindings_checksum_func_reverse_integer(
-    ): Short
     fun uniffi_bindings_checksum_func_attest_connection(
     ): Short
     fun ffi_bindings_uniffi_contract_version(
@@ -401,12 +393,6 @@ private fun uniffiCheckContractApiVersion(lib: _UniFFILib) {
 
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
-    if (lib.uniffi_bindings_checksum_func_reverse_string() != 41573.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_bindings_checksum_func_reverse_integer() != 15443.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
     if (lib.uniffi_bindings_checksum_func_attest_connection() != 58635.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -414,26 +400,6 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
 
 // Public interface members begin here.
 
-
-public object FfiConverterInt: FfiConverter<Int, Int> {
-    override fun lift(value: Int): Int {
-        return value
-    }
-
-    override fun read(buf: ByteBuffer): Int {
-        return buf.getInt()
-    }
-
-    override fun lower(value: Int): Int {
-        return value
-    }
-
-    override fun allocationSize(value: Int) = 4
-
-    override fun write(value: Int, buf: ByteBuffer) {
-        buf.putInt(value)
-    }
-}
 
 public object FfiConverterBoolean: FfiConverter<Boolean, Byte> {
     override fun lift(value: Byte): Boolean {
@@ -578,22 +544,6 @@ public object FfiConverterSequenceTypePCRs: FfiConverterRustBuffer<List<PcRs>> {
         }
     }
 }
-
-fun `reverseString`(`inputString`: String): String {
-    return FfiConverterString.lift(
-    rustCall() { _status ->
-    _UniFFILib.INSTANCE.uniffi_bindings_fn_func_reverse_string(FfiConverterString.lower(`inputString`),_status)
-})
-}
-
-
-fun `reverseInteger`(`inputInteger`: Int): Int {
-    return FfiConverterInt.lift(
-    rustCall() { _status ->
-    _UniFFILib.INSTANCE.uniffi_bindings_fn_func_reverse_integer(FfiConverterInt.lower(`inputInteger`),_status)
-})
-}
-
 
 fun `attestConnection`(`cert`: ByteArray, `expectedPcrsList`: List<PcRs>): Boolean {
     return FfiConverterBoolean.lift(
