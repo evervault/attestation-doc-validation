@@ -90,7 +90,7 @@ struct AttestationChallenge {
 /// - Validating the public key embedded in the attestation doc is the same public key in the cert
 /// - Validating the expiry embedded in the attestation doc is in the future
 /// 
-/// The given_cert represents the cert of the connection of which the attestation_document was fetched
+/// The `given_cert` represents the cert of the connection of which the `attestation_document` was fetched
 /// from the cage on. 
 /// 
 /// # Errors
@@ -100,7 +100,7 @@ struct AttestationChallenge {
 /// - The attestation document is not signed by the nitro cert chain
 /// - The public key from the certificate is not present in the attestation document's challenge
 /// - Any of the certificates are malformed
-/// - The attestation document has no user_data
+/// - The attestation document has no `user_data`
 /// - The binary encoded challenge cannot be decoded
 /// - The base64 encoded public key within the challenge cannot be decoded
 /// - The decoded public key raw bytes are not equal to those of the given cert's public key
@@ -123,17 +123,14 @@ pub fn validate_attestation_doc_against_cert(
     attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
 
     // Validate the public key of the cert & the attestation doc match
-    true_or_invalid(
-        decoded_attestation_doc.user_data.is_some(),
-        AttestationError::MissingUserData,
-    )?;
+
+    let user_data = decoded_attestation_doc.clone()
+        .user_data
+        .ok_or_else(|| AttestationError::MissingUserData)?;
 
     // Decode the binary encoded attestation doc
     let challenge: AttestationChallenge = bincode::deserialize(
-        decoded_attestation_doc
-            .clone()
-            .user_data
-            .expect("infallible")
+            user_data
             .as_slice()
         )?;
 
