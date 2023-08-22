@@ -28,7 +28,7 @@ where
     #[error("An error occured decoding the public key from the attestation doc's userdata")]
     DecodeError(#[from] base64::DecodeError),
     #[error("An error occured parsing the expiry date from the attestation doc's userdata")]
-    DateParseError(#[from] chrono::ParseError)
+    DateParseError(#[from] chrono::ParseError),
 }
 
 /// Wrapping type to record the specific error that occurred while validating the attestation document.
@@ -76,7 +76,7 @@ where
     #[error("The user data length in the attestation doc was invalid")]
     InvalidUserData,
     #[error("The supplied attestation doc has expired")]
-    ExpiredDocument
+    ExpiredDocument,
 }
 
 /// Wrapping type to record the specific error that occurred while validating the TLS Cert.
