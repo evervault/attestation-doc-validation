@@ -4,8 +4,8 @@ pub mod error;
 mod nsm;
 
 pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
-use base64::Engine;
 use base64::engine::general_purpose;
+use base64::Engine;
 use error::{AttestResult as Result, AttestationError};
 use nsm::nsm_api::AttestationDoc;
 
@@ -89,10 +89,10 @@ struct AttestationChallenge {
 /// - Validating the signature on the attestation doc
 /// - Validating the public key embedded in the attestation doc is the same public key in the cert
 /// - Validating the expiry embedded in the attestation doc is in the future
-/// 
+///
 /// The `given_cert` represents the cert of the connection of which the `attestation_document` was fetched
-/// from the cage on. 
-/// 
+/// from the cage on.
+///
 /// # Errors
 ///
 /// Will return an error if:
@@ -124,29 +124,27 @@ pub fn validate_attestation_doc_against_cert(
 
     // Validate the public key of the cert & the attestation doc match
 
-    let user_data = decoded_attestation_doc.clone()
+    let user_data = decoded_attestation_doc
+        .clone()
         .user_data
         .ok_or_else(|| AttestationError::MissingUserData)?;
 
     // Decode the binary encoded attestation doc
-    let challenge: AttestationChallenge = bincode::deserialize(
-            user_data
-            .as_slice()
-        )?;
+    let challenge: AttestationChallenge = bincode::deserialize(user_data.as_slice())?;
 
     // Decode the base64 encoded public key from the challenge
     let pub_key = general_purpose::STANDARD.decode(challenge.pub_key)?;
 
     // Validate that the public key of the given cert and that of the challenge are the same
     true_or_invalid(
-        pub_key == given_cert.public_key().raw, 
-        AttestationError::InvalidPublicKey
+        pub_key == given_cert.public_key().raw,
+        AttestationError::InvalidPublicKey,
     )?;
 
     // Validate that the expiry time is in the future
     true_or_invalid(
         chrono::DateTime::parse_from_rfc3339(&challenge.expiry)? < chrono::Utc::now(),
-        AttestationError::ExpiredDocument
+        AttestationError::ExpiredDocument,
     )?;
 
     Ok(decoded_attestation_doc)
