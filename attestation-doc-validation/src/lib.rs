@@ -4,7 +4,9 @@ pub mod error;
 mod nsm;
 
 pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
-use error::AttestResult as Result;
+use base64::Engine;
+use base64::engine::general_purpose;
+use error::{AttestResult as Result, AttestationError};
 use nsm::nsm_api::AttestationDoc;
 
 use nsm::CryptoClient;
@@ -74,11 +76,88 @@ pub fn validate_attestation_doc_in_cert(
     Ok(decoded_attestation_doc)
 }
 
+#[derive(serde::Deserialize)]
+struct AttestationChallenge {
+    expiry: String,
+    // base64 encoded raw bytes of cage's cert's public key
+    pub_key: String,
+}
+
 /// Validates an attestation doc by:
 /// - Validating the cert structure
 /// - Decoding and validating the attestation doc
 /// - Validating the signature on the attestation doc
-/// - Validating that the PCRs of the attestation doc are as expected
+/// - Validating the public key embedded in the attestation doc is the same public key in the cert
+/// - Validating the expiry embedded in the attestation doc is in the future
+/// 
+/// The given_cert represents the cert of the connection of which the attestation_document was fetched
+/// from the cage on. 
+/// 
+/// # Errors
+///
+/// Will return an error if:
+/// - The cose1 encoded attestation doc fails to parse, or its signature is invalid
+/// - The attestation document is not signed by the nitro cert chain
+/// - The public key from the certificate is not present in the attestation document's challenge
+/// - Any of the certificates are malformed
+/// - The attestation document has no user_data
+/// - The binary encoded challenge cannot be decoded
+/// - The base64 encoded public key within the challenge cannot be decoded
+/// - The decoded public key raw bytes are not equal to those of the given cert's public key
+pub fn validate_attestation_doc_against_cert(
+    given_cert: &X509Certificate<'_>,
+    attestation_doc_cose_sign_1_bytes: &[u8],
+) -> error::AttestResult<()> {
+    // Parse attestation doc from cose signature and validate structure
+    let (cose_sign_1_decoded, decoded_attestation_doc) =
+        attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
+    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+
+    // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
+    let intermediate_certs = create_intermediate_cert_stack(&decoded_attestation_doc.cabundle);
+    cert::validate_cert_trust_chain(&decoded_attestation_doc.certificate, &intermediate_certs)?;
+
+    // Validate Cose signature over attestation doc
+    let pub_key: nsm::PublicKey = attestation_doc_signing_cert.public_key().try_into()?;
+    attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
+
+    // Validate the public key of the cert & the attestation doc match
+    true_or_invalid(
+        decoded_attestation_doc.user_data.is_some(),
+        AttestationError::MissingUserData,
+    )?;
+
+    // Decode the binary encoded attestation doc
+    let challenge: AttestationChallenge = bincode::deserialize(
+        decoded_attestation_doc
+            .user_data
+            .expect("infallible")
+            .as_slice()
+        )?;
+
+    // Decode the base64 encoded public key from the challenge
+    let pub_key = general_purpose::STANDARD.decode(challenge.pub_key)?;
+
+    // Validate that the public key of the given cert and that of the challenge are the same
+    true_or_invalid(
+        pub_key == given_cert.public_key().raw, 
+        AttestationError::InvalidPublicKey
+    )?;
+
+    // Validate that the expiry time is in the future
+    true_or_invalid(
+        chrono::DateTime::parse_from_rfc3339(&challenge.expiry)? < chrono::Utc::now(),
+        AttestationError::ExpiredDocument
+    )?;
+
+    Ok(())
+}
+
+/// Validates an attestation doc by:
+/// - Validating the cert structure
+/// - Decoding and validating the attestation doc
+/// - Validating the signature on the attestation doc
 ///
 /// # Errors
 ///
