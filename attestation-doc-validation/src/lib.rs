@@ -107,7 +107,7 @@ struct AttestationChallenge {
 pub fn validate_attestation_doc_against_cert(
     given_cert: &X509Certificate<'_>,
     attestation_doc_cose_sign_1_bytes: &[u8],
-) -> error::AttestResult<()> {
+) -> Result<AttestationDoc> {
     // Parse attestation doc from cose signature and validate structure
     let (cose_sign_1_decoded, decoded_attestation_doc) =
         attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
@@ -131,6 +131,7 @@ pub fn validate_attestation_doc_against_cert(
     // Decode the binary encoded attestation doc
     let challenge: AttestationChallenge = bincode::deserialize(
         decoded_attestation_doc
+            .clone()
             .user_data
             .expect("infallible")
             .as_slice()
@@ -151,7 +152,7 @@ pub fn validate_attestation_doc_against_cert(
         AttestationError::ExpiredDocument
     )?;
 
-    Ok(())
+    Ok(decoded_attestation_doc)
 }
 
 /// Validates an attestation doc by:
