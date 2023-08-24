@@ -55,5 +55,5 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release -o dist --universal2 --find-interpreter
+          args: --release -o dist --find-interpreter --target universal2-apple-darwin
           working-directory: python-attestation-bindings
