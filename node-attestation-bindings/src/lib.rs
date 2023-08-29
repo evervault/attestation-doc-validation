@@ -58,17 +58,17 @@ fn attest_connection(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>) -> bool 
 
   let mut result = Ok(true);
   for expected_pcrs in expected_pcrs_list {
-      match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
-          Ok(_) => return true,
-          Err(err) => result = Err(err),
-      }
+    match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+      Ok(()) => return true,
+      Err(err) => result = Err(err),
+    }
   }
-  
+
   match result {
-      Ok(_) => true,
-      Err(e) => {
-          eprintln!("Failed to validate that PCRs are as expected: {e}");
-          false
-      }
+    Ok(_) => true,
+    Err(e) => {
+      eprintln!("Failed to validate that PCRs are as expected: {e}");
+      false
+    }
   }
 }
