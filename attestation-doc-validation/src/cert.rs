@@ -46,7 +46,9 @@ pub fn extract_signed_cose_sign_1_from_certificate(
     let parsed_attestation_bytes = general_names
         .iter()
         .filter_map(|alt_name| {
-            let GeneralName::DNSName(dns_name) = alt_name else { return None };
+            let GeneralName::DNSName(dns_name) = alt_name else {
+                return None;
+            };
             dns_name.split('.').next().map(String::from)
         })
         .reduce(|a, b| if a.len() > b.len() { a } else { b })
@@ -59,14 +61,15 @@ pub(super) fn get_subject_alt_names_from_cert<'a>(
 ) -> CertResult<Vec<GeneralName<'a>>> {
     let subject_alt_names_oid = x509_parser::oid_registry::Oid::from_str(SUBJECT_ALT_NAMES_OID)
         .expect("Infallible: hardcoded oid");
-    let ParsedExtension::SubjectAlternativeName(SubjectAlternativeName {
-    general_names
-  }) = certificate.get_extension_unique(&subject_alt_names_oid)
-        .map_err(|_| CertError::NoSubjectAltNames)?
-        .ok_or(CertError::NoSubjectAltNames)?
-        .parsed_extension() else {
-          return Err(CertError::NoSubjectAltNames)
-        };
+    let ParsedExtension::SubjectAlternativeName(SubjectAlternativeName { general_names }) =
+        certificate
+            .get_extension_unique(&subject_alt_names_oid)
+            .map_err(|_| CertError::NoSubjectAltNames)?
+            .ok_or(CertError::NoSubjectAltNames)?
+            .parsed_extension()
+    else {
+        return Err(CertError::NoSubjectAltNames);
+    };
 
     Ok(general_names.clone())
 }

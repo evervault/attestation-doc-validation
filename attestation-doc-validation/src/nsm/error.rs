@@ -9,7 +9,7 @@ pub enum NsmError
 where
     Self: Send + Sync,
 {
-    #[error("Failed to obtain sufficient entropy")]
+    #[error("Failed to obtain sufficient entrpy")]
     EntropyError(String),
     #[error("Failed to compute hash")]
     HashingError(String),
