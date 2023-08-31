@@ -1,0 +1,23 @@
+[package]
+name = "kotlin-attestation-bindings"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "bindings"
+crate-type = ["cdylib"]
+
+[dependencies]
+attestation-doc-validation = "0.6.1"
+uniffi = { version = "0.24.1" }
+
+[build-dependencies]
+uniffi = { version = "0.24.1", features = [ "build" ] }
+
+[[bin]]
+# This can be whatever name makes sense for your project, but the rest of this tutorial assumes uniffi-bindgen.
+name = "uniffi-bindgen"
+path = "uniffi-bindgen.rs"
+
+#[target.'cfg(target_os="android")'.dependencies]
+#jni = { version = "0.20", default-features = false }

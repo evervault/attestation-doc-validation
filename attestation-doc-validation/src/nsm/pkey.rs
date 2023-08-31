@@ -28,7 +28,9 @@ impl<'a> std::convert::TryFrom<&'a SubjectPublicKeyInfo<'a>> for PublicKey<'a> {
 impl<'a> SigningPublicKey for PublicKey<'a> {
     fn get_parameters(&self) -> Result<(SignatureAlgorithm, MessageDigest), CoseError> {
         let EcParameters::NamedCurve(curve_name) = self.spki.algorithm.parameters else {
-          return Err(CoseError::UnsupportedError("Only named curves are supported".to_string()));
+            return Err(CoseError::UnsupportedError(
+                "Only named curves are supported".to_string(),
+            ));
         };
         let curve_string = curve_name.to_string();
         let params = match curve_string.as_str() {

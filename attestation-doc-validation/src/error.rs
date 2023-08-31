@@ -23,6 +23,12 @@ where
     CertError(#[from] CertError),
     #[error("An error occurred interfacing with the Nitro Security Module: {0}")]
     NsmError(#[from] InnerNsm),
+    #[error("An error occured deserializing the attestation doc's userdata")]
+    DeserializeError(#[from] bincode::Error),
+    #[error("An error occured decoding the public key from the attestation doc's userdata")]
+    DecodeError(#[from] base64::DecodeError),
+    #[error("An error occured parsing the expiry date from the attestation doc's userdata")]
+    DateParseError(#[from] chrono::ParseError),
 }
 
 /// Wrapping type to record the specific error that occurred while validating the attestation document.
@@ -69,6 +75,8 @@ where
     InvalidNonce,
     #[error("The user data length in the attestation doc was invalid")]
     InvalidUserData,
+    #[error("The supplied attestation doc has expired")]
+    ExpiredDocument,
 }
 
 /// Wrapping type to record the specific error that occurred while validating the TLS Cert.
