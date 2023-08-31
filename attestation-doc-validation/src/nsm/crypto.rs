@@ -56,7 +56,7 @@ macro_rules! aes_decryption {
         ) -> Result<Vec<u8>, CoseError> {
             let cipher = $cipher::new_from_slice(key).unwrap();
             let nonce = AesNonce::from_slice(iv.unwrap());
-            let tagged_cipher = vec![ciphertext, tag].concat();
+            let tagged_cipher = [ciphertext, tag].concat();
             let authenticated_payload = Payload {
                 msg: tagged_cipher.as_ref(),
                 aad,

@@ -140,7 +140,9 @@ mod test {
         let parsed_cert = parse_cert(der_cert.as_ref()).unwrap();
         let subject_alt_names = get_subject_alt_names_from_cert(&parsed_cert).unwrap();
         let matched_hostname = subject_alt_names.into_iter().any(|entries| {
-            let GeneralName::DNSName(san) = entries else { return false };
+            let GeneralName::DNSName(san) = entries else {
+                return false;
+            };
             san == hostname
         });
         assert!(matched_hostname);

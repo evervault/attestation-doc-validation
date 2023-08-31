@@ -6,7 +6,7 @@ pub struct PCRs {
     pcr0: String,
     pcr1: String,
     pcr2: String,
-    pcr8: String
+    pcr8: String,
 }
 
 impl PCRProvider for PCRs {
@@ -39,8 +39,8 @@ pub fn attest_connection(cert: Vec<u8>, expected_pcrs_list: Vec<PCRs>) -> bool {
     let validated_attestation_doc = match validate_attestation_doc_in_cert(&parsed_cert) {
         Ok(attestation_doc) => attestation_doc,
         Err(e) => {
-        eprintln!("An error occurred while validating the connection to this Cage: {e}");
-        return false;
+            eprintln!("An error occurred while validating the connection to this Cage: {e}");
+            return false;
         }
     };
 
