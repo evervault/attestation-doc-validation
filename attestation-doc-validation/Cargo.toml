@@ -1,6 +1,6 @@
 [package]
 name = "attestation-doc-validation"
-version = "0.6.1"
+version = "0.6.2"
 edition = "2021"
 license = "Apache-2.0"
 description = "A Rust library for attesting enclaves according to the Evervault Attestation scheme. This crate is used to generate ffi bindings."
@@ -32,6 +32,8 @@ sha2 = "0.10.6"
 aes = "0.8.2"
 aes-gcm = "0.10.1"
 rand = { version = "0.8.5", features = ["getrandom"] }
+bincode = "1.3.3"
+chrono = "0.4.26"
 
 [dev-dependencies]
 rcgen = "0.10"
