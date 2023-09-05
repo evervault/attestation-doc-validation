@@ -11,3 +11,5 @@ export interface NodePcRs {
   pcr8?: string
 }
 export function attestConnection(cert: Buffer, expectedPcrsList: Array<NodePcRs>): boolean
+
+export function attestCage(cert: Buffer, expectedPcrsList: Array<NodePcRs>, attestationDoc: Buffer): boolean    
