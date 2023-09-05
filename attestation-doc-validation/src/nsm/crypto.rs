@@ -19,6 +19,16 @@ type Aes192Gcm = AesGcm<Aes192, U12>;
 pub(crate) struct CryptoClient;
 
 impl Entropy for CryptoClient {
+    /// Generates cryptographically secure random bytes and stores them in the provided buffer. 
+    
+    ///
+    /// # Arguments
+    ///
+    /// * `buff` - A mutable reference to an array of u8 bytes to be filled with random bytes
+    ///
+    /// # Returns
+    ///
+    /// * `Result<(), CoseError>` - `Ok(())` if execution was successful, otherwise a `CoseError` is returned.
     fn rand_bytes(buff: &mut [u8]) -> Result<(), CoseError> {
         OsRng.fill_bytes(buff);
         Ok(())
@@ -134,6 +144,33 @@ macro_rules! compute_hash {
 }
 
 impl Hash for CryptoClient {
+    /// /**
+     * Computes the hash of the input data using the specified digest
+     * algorithm.
+     *
+     * # Arguments
+     *
+     * * `digest` - The digest algorithm to use (must be one of Sha256,
+     * Sha384, or Sha512)
+     * * `data` - The data to hash
+     *
+     * # Returns
+     *
+     * The resulting hash as a byte vector or an error of type `CoseError`.
+     *
+     * # Example
+     *
+     * ```
+     * use openssl::hash::MessageDigest;
+     * use cose::util::hash;
+     *
+     * let data = &[0xF1, 0xF2, 0xF3, 0xF4, 0xF5];
+     * let digest = MessageDigest::Sha256;
+     *
+     * let result = hash(digest, data);
+     * assert!(result.is_ok());
+     * ```
+     */
     fn hash(digest: MessageDigest, data: &[u8]) -> Result<Vec<u8>, CoseError> {
         match digest {
             MessageDigest::Sha256 => {
