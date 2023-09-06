@@ -1,6 +1,6 @@
 use attestation_doc_validation::{
     attestation_doc::{validate_expected_pcrs, PCRProvider},
-    parse_cert, validate_attestation_doc_in_cert,
+    parse_cert, validate_attestation_doc_in_cert, validate_attestation_doc_against_cert,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -110,6 +110,30 @@ pub fn attest_connection(cert: &[u8], expected_pcrs_list: Vec<PCRs>) -> PyResult
     }
     result
 }
+
+#[pyfunction]
+pub fn attest_cage(cert: &[u8], expected_pcrs_list: Vec<PCRs>, attestation_doc: &[u8]) -> PyResult<bool> {
+
+    let parsed_cert = parse_cert(cert.as_ref()).map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
+
+    let validated_attestation_doc = validate_attestation_doc_against_cert(&parsed_cert, attestation_doc.as_ref()).map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
+  
+    let mut result = Ok(true);
+    for expected_pcrs in expected_pcrs_list {
+        match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+            Ok(_) => return Ok(true),
+            Err(err) => result = Err(err),
+        }
+    }
+    
+    match result {
+        Ok(_) => Ok(true),
+        Err(e) => {
+            eprintln!("Failed to validate that PCRs are as expected: {e}");
+            Ok(false)
+        }
+    }
+  }
 
 /// A small python module offering bindings to the rust attestation doc validation project
 #[pymodule]
