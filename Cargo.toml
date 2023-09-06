@@ -3,6 +3,7 @@ members = [
   "attestation-doc-validation",
   "python-attestation-bindings",
   "node-attestation-bindings",
+  "swift-attestation-bindings",
   "kotlin-attestation-bindings"
 ]
 
