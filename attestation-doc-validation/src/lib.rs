@@ -206,7 +206,7 @@ mod test {
     #[test]
     fn test_der_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/valid-attestation-doc-bytes",
+            "../test-data/beta/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com".to_string();
@@ -227,7 +227,7 @@ mod test {
     fn validate_debug_mode_attestation_doc() {
         // debug mode attestation docs fail due to an untrusted cert
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/debug-mode-attestation-doc-bytes",
+            "../test-data/beta/debug-mode-attestation-doc-bytes",
         ))
         .unwrap();
         let attestable_cert =
@@ -292,7 +292,7 @@ mod test {
     macro_rules! evaluate_test_from_spec {
         ($test_spec:literal) => {
             // Resolve test spec
-            let test_def_filepath = format!("{}/test-specs/{}", TEST_BASE_PATH, $test_spec);
+            let test_def_filepath = format!("{}/test-specs/beta/{}", TEST_BASE_PATH, $test_spec);
             let test_definition = std::fs::read(std::path::Path::new(&test_def_filepath)).unwrap();
             let test_def_str = std::str::from_utf8(&test_definition).unwrap();
             let test_spec: TestSpec = serde_json::from_str(test_def_str).unwrap();

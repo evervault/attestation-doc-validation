@@ -1,5 +1,5 @@
 {
-    "file": "test-data/non-debug-cert-containing-attestation-document-18-1-23-der.crt",
+    "file": "test-data/beta/non-debug-cert-containing-attestation-document-18-1-23-der.crt",
     "pcrs": {
       "pcr8": "97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca"
     },

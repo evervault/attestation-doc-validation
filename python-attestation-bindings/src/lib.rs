@@ -1,6 +1,6 @@
 use attestation_doc_validation::{
     attestation_doc::{validate_expected_pcrs, PCRProvider},
-    parse_cert, validate_attestation_doc_in_cert, validate_attestation_doc_against_cert,
+    parse_cert, validate_attestation_doc_against_cert, validate_attestation_doc_in_cert,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -87,7 +87,7 @@ impl PCRProvider for PCRs {
     }
 }
 
-/// Top level function to attest the Cage being connected to.
+/// [DEPRECATED] Top level function to attest the Cage being connected to.
 /// * If the cert fails to parse, return an error
 /// * If the attestation doc fails to validate, return an error
 /// * If the list of PCRs to check is empty, return true
@@ -111,13 +111,26 @@ pub fn attest_connection(cert: &[u8], expected_pcrs_list: Vec<PCRs>) -> PyResult
     result
 }
 
+
+/// Top level function to attest the Cage being connected to.
+/// * If the cert fails to parse, return an error
+/// * If the attestation doc fails to validate, return an error
+/// * If the list of PCRs to check is empty, return true
+/// * If any of the PCRs in the list match, return true
+/// * If they all fail, return the last error
 #[pyfunction]
-pub fn attest_cage(cert: &[u8], expected_pcrs_list: Vec<PCRs>, attestation_doc: &[u8]) -> PyResult<bool> {
+pub fn attest_cage(
+    cert: &[u8],
+    expected_pcrs_list: Vec<PCRs>,
+    attestation_doc: &[u8],
+) -> PyResult<bool> {
+    let parsed_cert = parse_cert(cert.as_ref())
+        .map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
 
-    let parsed_cert = parse_cert(cert.as_ref()).map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
+    let validated_attestation_doc =
+        validate_attestation_doc_against_cert(&parsed_cert, attestation_doc.as_ref())
+            .map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
 
-    let validated_attestation_doc = validate_attestation_doc_against_cert(&parsed_cert, attestation_doc.as_ref()).map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
-  
     let mut result = Ok(true);
     for expected_pcrs in expected_pcrs_list {
         match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
@@ -125,7 +138,7 @@ pub fn attest_cage(cert: &[u8], expected_pcrs_list: Vec<PCRs>, attestation_doc: 
             Err(err) => result = Err(err),
         }
     }
-    
+
     match result {
         Ok(_) => Ok(true),
         Err(e) => {
@@ -133,7 +146,7 @@ pub fn attest_cage(cert: &[u8], expected_pcrs_list: Vec<PCRs>, attestation_doc: 
             Ok(false)
         }
     }
-  }
+}
 
 /// A small python module offering bindings to the rust attestation doc validation project
 #[pymodule]

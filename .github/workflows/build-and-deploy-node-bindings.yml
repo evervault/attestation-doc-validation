@@ -272,7 +272,7 @@ jobs:
           yarn config set supportedArchitectures.cpu "arm64"
           yarn config set supportedArchitectures.libc "glibc"
           yarn install
-      - name: Setup and run tests
+      - name: Setup and run tests - beta
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:aarch64-${{ matrix.node }}
@@ -283,6 +283,17 @@ jobs:
             export FAKETIME="2023-01-18 15:15:00" 
             LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1 yarn test
             ls -la
+      - name: Setup and run tests
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ghcr.io/napi-rs/napi-rs/nodejs:aarch64-${{ matrix.node }}
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
+          run: |
+            set -e
+            apt-get install -y libfaketime
+            export FAKETIME="2023-08-6 14:50:05" 
+            LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1 yarn test
+            ls -la      
   # test-linux-aarch64-musl-binding:
   #   name: Test bindings on aarch64-unknown-linux-musl - node@${{ matrix.node }}
   #   needs:
