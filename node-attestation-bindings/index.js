@@ -246,6 +246,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { attestConnection } = nativeBinding
+const { attestConnection, attestCage } = nativeBinding
 
 module.exports.attestConnection = attestConnection
+module.exports.attestCage = attestCage
