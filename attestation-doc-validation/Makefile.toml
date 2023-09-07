@@ -19,13 +19,18 @@ args = ["check"]
 command = "cargo"
 args = ["test","--","--skip","time_sensitive"]
 
-[tasks.test_time_sensitive]
+[tasks.test_time_sensitive_beta]
 env = { "FAKETIME" = "1674054914" }
 command = "cargo"
-args = ["test","time_sensitive"]
+args = ["test","time_sensitive_beta"]
+
+[tasks.test_time_sensitive_ga]
+env = { "FAKETIME" = "1694105547" }
+command = "cargo"
+args = ["test","time_sensitive_ga"]
 
 [tasks.test_ci]
-dependencies = ["test", "test_time_sensitive"]
+dependencies = ["test", "test_time_sensitive_beta", "test_time_sensitive_ga"]
 
 [tasks.build]
 command = "cargo"

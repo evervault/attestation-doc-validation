@@ -4,8 +4,6 @@ pub mod error;
 mod nsm;
 
 pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
-use base64::engine::general_purpose;
-use base64::Engine;
 use error::{AttestResult as Result, AttestationError};
 use nsm::nsm_api::AttestationDoc;
 
@@ -76,13 +74,6 @@ pub fn validate_attestation_doc_in_cert(
     Ok(decoded_attestation_doc)
 }
 
-#[derive(serde::Deserialize)]
-struct AttestationChallenge {
-    expiry: String,
-    // base64 encoded raw bytes of cage's cert's public key
-    pub_key: String,
-}
-
 /// Validates an attestation doc by:
 /// - Validating the cert structure
 /// - Decoding and validating the attestation doc
@@ -123,28 +114,15 @@ pub fn validate_attestation_doc_against_cert(
     attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
 
     // Validate the public key of the cert & the attestation doc match
-
     let user_data = decoded_attestation_doc
         .clone()
         .user_data
         .ok_or_else(|| AttestationError::MissingUserData)?;
 
-    // Decode the binary encoded attestation doc
-    let challenge: AttestationChallenge = bincode::deserialize(user_data.as_slice())?;
-
-    // Decode the base64 encoded public key from the challenge
-    let pub_key = general_purpose::STANDARD.decode(challenge.pub_key)?;
-
     // Validate that the public key of the given cert and that of the challenge are the same
     true_or_invalid(
-        pub_key == given_cert.public_key().raw,
+        user_data == given_cert.public_key().raw,
         AttestationError::InvalidPublicKey,
-    )?;
-
-    // Validate that the expiry time is in the future
-    true_or_invalid(
-        chrono::DateTime::parse_from_rfc3339(&challenge.expiry)? < chrono::Utc::now(),
-        AttestationError::ExpiredDocument,
     )?;
 
     Ok(decoded_attestation_doc)
@@ -206,7 +184,7 @@ mod test {
     #[test]
     fn test_der_cert_parsing() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/valid-attestation-doc-bytes",
+            "../test-data/beta/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let hostname = "debug.cage.com".to_string();
@@ -227,7 +205,7 @@ mod test {
     fn validate_debug_mode_attestation_doc() {
         // debug mode attestation docs fail due to an untrusted cert
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/debug-mode-attestation-doc-bytes",
+            "../test-data/beta/debug-mode-attestation-doc-bytes",
         ))
         .unwrap();
         let attestable_cert =
@@ -247,7 +225,7 @@ mod test {
      *
      * Live Cage certs are required to have the public key match with the AD challenge (which in practice prevents MITM)
      * However, this introduces issues when testing. When the certs are more than 3 hours old, they will expire and fail
-     * our validity checks. To get around this the tests corresponding to live certs are suffixed with time_sensitive, and
+     * our validity checks. To get around this the tests corresponding to live certs are suffixed with time_sensitive_beta, and
      * only run in CI when the time has been spoofed to match their validity window.
      *
      * The certs being used were generated on January 18th 2023 at approximately 15:15. (epoch: 1674054914)
@@ -292,7 +270,7 @@ mod test {
     macro_rules! evaluate_test_from_spec {
         ($test_spec:literal) => {
             // Resolve test spec
-            let test_def_filepath = format!("{}/test-specs/{}", TEST_BASE_PATH, $test_spec);
+            let test_def_filepath = format!("{}/test-specs/beta/{}", TEST_BASE_PATH, $test_spec);
             let test_definition = std::fs::read(std::path::Path::new(&test_def_filepath)).unwrap();
             let test_def_str = std::str::from_utf8(&test_definition).unwrap();
             let test_spec: TestSpec = serde_json::from_str(test_def_str).unwrap();
@@ -331,31 +309,49 @@ mod test {
     }
 
     #[test]
-    fn validate_valid_attestation_doc_in_cert_time_sensitive() {
+    fn validate_valid_attestation_doc_in_cert_time_sensitive_beta() {
         evaluate_test_from_spec!("valid_attestation_doc_in_cert_time_sensitive.json");
     }
 
     #[test]
-    fn validate_valid_attestation_doc_in_non_debug_mode_with_correct_pcrs_time_sensitive() {
+    fn validate_valid_attestation_doc_in_non_debug_mode_with_correct_pcrs_time_sensitive_beta() {
         evaluate_test_from_spec!(
             "valid_attestation_doc_in_non_debug_mode_with_correct_pcrs_time_sensitive.json"
         );
     }
 
     #[test]
-    fn validate_valid_attestation_doc_in_cert_incorrect_pcrs_time_sensitive() {
+    fn validate_valid_attestation_doc_in_cert_incorrect_pcrs_time_sensitive_beta() {
         evaluate_test_from_spec!(
             "valid_attestation_doc_in_cert_incorrect_pcrs_time_sensitive.json"
         );
     }
 
     #[test]
-    fn validate_valid_attestation_doc_in_cert_der_encoding_time_sensitive() {
+    fn validate_valid_attestation_doc_in_cert_der_encoding_time_sensitive_beta() {
         evaluate_test_from_spec!("valid_attestation_doc_in_cert_der_encoding_time_sensitive.json");
     }
 
     #[test]
-    fn valid_attestation_check_pcr8_only_time_sensitive() {
+    fn valid_attestation_check_pcr8_only_time_sensitive_beta() {
         evaluate_test_from_spec!("valid_attestation_doc_check_pcr8_only_time_sensitive.json");
+    }
+
+    #[test]
+    fn validate_valid_attestation_doc_in_cert_time_sensitive_ga() {
+        let attestation_doc = std::fs::read(std::path::Path::new(
+            &"../test-data/valid-attestation-doc-base64",
+        ))
+        .unwrap();
+        let attestation_doc_str = std::str::from_utf8(&attestation_doc).unwrap();
+        let attestation_doc_bytes = base64::decode(attestation_doc_str).unwrap();
+
+        let input_bytes =
+            std::fs::read(std::path::Path::new("../test-data/valid-cage-cert")).unwrap();
+
+        let cert = parse_cert(&input_bytes).unwrap();
+        let maybe_attestation_doc =
+            validate_attestation_doc_against_cert(&cert, &attestation_doc_bytes).unwrap();
+        assert!(maybe_attestation_doc.is_ok());
     }
 }

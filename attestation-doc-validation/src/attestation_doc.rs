@@ -258,7 +258,7 @@ mod test {
         // this test only validates the structure of the AD, but not the validity of the Nitro signature over it
         // so it will pass despite the AD being expired.
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/valid-attestation-doc-bytes",
+            "../test-data/beta/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let expected_pcrs = PCRs {
@@ -277,7 +277,7 @@ mod test {
     #[test]
     fn validate_valid_attestation_doc_structure_with_mismatched_pcrs() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/valid-attestation-doc-bytes",
+            "../test-data/beta/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let expected_pcrs = PCRs {
@@ -296,7 +296,7 @@ mod test {
     #[test]
     fn validate_get_pcrs() {
         let sample_cose_sign_1_bytes = std::fs::read(std::path::Path::new(
-            "../test-data/valid-attestation-doc-bytes",
+            "../test-data/beta/valid-attestation-doc-bytes",
         ))
         .unwrap();
         let expected_pcrs = PCRs {

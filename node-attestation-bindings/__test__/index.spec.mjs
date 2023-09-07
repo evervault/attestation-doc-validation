@@ -5,7 +5,7 @@ import { attestConnection } from "../index.js";
 import { readdirSync, readFileSync } from "fs";
 
 const BASE_TEST_PATH = "..";
-const directory = readdirSync(`${BASE_TEST_PATH}/test-specs`, "utf8");
+const directory = readdirSync(`${BASE_TEST_PATH}/test-specs/beta`, "utf8");
 
 function resolveCert(filePath) {
   const rawCert = readFileSync(`${BASE_TEST_PATH}/${filePath}`);
@@ -20,7 +20,7 @@ function resolveCert(filePath) {
 for (let testSpec of directory) {
   test(testSpec, (t) => {
     const specText = readFileSync(
-      `${BASE_TEST_PATH}/test-specs/${testSpec}`,
+      `${BASE_TEST_PATH}/test-specs/beta/${testSpec}`,
       "utf8"
     );
     const { file, pcrs, isAttestationDocValid, shouldPcrsMatch } =
