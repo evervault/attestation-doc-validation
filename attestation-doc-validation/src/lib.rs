@@ -344,14 +344,15 @@ mod test {
         ))
         .unwrap();
         let attestation_doc_str = std::str::from_utf8(&attestation_doc).unwrap();
-        let attestation_doc_bytes = base64::decode(attestation_doc_str).unwrap();
+        let attestation_doc_bytes =
+            base64::decode_config(attestation_doc_str, base64::STANDARD).unwrap();
 
         let input_bytes =
             std::fs::read(std::path::Path::new("../test-data/valid-cage-cert")).unwrap();
 
         let cert = parse_cert(&input_bytes).unwrap();
         let maybe_attestation_doc =
-            validate_attestation_doc_against_cert(&cert, &attestation_doc_bytes).unwrap();
+            validate_attestation_doc_against_cert(&cert, &attestation_doc_bytes);
         assert!(maybe_attestation_doc.is_ok());
     }
 }
