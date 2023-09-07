@@ -23,8 +23,6 @@ where
     CertError(#[from] CertError),
     #[error("An error occurred interfacing with the Nitro Security Module: {0}")]
     NsmError(#[from] InnerNsm),
-    #[error("An error occured deserializing the attestation doc's userdata")]
-    DeserializeError(#[from] bincode::Error),
     #[error("An error occured decoding the public key from the attestation doc's userdata")]
     DecodeError(#[from] base64::DecodeError),
     #[error("An error occured parsing the expiry date from the attestation doc's userdata")]

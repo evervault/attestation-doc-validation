@@ -339,13 +339,15 @@ mod test {
 
     #[test]
     fn validate_valid_attestation_doc_in_cert_time_sensitive_ga() {
+        use base64::{engine::general_purpose, Engine as _};
         let attestation_doc = std::fs::read(std::path::Path::new(
             &"../test-data/valid-attestation-doc-base64",
         ))
         .unwrap();
         let attestation_doc_str = std::str::from_utf8(&attestation_doc).unwrap();
-        let attestation_doc_bytes =
-            base64::decode_config(attestation_doc_str, base64::STANDARD).unwrap();
+        let attestation_doc_bytes = general_purpose::STANDARD
+            .decode(&attestation_doc_str)
+            .unwrap();
 
         let input_bytes =
             std::fs::read(std::path::Path::new("../test-data/valid-cage-cert")).unwrap();

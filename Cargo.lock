@@ -174,7 +174,6 @@ dependencies = [
  "aes-gcm",
  "aws-nitro-enclaves-cose",
  "base64 0.21.3",
- "bincode",
  "chrono",
  "der",
  "ecdsa",
