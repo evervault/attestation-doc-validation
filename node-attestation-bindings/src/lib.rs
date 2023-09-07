@@ -1,5 +1,7 @@
 use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRProvider};
-use attestation_doc_validation::{parse_cert, validate_attestation_doc_in_cert, validate_attestation_doc_against_cert};
+use attestation_doc_validation::{
+  parse_cert, validate_attestation_doc_against_cert, validate_attestation_doc_in_cert,
+};
 
 use napi::JsBuffer;
 use napi_derive::napi;
@@ -79,7 +81,11 @@ fn attest_connection(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>) -> bool 
 /// a client can call out to `<cage-url>/.well-known/attestation` to fetch the attestation doc from the cage
 /// The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
 #[napi]
-fn attest_cage(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>, attestation_doc: JsBuffer) -> bool {
+fn attest_cage(
+  cert: JsBuffer,
+  expected_pcrs_list: Vec<NodePCRs>,
+  attestation_doc: JsBuffer,
+) -> bool {
   let cert_val = match cert.into_value() {
     Ok(cert_value) => cert_value,
     Err(e) => {
@@ -104,7 +110,10 @@ fn attest_cage(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>, attestation_do
     }
   };
 
-  let validated_attestation_doc = match validate_attestation_doc_against_cert(&parsed_cert, attestation_doc_value.as_ref()) {
+  let validated_attestation_doc = match validate_attestation_doc_against_cert(
+    &parsed_cert,
+    attestation_doc_value.as_ref(),
+  ) {
     Ok(attestation_doc) => attestation_doc,
     Err(e) => {
       eprintln!("An error occur while validating the attestation doc against the Cage connection's cert: {e}");
@@ -114,17 +123,17 @@ fn attest_cage(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>, attestation_do
 
   let mut result = Ok(true);
   for expected_pcrs in expected_pcrs_list {
-      match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
-          Ok(_) => return true,
-          Err(err) => result = Err(err),
-      }
+    match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+      Ok(_) => return true,
+      Err(err) => result = Err(err),
+    }
   }
-  
+
   match result {
-      Ok(_) => true,
-      Err(e) => {
-          eprintln!("Failed to validate that PCRs are as expected: {e}");
-          false
-      }
+    Ok(_) => true,
+    Err(e) => {
+      eprintln!("Failed to validate that PCRs are as expected: {e}");
+      false
+    }
   }
 }

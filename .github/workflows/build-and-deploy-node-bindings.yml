@@ -276,7 +276,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:aarch64-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs/beta:/test-specs/beta -v ${{ github.workspace }}/test-data/beta:/test-data/beta -w /build"
           run: |
             set -e
             apt-get install -y libfaketime
@@ -351,7 +351,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:armhf-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
+          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs/beta:/test-specs/beta -v ${{ github.workspace }}/test-data/beta:/test-data/beta -w /build"
           run: |
             set -e
             apt-get install -y libfaketime
