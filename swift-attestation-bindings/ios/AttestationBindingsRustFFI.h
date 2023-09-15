@@ -10,3 +10,6 @@ struct PCRs {
 };
 
 bool attest_connection(const uint8_t* cert, size_t cert_len, const struct PCRs* expected_pcrs_list, size_t expected_pcrs_len);
+
+bool attest_cage(const uint8_t* cert, size_t cert_len, const struct PCRs* expected_pcrs_list, size_t expected_pcrs_len, const uint8_t* attestation_doc, size_t attestation_doc_len);
+
