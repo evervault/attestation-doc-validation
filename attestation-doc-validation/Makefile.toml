@@ -25,7 +25,7 @@ command = "cargo"
 args = ["test","time_sensitive_beta"]
 
 [tasks.test_time_sensitive_ga]
-env = { "FAKETIME" = "1694105547" }
+env = { "FAKETIME" = "1695050165" }
 command = "cargo"
 args = ["test","time_sensitive_ga"]
 
