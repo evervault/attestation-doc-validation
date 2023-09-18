@@ -350,7 +350,7 @@ mod test {
             .unwrap();
 
         let input_bytes =
-            std::fs::read(std::path::Path::new("../test-data/valid-cage-cert")).unwrap();
+            std::fs::read(std::path::Path::new("../test-data/valid-certificate.der")).unwrap();
 
         let cert = parse_cert(&input_bytes).unwrap();
         let maybe_attestation_doc =

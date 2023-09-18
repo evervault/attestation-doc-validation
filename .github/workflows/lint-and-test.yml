@@ -59,3 +59,14 @@ jobs:
           working-directory: python-attestation-bindings
         env:
           PYO3_CROSS_PYTHON_VERSION: "3.9"
+      - name: Build and Test
+        run: |
+          cd python-attestation-bindings
+          python -m pip install --upgrade pip
+          python -m venv ./venv
+          source ./venv/bin/activate
+          pip install pytest
+          maturin develop
+          sudo apt-get install -y libfaketime
+          export FAKETIME="2023-09-18 17:18:00" 
+          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 pytest
