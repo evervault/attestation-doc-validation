@@ -51,6 +51,11 @@ pcrs = python_attestation_bindings.PCRs("<pcr0>","<pcr1>","<pcr2>","<pcr8>")
 python_attestation_bindings.attest_connection(<cert>, pcrs)
 ```
 
+To run tests 
+```sh
+maturin develop && pytest
+```
+
 ## Makefile
 
 Each project has some useful tasks defined in their `Makefile.toml`:

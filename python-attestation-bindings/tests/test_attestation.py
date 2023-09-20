@@ -29,6 +29,5 @@ def test_attest_incorrect_pcrs():
         "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000050000000",
     )
-    result = evervault_attestation_bindings.attest_cage(cert, [pcrs], attestation_doc)
-
-    assert result == False    
+    with pytest.raises(ValueError, match="The PCRs found were different to the expected values"):
+        evervault_attestation_bindings.attest_cage(cert, [pcrs], attestation_doc)  
