@@ -134,17 +134,10 @@ pub fn attest_cage(
     for expected_pcrs in expected_pcrs_list {
         match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
             Ok(_) => return Ok(true),
-            Err(err) => result = Err(err),
+            Err(err) => result = Err(PyValueError::new_err(format!("{err}"))),
         }
     }
-
-    match result {
-        Ok(_) => Ok(true),
-        Err(e) => {
-            eprintln!("Failed to validate that PCRs are as expected: {e}");
-            Ok(false)
-        }
-    }
+    result
 }
 
 /// A small python module offering bindings to the rust attestation doc validation project
