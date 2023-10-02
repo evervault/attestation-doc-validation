@@ -98,6 +98,7 @@ pub extern "C" fn attest_connection(
     }
 }
 
+#[no_mangle]
 pub extern "C" fn attest_cage(
     cert: *const u8,
     cert_len: usize,

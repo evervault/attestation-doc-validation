@@ -1,0 +1,25 @@
+name: Build and deploy swift bindings
+
+on:
+  push:
+    branches:
+      - main
+      - donal/spe-883-add-ci-workflow-to-publish-swift-attestation-bindings
+    # tags:
+      # - "swift/v*"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      
+      - name: Build XCFramework
+        run: ./swift-attestation-bindings/build-xcframework.sh
