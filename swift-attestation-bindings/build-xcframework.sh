@@ -80,8 +80,10 @@ cargo_build () {
 set -euvx
 
 rustup install nightly
+rustup default nightly
 rustup target add x86_64-apple-ios
 rustup target add aarch64-apple-ios-sim
+rustup target add aarch64-apple-ios
 
 # Intel iOS simulator
 CFLAGS_x86_64_apple_ios="-target x86_64-apple-ios" \
