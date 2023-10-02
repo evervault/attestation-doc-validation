@@ -85,10 +85,10 @@ rustup target add aarch64-apple-ios-sim
 
 # Intel iOS simulator
 CFLAGS_x86_64_apple_ios="-target x86_64-apple-ios" \
-  cargo_build x86_64-apple-ios
+  cargo +nightly build --target x86_64-apple-ios --release
 
 # Hardware iOS targets
-cargo_build aarch64-apple-ios
+cargo +nightly build --target aarch64-apple-ios --release
 
 # M1 iOS simulator.
 # CFLAGS_aarch64_apple_ios_sim="-target aarch64-apple-ios-sim" \
