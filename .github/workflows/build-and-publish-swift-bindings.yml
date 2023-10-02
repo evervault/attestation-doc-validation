@@ -7,7 +7,6 @@ on:
       - donal/spe-883-add-ci-workflow-to-publish-swift-attestation-bindings
     # tags:
       # - "swift/v*"
-  pull_request:
   workflow_dispatch:
 
 jobs:
