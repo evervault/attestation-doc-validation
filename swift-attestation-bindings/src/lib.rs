@@ -1,9 +1,7 @@
-use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRProvider, self};
+use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRProvider};
 use attestation_doc_validation::{parse_cert, validate_attestation_doc_in_cert, validate_attestation_doc_against_cert};
 use std::ffi::CStr;
 use std::os::raw::c_char;
-use std::os::raw::c_int;
-use std::slice;
 
 #[repr(C)]
 #[derive(Clone)]
