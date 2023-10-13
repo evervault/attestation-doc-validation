@@ -1,7 +1,5 @@
 use thiserror::Error;
 
-pub type NsmResult<T> = std::result::Result<T, NsmError>;
-
 /// Wrapping type to record the specific error that occurred while processing the encoded attestation doc.
 #[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]

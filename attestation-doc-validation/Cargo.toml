@@ -33,6 +33,7 @@ aes = "0.8.2"
 aes-gcm = "0.10.1"
 rand = { version = "0.8.5", features = ["getrandom"] }
 chrono = "0.4.26"
+aws-nitro-enclaves-nsm-api = "0.2.1"
 
 [dev-dependencies]
 rcgen = "0.10"
