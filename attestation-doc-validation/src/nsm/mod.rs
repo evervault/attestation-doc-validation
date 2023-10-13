@@ -5,4 +5,4 @@ mod pkey;
 pub(super) use crypto::{CryptoClient, Hash};
 pub(super) use pkey::{PublicKey, SigningPublicKey};
 pub(super) mod error;
-pub(super) mod nsm_api;
+pub mod nsm_api;

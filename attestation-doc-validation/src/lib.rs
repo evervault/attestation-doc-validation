@@ -1,7 +1,7 @@
 pub mod attestation_doc;
 pub mod cert;
 pub mod error;
-mod nsm;
+pub mod nsm;
 
 pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
 use error::{AttestResult as Result, AttestationError};
