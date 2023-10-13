@@ -4,8 +4,8 @@ pub mod error;
 mod nsm;
 
 pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
+use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
 use error::{AttestResult as Result, AttestationError};
-use nsm::nsm_api::AttestationDoc;
 
 use nsm::CryptoClient;
 use serde_bytes::ByteBuf;

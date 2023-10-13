@@ -1,6 +1,6 @@
 [package]
 name = "attestation-doc-validation"
-version = "0.6.3"
+version = "0.7.3"
 edition = "2021"
 license = "Apache-2.0"
 description = "A Rust library for attesting enclaves according to the Evervault Attestation scheme. This crate is used to generate ffi bindings."
@@ -33,6 +33,7 @@ aes = "0.8.2"
 aes-gcm = "0.10.1"
 rand = { version = "0.8.5", features = ["getrandom"] }
 chrono = "0.4.26"
+aws-nitro-enclaves-nsm-api = { version = "0.2.1", default-features = false }
 
 [dev-dependencies]
 rcgen = "0.10"
