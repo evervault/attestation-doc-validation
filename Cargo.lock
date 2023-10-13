@@ -150,6 +150,33 @@ dependencies = [
 [[package]]
 name = "attestation-doc-validation"
 version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2db5e0b138a7a3e8d20592636f2094f0ecefb344a187902df4112ee702d2135"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "aws-nitro-enclaves-cose",
+ "base64 0.21.4",
+ "chrono",
+ "der",
+ "ecdsa",
+ "hex",
+ "p256",
+ "p384",
+ "rand",
+ "serde",
+ "serde_bytes",
+ "serde_cbor",
+ "serde_with 2.3.3",
+ "sha2",
+ "thiserror",
+ "webpki",
+ "x509-parser",
+]
+
+[[package]]
+name = "attestation-doc-validation"
+version = "0.7.3"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -169,33 +196,6 @@ dependencies = [
  "serde_bytes",
  "serde_cbor",
  "serde_json",
- "serde_with 2.3.3",
- "sha2",
- "thiserror",
- "webpki",
- "x509-parser",
-]
-
-[[package]]
-name = "attestation-doc-validation"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2db5e0b138a7a3e8d20592636f2094f0ecefb344a187902df4112ee702d2135"
-dependencies = [
- "aes",
- "aes-gcm",
- "aws-nitro-enclaves-cose",
- "base64 0.21.4",
- "chrono",
- "der",
- "ecdsa",
- "hex",
- "p256",
- "p384",
- "rand",
- "serde",
- "serde_bytes",
- "serde_cbor",
  "serde_with 2.3.3",
  "sha2",
  "thiserror",
@@ -796,7 +796,7 @@ dependencies = [
 name = "kotlin-attestation-bindings"
 version = "0.1.0"
 dependencies = [
- "attestation-doc-validation 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "attestation-doc-validation 0.6.3",
  "uniffi",
 ]
 
@@ -958,7 +958,7 @@ dependencies = [
 name = "node-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "attestation-doc-validation 0.6.3",
  "napi",
  "napi-build",
  "napi-derive",
@@ -1236,7 +1236,7 @@ dependencies = [
 name = "python-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "attestation-doc-validation 0.6.3",
  "pyo3",
 ]
 
@@ -1588,7 +1588,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 name = "swift-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "attestation-doc-validation 0.6.3",
 ]
 
 [[package]]
