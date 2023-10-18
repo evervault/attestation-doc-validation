@@ -13,6 +13,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
+      - uses: docker/setup-qemu-action@v1
       - uses: actions/checkout@v3
       - uses: PyO3/maturin-action@v1
         with:
