@@ -13,7 +13,6 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: docker/setup-qemu-action@v1
       - uses: actions/checkout@v3
       - uses: PyO3/maturin-action@v1
         with:
@@ -21,6 +20,28 @@ jobs:
           command: build
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
+      - uses: docker/setup-qemu-action@v1  
+      - uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          command: build
+          target: armv7-unknown-linux-gnueabihf
+          args: --release --sdist -o dist --find-interpreter
+          working-directory: python-attestation-bindings
+      - uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          command: build
+          target: aarch64-unknown-linux-gnu
+          args: --release --sdist -o dist --find-interpreter
+          working-directory: python-attestation-bindings 
+      - uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          command: build
+          target: aarch64-unknown-linux-musl
+          args: --release --sdist -o dist --find-interpreter
+          working-directory: python-attestation-bindings      
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
