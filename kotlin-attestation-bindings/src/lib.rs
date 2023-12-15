@@ -3,27 +3,27 @@ use attestation_doc_validation::attestation_doc::{validate_expected_pcrs, PCRPro
 use attestation_doc_validation::{parse_cert, validate_attestation_doc_in_cert, validate_attestation_doc_against_cert};
 
 pub struct PCRs {
-    pcr0: String,
-    pcr1: String,
-    pcr2: String,
-    pcr8: String,
+    pcr0: Option<String>,
+    pcr1: Option<String>,
+    pcr2: Option<String>,
+    pcr8: Option<String>,
 }
 
 impl PCRProvider for PCRs {
     fn pcr_0(&self) -> Option<&str> {
-        Some(&self.pcr0)
+        self.pcr0.as_deref()
     }
 
     fn pcr_1(&self) -> Option<&str> {
-        Some(&self.pcr1)
+        self.pcr1.as_deref()
     }
 
     fn pcr_2(&self) -> Option<&str> {
-        Some(&self.pcr2)
+        self.pcr2.as_deref()
     }
 
     fn pcr_8(&self) -> Option<&str> {
-        Some(&self.pcr8)
+        self.pcr8.as_deref()
     }
 }
 
