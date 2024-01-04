@@ -39,7 +39,7 @@ pub fn attest_connection(cert: Vec<u8>, expected_pcrs_list: Vec<PCRs>) -> bool {
     let validated_attestation_doc = match validate_attestation_doc_in_cert(&parsed_cert) {
         Ok(attestation_doc) => attestation_doc,
         Err(e) => {
-            eprintln!("An error occurred while validating the connection to this Cage: {e}");
+            eprintln!("An error occurred while validating the connection to this Enclave: {e}");
             return false;
         }
     };
@@ -62,7 +62,7 @@ pub fn attest_connection(cert: Vec<u8>, expected_pcrs_list: Vec<PCRs>) -> bool {
 }
 
 
-pub fn attest_cage(cert: Vec<u8>, expected_pcrs_list: Vec<PCRs>, attestation_doc: Vec<u8>) -> bool {
+pub fn attest_enclave(cert: Vec<u8>, expected_pcrs_list: Vec<PCRs>, attestation_doc: Vec<u8>) -> bool {
     let parsed_cert = match parse_cert(&cert) {
         Ok(parsed_cert) => parsed_cert,
         Err(e) => {
@@ -74,7 +74,7 @@ pub fn attest_cage(cert: Vec<u8>, expected_pcrs_list: Vec<PCRs>, attestation_doc
     let validated_attestation_doc = match validate_attestation_doc_against_cert(&parsed_cert, &attestation_doc) {
         Ok(attestation_doc) => attestation_doc,
         Err(e) => {
-            eprintln!("An error occurred while validating the connection to this Cage: {e}");
+            eprintln!("An error occurred while validating the connection to this Enclave: {e}");
             return false;
         }
     };

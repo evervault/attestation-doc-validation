@@ -1,6 +1,6 @@
 namespace bindings {
   boolean attest_connection(bytes cert, sequence<PCRs> expected_pcrs_list);
-  boolean attest_cage(bytes cert, sequence<PCRs> expected_pcrs_list, bytes attestation_doc);
+  boolean attest_enclave(bytes cert, sequence<PCRs> expected_pcrs_list, bytes attestation_doc);
 };
 
 dictionary PCRs {

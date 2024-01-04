@@ -366,7 +366,7 @@ internal interface _UniFFILib : Library {
 
     fun uniffi_bindings_fn_func_attest_connection(`cert`: RustBuffer.ByValue,`expectedPcrsList`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): Byte
-    fun uniffi_bindings_fn_func_attest_cage(`cert`: RustBuffer.ByValue,`expectedPcrsList`: RustBuffer.ByValue,`attestationDoc`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    fun uniffi_bindings_fn_func_attest_enclave(`cert`: RustBuffer.ByValue,`expectedPcrsList`: RustBuffer.ByValue,`attestationDoc`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): Byte
     fun ffi_bindings_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
@@ -378,7 +378,7 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_bindings_checksum_func_attest_connection(
     ): Short
-    fun uniffi_bindings_checksum_func_attest_cage(
+    fun uniffi_bindings_checksum_func_attest_enclave(
     ): Short
     fun ffi_bindings_uniffi_contract_version(
     ): Int
@@ -400,7 +400,7 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
     if (lib.uniffi_bindings_checksum_func_attest_connection() != 58635.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_bindings_checksum_func_attest_cage() != 59539.toShort()) {
+    if (lib.uniffi_bindings_checksum_func_attest_enclave() != 14194.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -589,10 +589,10 @@ fun `attestConnection`(`cert`: ByteArray, `expectedPcrsList`: List<PcRs>): Boole
 }
 
 
-fun `attestCage`(`cert`: ByteArray, `expectedPcrsList`: List<PcRs>, `attestationDoc`: ByteArray): Boolean {
+fun `attestEnclave`(`cert`: ByteArray, `expectedPcrsList`: List<PcRs>, `attestationDoc`: ByteArray): Boolean {
     return FfiConverterBoolean.lift(
     rustCall() { _status ->
-    _UniFFILib.INSTANCE.uniffi_bindings_fn_func_attest_cage(FfiConverterByteArray.lower(`cert`),FfiConverterSequenceTypePCRs.lower(`expectedPcrsList`),FfiConverterByteArray.lower(`attestationDoc`),_status)
+    _UniFFILib.INSTANCE.uniffi_bindings_fn_func_attest_enclave(FfiConverterByteArray.lower(`cert`),FfiConverterSequenceTypePCRs.lower(`expectedPcrsList`),FfiConverterByteArray.lower(`attestationDoc`),_status)
 })
 }
 
