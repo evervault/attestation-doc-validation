@@ -246,7 +246,6 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { attestConnection, attestEnclave } = nativeBinding
+const { attestEnclave } = nativeBinding
 
-module.exports.attestConnection = attestConnection
 module.exports.attestEnclave = attestEnclave

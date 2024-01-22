@@ -11,11 +11,6 @@ export interface NodePcRs {
   pcr8?: string
 }
 /**
- * Deprecated legacy attestation method
- * Supports attesting connections where the attestation doc is embedded in the certs SANs
- */
-export function attestConnection(cert: Buffer, expectedPcrsList: Array<NodePcRs>): boolean
-/**
  * a client can call out to `<enclave-url>/.well-known/attestation` to fetch the attestation doc from the Enclave
  * The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
  */
