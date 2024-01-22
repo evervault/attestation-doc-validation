@@ -1,0 +1,9 @@
+{
+  "cert": "test-data/valid-certificate.der",
+  "attestationDoc": "test-data/valid-attestation-doc-base64",
+  "pcrs": {
+    "pcr8": "97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca"
+  },
+  "isAttestationDocValid": true,
+  "shouldPcrsMatch": true
+}
