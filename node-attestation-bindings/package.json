@@ -1,6 +1,6 @@
 {
-  "name": "evervault-attestation-bindings",
-  "version": "0.3.2",
+  "name": "@evervault/attestation-bindings",
+  "version": "1.0.0",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -22,7 +22,11 @@
   "license": "MIT",
   "devDependencies": {
     "@napi-rs/cli": "^2.14.3",
+    "@types/node": "^20.11.5",
     "ava": "^5.2.0"
+  },
+  "peerDependencies": {
+    "@evervault/sdk": "^6.0.0"
   },
   "ava": {
     "timeout": "3m"

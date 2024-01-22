@@ -1,9 +1,9 @@
 # Attestation Doc Validation
 
-This repo contains several projects relating to the Remote Attestation Protocol used by Evervault Cages.
+This repo contains several projects relating to the Remote Attestation Protocol used by Evervault Enclaves.
 
-- The [Attestation doc](./Attestation.md) discusses the protocol in depth.
-- [attestation-doc-validation](./attestation-doc-validation/) contains a rust crate which implements the core logic required for attesting a Cage (validating certs, and attestation docs)
+- You can read more about the attestation protocol [here](https://docs.evervault.com/security/enclaves-attestation-in-tls).
+- [attestation-doc-validation](./attestation-doc-validation/) contains a rust crate which implements the core logic required for attesting an Enclave (validating certs, and attestation docs)
 - [node-attestation-bindings](./node-attestation-bindings/) contains an npm module which creates bindings for consuming the rust crate from node clients
 
 **Note: This crate cannot validate Attestation Documents which use p521r1.**

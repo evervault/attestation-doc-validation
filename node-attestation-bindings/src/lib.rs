@@ -56,7 +56,7 @@ fn attest_connection(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>) -> bool 
   let validated_attestation_doc = match validate_attestation_doc_in_cert(&parsed_cert) {
     Ok(attestation_doc) => attestation_doc,
     Err(e) => {
-      eprintln!("An error occurred while validating the connection to this Cage: {e}");
+      eprintln!("An error occurred while validating the connection to this Enclave: {e}");
       return false;
     }
   };
@@ -78,10 +78,10 @@ fn attest_connection(cert: JsBuffer, expected_pcrs_list: Vec<NodePCRs>) -> bool 
   }
 }
 
-/// a client can call out to `<cage-url>/.well-known/attestation` to fetch the attestation doc from the cage
+/// a client can call out to `<enclave-url>/.well-known/attestation` to fetch the attestation doc from the Enclave
 /// The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
 #[napi]
-fn attest_cage(
+fn attest_enclave(
   cert: JsBuffer,
   expected_pcrs_list: Vec<NodePCRs>,
   attestation_doc: JsBuffer,
@@ -116,7 +116,7 @@ fn attest_cage(
   ) {
     Ok(attestation_doc) => attestation_doc,
     Err(e) => {
-      eprintln!("An error occur while validating the attestation doc against the Cage connection's cert: {e}");
+      eprintln!("An error occur while validating the attestation doc against the Enclave connection's cert: {e}");
       return false;
     }
   };
