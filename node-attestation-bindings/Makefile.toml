@@ -30,7 +30,7 @@ sudo apt-get install -y libfaketime
 
 [tasks.test]
 dependencies = ["build", "add_lib_faketime"]
-env = { "LD_PRELOAD" = "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1", "FAKETIME" = "1695050165" }
+env = { "LD_PRELOAD" = "/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1", "FAKETIME" = "2023-09-18 15:16:05" }
 command = "yarn"
 args = ["test"]
 
