@@ -223,7 +223,7 @@ mod test {
      *
      * The following tests act as integration tests, but require the #[cfg(test)] flag to be set in the cert module, so must be written as unit tests.
      *
-     * Live Cage certs are required to have the public key match with the AD challenge (which in practice prevents MITM)
+     * Live Enclave certs are required to have the public key match with the AD challenge (which in practice prevents MITM)
      * However, this introduces issues when testing. When the certs are more than 3 hours old, they will expire and fail
      * our validity checks. To get around this the tests corresponding to live certs are suffixed with time_sensitive_beta, and
      * only run in CI when the time has been spoofed to match their validity window.
