@@ -33,7 +33,7 @@ impl PCRProvider for NodePCRs {
   }
 }
 
-/// a client can call out to `<enclave-url>/.well-known/attestation` to fetch the attestation doc from the Enclave
+/// A client can call out to `<enclave-url>/.well-known/attestation` to fetch the attestation doc from the Enclave
 /// The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
 #[napi]
 fn attest_enclave(
