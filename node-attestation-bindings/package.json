@@ -1,6 +1,6 @@
 {
   "name": "@evervault/attestation-bindings",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
