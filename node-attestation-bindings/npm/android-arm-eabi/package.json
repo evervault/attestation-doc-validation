@@ -1,5 +1,5 @@
 {
-  "name": "evervault-attestation-bindings-android-arm-eabi",
+  "name": "@evervault/attestation-bindings-android-arm-eabi",
   "version": "0.0.0",
   "os": [
     "android"

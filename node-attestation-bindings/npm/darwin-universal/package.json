@@ -1,5 +1,5 @@
 {
-  "name": "evervault-attestation-bindings-darwin-universal",
+  "name": "@evervault/attestation-bindings-darwin-universal",
   "version": "0.0.0",
   "os": [
     "darwin"
