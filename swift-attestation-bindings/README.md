@@ -2,7 +2,7 @@
 
 ## Build
 
-This library uses the Rust to build a iOS compatible library for the uses the attestation bindings with Swift. You will need the rust toolchains installed that are required by the following script
+This library uses Rust to build a iOS compatible library for the uses the attestation bindings with Swift. You will need the rust toolchains installed that are required by the following script
 
 ```
 aarch64-apple-ios
