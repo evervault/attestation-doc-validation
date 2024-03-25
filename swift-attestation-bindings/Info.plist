@@ -32,6 +32,8 @@
 			<string>simulator</string>
 		</dict>
 	</array>
+	<key>MinimumOSVersion</key>
+	<string>19.0</string>
 	<key>CFBundlePackageType</key>
 	<string>XFWK</string>
 	<key>XCFrameworkFormatVersion</key>
