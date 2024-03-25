@@ -3,7 +3,7 @@ edition = "2021"
 name = "node-attestation-bindings"
 version = "0.0.0"
 license = "Apache-2.0"
-description = "A Node library for attesting Nitro Enclaves according to the Evervault Cages attestation protocol."
+description = "A Node library for attesting Nitro Enclaves according to the Evervault Enclaves attestation protocol."
 homepage = "https://github.com/evervault/attestation-doc-validation"
 repository = "https://github.com/evervault/attestation-doc-validation"
 

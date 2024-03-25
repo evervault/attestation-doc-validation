@@ -1,6 +1,6 @@
 # Attestation Doc Validation
 
-This library exposes the high level functions required by Evervault Clients to attest a Cage per the defined [Attestation Protocol](../Attestation.md).
+This library exposes the high level functions required by Evervault Clients to attest an Enclave per the defined [Attestation Protocol](../Attestation.md).
 
 The library has been design to allow for bindings to be generated for multiple languages on top of the Rust crate, and should also expose enough logic to be composable for alternative Nitro Enclaves Attestation protocols.
 

@@ -1,14 +1,14 @@
 import test from "ava";
 
-import { attestConnection } from "../index.js";
+import { attestEnclave } from "../index.js";
 
 import { readdirSync, readFileSync } from "fs";
 
 const BASE_TEST_PATH = "..";
-const directory = readdirSync(`${BASE_TEST_PATH}/test-specs/beta`, "utf8");
+const directory = readdirSync(`${BASE_TEST_PATH}/test-specs/ga`, "utf8");
 
-function resolveCert(filePath) {
-  const rawCert = readFileSync(`${BASE_TEST_PATH}/${filePath}`);
+function resolveFile(filePath, encoding) {
+  const rawCert = readFileSync(`${BASE_TEST_PATH}/${filePath}`, encoding);
   if (!filePath.endsWith(".pem")) {
     return rawCert;
   }
@@ -20,14 +20,21 @@ function resolveCert(filePath) {
 for (let testSpec of directory) {
   test(testSpec, (t) => {
     const specText = readFileSync(
-      `${BASE_TEST_PATH}/test-specs/beta/${testSpec}`,
+      `${BASE_TEST_PATH}/test-specs/ga/${testSpec}`,
       "utf8"
     );
-    const { file, pcrs, isAttestationDocValid, shouldPcrsMatch } =
-      JSON.parse(specText);
+    const {
+      cert,
+      attestationDoc,
+      pcrs,
+      isAttestationDocValid,
+      shouldPcrsMatch,
+    } = JSON.parse(specText);
 
-    const inputFile = resolveCert(file);
-    const isConnectionValid = attestConnection(inputFile, [pcrs]);
+    const certBuf = resolveFile(cert);
+    const attestationDocString = resolveFile(attestationDoc, "utf8");
+    const attestationDocBuf = Buffer.from(attestationDocString, "base64");
+    const isConnectionValid = attestEnclave(certBuf, [pcrs], attestationDocBuf);
     t.deepEqual(isConnectionValid, isAttestationDocValid && shouldPcrsMatch);
   });
 }
