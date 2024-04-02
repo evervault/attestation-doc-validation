@@ -21,20 +21,24 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Run CI Tasks with backtrace
-        run: cd attestation-doc-validation ; cargo make ci
+        run: cargo make ci
+        working-directory: ./attestation-doc-validation
         env:
           RUST_BACKTRACE: full
   lint_and_test_node:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./node-attestation-bindings/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./node-attestation-bindings/pnpm-lock.yaml
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -43,11 +47,12 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
+        run: pnpm install
+        working-directory: ./node-attestation-bindings
+      - name: Test node bindings
         run: |
           cd node-attestation-bindings
-          yarn install
-      - name: Test node bindings
-        run: cd node-attestation-bindings ; cargo make test
+          cargo make test
   build_and_test_python:
     runs-on: ubuntu-latest
     steps:
@@ -58,15 +63,15 @@ jobs:
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
         env:
-          PYO3_CROSS_PYTHON_VERSION: "3.9"
+          PYO3_CROSS_PYTHON_VERSION: '3.9'
       - name: Build and Test
+        working-directory: ./python-attestation-bindings
         run: |
-          cd python-attestation-bindings
           python -m pip install --upgrade pip
           python -m venv ./venv
           source ./venv/bin/activate
           pip install pytest
           maturin develop
           sudo apt-get install -y libfaketime
-          export FAKETIME="2023-09-18 17:18:00" 
+          export FAKETIME="2023-09-18 17:18:00"
           LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 pytest
