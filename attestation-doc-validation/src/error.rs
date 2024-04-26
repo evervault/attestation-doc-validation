@@ -84,7 +84,7 @@ pub enum CertError
 where
     Self: Send + Sync,
 {
-    // Webpki errors don't implement stderr, so must be serialized before wrapping in custome err.
+    // Webpki errors don't implement stderr, so must be serialized before wrapping in custom err.
     #[error("Failed to validate the trust chain for the provided cert — {0}")]
     InvalidTrustChain(String),
     #[error("The certificate in the attestation doc was detected as not having the NSM as root")]
