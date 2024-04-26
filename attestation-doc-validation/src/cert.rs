@@ -1,8 +1,5 @@
 //! Module for parsing and validating X509 certs
-use super::{
-    error::{CertError, CertResult},
-    true_or_invalid,
-};
+use super::error::{CertError, CertResult};
 use serde_bytes::ByteBuf;
 use std::str::FromStr;
 use webpki::{EndEntityCert, TrustAnchor};
@@ -127,17 +124,14 @@ pub fn validate_cert_trust_chain(target: &[u8], intermediates: &[&[u8]]) -> Cert
     let now = get_epoch()?;
     let time = webpki::Time::from_seconds_since_unix_epoch(now);
 
-    true_or_invalid(
-        end_entity_cert
-            .verify_is_valid_tls_server_cert(
-                SUPPORTED_SIG_ALGS,
-                &server_trust_anchors,
-                intermediates,
-                time,
-            )
-            .is_ok(),
-        CertError::UntrustedCert,
-    )
+    end_entity_cert.verify_is_valid_tls_server_cert(
+        SUPPORTED_SIG_ALGS,
+        &server_trust_anchors,
+        intermediates,
+        time,
+    )?;
+
+    Ok(())
 }
 
 pub(super) fn parse_der_cert(cert: &[u8]) -> CertResult<X509Certificate<'_>> {
