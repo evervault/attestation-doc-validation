@@ -215,7 +215,7 @@ mod test {
         let err = validate_attestation_doc_in_cert(&cert).unwrap_err();
         assert!(matches!(
             err,
-            error::AttestError::CertError(error::CertError::UntrustedCert)
+            error::AttestError::CertError(error::CertError::InvalidTrustChain(_))
         ));
     }
 
