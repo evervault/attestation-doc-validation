@@ -8,6 +8,8 @@ env:
   push:
     branches:
       - main
+    branches-ignore:
+      - "donal/spe-883-add-ci-workflow-to-publish-swift-attestation-bindings"
     tags:
       - "node/v*"
     paths-ignore:
@@ -16,7 +18,9 @@ env:
       - "**/*.gitignore"
       - .editorconfig
       - docs/**
-  pull_request: null
+  pull_request:
+    branches-ignore:
+      - "donal/spe-883-add-ci-workflow-to-publish-swift-attestation-bindings"
 jobs:
   build:
     strategy:
