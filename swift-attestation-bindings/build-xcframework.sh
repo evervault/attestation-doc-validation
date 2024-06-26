@@ -79,16 +79,20 @@ cargo_build () {
 
 set -euvx
 
+# Set up the rust environment.
+rustup install nightly
+rustup default nightly
+rustup target add x86_64-apple-ios
+rustup target add aarch64-apple-ios-sim
+rustup target add aarch64-apple-ios
+
 # Intel iOS simulator
-CFLAGS_x86_64_apple_ios="-target x86_64-apple-ios" \
-  cargo_build x86_64-apple-ios
+CFLAGS_x86_64_apple_ios="-target x86_64-apple-ios" cargo +nightly build --target x86_64-apple-ios --release
 
 # Hardware iOS targets
-cargo_build aarch64-apple-ios
+cargo +nightly build --target aarch64-apple-ios --release
 
-# M1 iOS simulator.
-CFLAGS_aarch64_apple_ios_sim="-target aarch64-apple-ios-sim" \
-  cargo_build aarch64-apple-ios-sim
+cargo +nightly build -Z build-std --target aarch64-apple-ios-sim --release
 
 # TODO: would it be useful to also include desktop builds here?
 # It might make it possible to run the Swift tests via `swift test`
