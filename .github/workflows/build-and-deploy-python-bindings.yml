@@ -40,7 +40,7 @@ jobs:
           rust-toolchain: 1.79.0 
       - uses: PyO3/maturin-action@v1
         with:
-          manylinux: '2_28'
+          manylinux: 'musllinux_1_2'
           command: build
           target: aarch64-unknown-linux-musl
           args: --release --sdist -o dist --find-interpreter
