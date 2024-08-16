@@ -1,10 +1,10 @@
-use der::asn1::{BitString, Null, ObjectIdentifier, OctetString, UIntRef};
+use der::asn1::{BitString, Null, ObjectIdentifier, OctetString, UintRef};
 use der::{Choice, Sequence};
 
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 pub struct FieldId<'a> {
     pub field_type: ObjectIdentifier,
-    pub parameters: UIntRef<'a>,
+    pub parameters: UintRef<'a>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
@@ -20,7 +20,7 @@ pub struct SpecifiedCurve<'a> {
     pub field_id: FieldId<'a>,
     pub curve: Curve,
     pub base: OctetString,
-    pub order: UIntRef<'a>,
+    pub order: UintRef<'a>,
     pub cofactor: u8,
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "attestation-doc-validation"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "A Rust library for attesting enclaves according to the Evervault Attestation scheme. This crate is used to generate ffi bindings."
@@ -24,16 +24,16 @@ serde = { version = "1.0.180", features = ["derive"] }
 serde_with = "2.2"
 webpki = { version = "0.22", features = ["alloc"] }
 x509-parser = "0.14.0"
-der = { version = "0.6", features = ["alloc","derive","oid"] }
-p256 = { version = "0.12.0", features = ["ecdsa"] }
-p384 = { version = "0.12.0", features = ["ecdsa","arithmetic"] }
-ecdsa = { version = "0.15.0", features = ["verifying"] }
-sha2 = "0.10.6"
-aes = "0.8.2"
-aes-gcm = "0.10.1"
-rand = { version = "0.8.5", features = ["getrandom"] }
+der = { version = "^0.7", features = ["alloc","derive","oid"] }
+p256 = { version = "^0.13", features = ["ecdsa"] }
+p384 = { version = "^0.13", features = ["ecdsa","arithmetic"] }
+ecdsa = { version = "^0.16", features = ["verifying"] }
+sha2 = "^0.10"
+aes = "^0.8"
+aes-gcm = "^0.10"
+rand = { version = "^0.8", features = ["getrandom"] }
 chrono = "0.4.26"
-aws-nitro-enclaves-nsm-api = { version = "0.4.0", default-features = false }
+aws-nitro-enclaves-nsm-api = { version = "^0.4", default-features = false }
 
 [dev-dependencies]
 rcgen = "0.10"
