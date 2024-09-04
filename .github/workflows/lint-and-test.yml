@@ -21,7 +21,8 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Run CI Tasks with backtrace
-        run: cd attestation-doc-validation ; cargo make ci
+        working-directory: attestation-doc-validation
+        run: cargo make ci
         env:
           RUST_BACKTRACE: full
   lint_and_test_node:
@@ -31,7 +32,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
           check-latest: true
           cache: yarn
           cache-dependency-path: ./node-attestation-bindings/yarn.lock
@@ -43,11 +44,11 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
-        run: |
-          cd node-attestation-bindings
-          yarn install
+        working-directory: node-attestation-bindings
+        run: yarn install
       - name: Test node bindings
-        run: cd node-attestation-bindings ; cargo make test
+        working-directory: node-attestation-bindings
+        run: cargo make test
   build_and_test_python:
     runs-on: ubuntu-latest
     steps:
@@ -58,15 +59,16 @@ jobs:
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
         env:
-          PYO3_CROSS_PYTHON_VERSION: "3.9"
+          PYO3_CROSS_PYTHON_VERSION: '3.9'
       - name: Build and Test
-        run: |
-          cd python-attestation-bindings
+        working-directory: python-attestation-bindings
+        run: |-
           python -m pip install --upgrade pip
           python -m venv ./venv
           source ./venv/bin/activate
           pip install pytest
           maturin develop
           sudo apt-get install -y libfaketime
-          export FAKETIME="2023-09-18 17:18:00" 
+          export FAKETIME="2023-09-18 17:18:00"
           LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 pytest
+

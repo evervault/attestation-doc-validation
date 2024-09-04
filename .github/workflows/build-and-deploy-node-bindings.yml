@@ -3,17 +3,17 @@ env:
   DEBUG: napi:*
   APP_NAME: evervault-attestation-bindings
   SUBDIRECTORY: node-attestation-bindings
-  MACOSX_DEPLOYMENT_TARGET: "10.13"
-"on":
+  MACOSX_DEPLOYMENT_TARGET: '10.13'
+on:
   push:
     branches:
       - main
     tags:
-      - "node/v*"
+      - 'node/v*'
     paths-ignore:
-      - "**/*.md"
+      - '**/*.md'
       - LICENSE
-      - "**/*.gitignore"
+      - '**/*.gitignore'
       - .editorconfig
       - docs/**
   pull_request: null
@@ -32,16 +32,14 @@ jobs:
             build: yarn build
             target: x86_64-pc-windows-msvc
           - host: windows-latest
-            build: |
-              yarn build --target i686-pc-windows-msvc
+            build: yarn build --target i686-pc-windows-msvc
             target: i686-pc-windows-msvc
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:stable-2023-09-17-x64
-            build: |-
-              set -e &&
-              yarn build --target x86_64-unknown-linux-gnu &&
-              strip *.node
+            build:
+              set -e && yarn build --target x86_64-unknown-linux-gnu && strip
+              *.node
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:stable-2023-09-17-alpine
@@ -54,9 +52,8 @@ jobs:
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:stable-2023-09-17-aarch64
-            build: |-
-              set -e &&
-              yarn build --target aarch64-unknown-linux-gnu &&
+            build:
+              set -e && yarn build --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
           - host: ubuntu-latest
             target: armv7-unknown-linux-gnueabihf
@@ -79,11 +76,10 @@ jobs:
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:stable-2023-09-17-alpine
-            build: |-
-              set -e &&
-              apk add perl openssl &&
-              rustup target add aarch64-unknown-linux-musl &&
-              yarn build --target aarch64-unknown-linux-musl &&
+            build:
+              set -e && apk add perl openssl && rustup target add
+              aarch64-unknown-linux-musl && yarn build --target
+              aarch64-unknown-linux-musl &&
               /aarch64-linux-musl-cross/bin/aarch64-linux-musl-strip *.node
     name: stable - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
@@ -144,19 +140,25 @@ jobs:
         if: ${{ matrix.settings.docker }}
         with:
           image: ${{ matrix.settings.docker }}
-          options: "--user 0:0 -v ${{ github.workspace }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build"
+          options:
+            '--user 0:0 -v ${{ github.workspace
+            }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{
+            github.workspace
+            }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{
+            github.workspace
+            }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{
+            github.workspace }}/${{ env.SUBDIRECTORY }}:/build -w /build'
           run: ${{ matrix.settings.build }}
       - name: Build
         run: ${{ matrix.settings.build }}
         if: ${{ !matrix.settings.docker }}
         shell: bash
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.settings.target }}
           path: ./${{ env.SUBDIRECTORY }}/${{ env.APP_NAME }}.*.node
           if-no-files-found: error
-
   # Node version has been descoped to v18 for the following tests. Tests on 14 and 16 are hanging.
   test-linux-x64-gnu-binding:
     name: Test bindings on Linux-x64-gnu - node@${{ matrix.node }}
@@ -168,7 +170,7 @@ jobs:
         node:
           # - "14"
           # - "16"
-          - "18"
+          - '18'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -187,7 +189,8 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
-        run: cd ${{ env.SUBDIRECTORY }} ; yarn install
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: yarn install
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.7
         with:
@@ -197,7 +200,8 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: cd ${{ env.SUBDIRECTORY }} ; cargo make test
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: cargo make test
   test-linux-x64-musl-binding:
     name: Test bindings on x86_64-unknown-linux-musl - node@${{ matrix.node }}
     needs:
@@ -208,7 +212,7 @@ jobs:
         node:
           # - "14"
           # - "16"
-          - "18"
+          - '18'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -227,8 +231,8 @@ jobs:
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
+        working-directory: ${{ env.SUBDIRECTORY }}
         run: |
-          cd ${{ env.SUBDIRECTORY }}
           yarn config set supportedArchitectures.libc "musl"
           yarn install
       - name: Download artifacts
@@ -237,10 +241,12 @@ jobs:
           name: bindings-x86_64-unknown-linux-musl
           path: ${{ env.SUBDIRECTORY }}
       - name: List packages
-        run: cd ${{ env.SUBDIRECTORY }} ; ls -R .
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: ls -R .
         shell: bash
       - name: Test bindings
-        run: cd ${{ env.SUBDIRECTORY }} ; cargo make test
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: cargo make test
   test-linux-aarch64-gnu-binding:
     name: Test bindings on aarch64-unknown-linux-gnu - node@${{ matrix.node }}
     needs:
@@ -251,14 +257,16 @@ jobs:
         node:
           # - "14"
           # - "16"
-          - "18"
+          - '18'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
-      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - run:
+          docker run --rm --privileged multiarch/qemu-user-static:register
+          --reset
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.7
         with:
@@ -276,11 +284,14 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:aarch64-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
+          options:
+            '-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{
+            github.workspace }}/test-specs:/test-specs -v ${{ github.workspace
+            }}/test-data:/test-data -w /build'
           run: |
             set -e
             apt-get install -y libfaketime
-            export FAKETIME="2023-09-18 15:16:05" 
+            export FAKETIME="2023-09-18 15:16:05"
             LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1 yarn test
             ls -la
   # test-linux-aarch64-musl-binding:
@@ -315,10 +326,11 @@ jobs:
   #         run: |
   #           apk upgrade ; apk update ; apk add nodejs npm yarn
   #           apk add libfaketime --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
-  #           export FAKETIME="2023-09-18 15:16:05" 
+  #           export FAKETIME="2023-09-18 15:16:05"
   #           LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1 yarn test || exit 1
   test-linux-arm-gnueabihf-binding:
-    name: Test bindings on armv7-unknown-linux-gnueabihf - node@${{ matrix.node }}
+    name:
+      Test bindings on armv7-unknown-linux-gnueabihf - node@${{ matrix.node }}
     needs:
       - build
     strategy:
@@ -327,14 +339,16 @@ jobs:
         node:
           # - "14"
           # - "16"
-          - "18"
+          - '18'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
       - uses: actions/checkout@v3
-      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - run:
+          docker run --rm --privileged multiarch/qemu-user-static:register
+          --reset
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.7
         with:
@@ -351,11 +365,14 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/napi-rs/napi-rs/nodejs:armhf-${{ matrix.node }}
-          options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs/ga:/test-specs/ga -v ${{ github.workspace }}/test-data:/test-data -w /build"
+          options:
+            '-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{
+            github.workspace }}/test-specs/ga:/test-specs/ga -v ${{
+            github.workspace }}/test-data:/test-data -w /build'
           run: |
             set -e
             apt-get install -y libfaketime
-            export FAKETIME="2023-09-18 15:16:05" 
+            export FAKETIME="2023-09-18 15:16:05"
             LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/faketime/libfaketime.so.1 yarn test
             ls -la
   universal-macOS:
@@ -390,7 +407,7 @@ jobs:
       - name: Combine binaries
         run: yarn universal
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bindings-universal-apple-darwin
           path: ${{ env.SUBDIRECTORY }}/${{ env.APP_NAME }}.*.node
@@ -429,18 +446,21 @@ jobs:
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
           registry-url: https://registry.npmjs.org/
       - name: Install dependencies
-        run: cd ${{ env.SUBDIRECTORY }} ; yarn install
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: yarn install
       - name: Download all artifacts
         uses: actions/download-artifact@v4.1.7
         with:
           path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Move artifacts
-        run: cd ${{ env.SUBDIRECTORY }} ; yarn artifacts
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: yarn artifacts
       - name: List packages
-        run: cd ${{ env.SUBDIRECTORY }} ; ls -R ./npm
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: ls -R ./npm
         shell: bash
       - name: Publish
-        run: |
-          cd ${{ env.SUBDIRECTORY }} ; npm publish --access public
+        working-directory: ${{ env.SUBDIRECTORY }}
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
