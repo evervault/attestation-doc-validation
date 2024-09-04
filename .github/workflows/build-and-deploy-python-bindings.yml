@@ -1,14 +1,12 @@
 name: Build and deploy python bindings
-
 on:
   push:
     branches:
       - main
     tags:
-      - "python/v*"
+      - 'python/v*'
   pull_request:
   workflow_dispatch:
-
 jobs:
   linux:
     runs-on: ubuntu-latest
@@ -20,8 +18,8 @@ jobs:
           command: build
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0 
-      - uses: docker/setup-qemu-action@v1  
+          rust-toolchain: 1.79.0
+      - uses: docker/setup-qemu-action@v1
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
@@ -29,29 +27,28 @@ jobs:
           target: armv7-unknown-linux-gnueabihf
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0 
+          rust-toolchain: 1.79.0
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
           command: build
           target: aarch64-unknown-linux-gnu
           args: --release --sdist -o dist --find-interpreter
-          working-directory: python-attestation-bindings 
-          rust-toolchain: 1.79.0 
+          working-directory: python-attestation-bindings
+          rust-toolchain: 1.79.0
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: 'musllinux_1_2'
           command: build
           target: aarch64-unknown-linux-musl
           args: --release --sdist -o dist --find-interpreter
-          working-directory: python-attestation-bindings     
-          rust-toolchain: 1.79.0 
+          working-directory: python-attestation-bindings
+          rust-toolchain: 1.79.0
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: python-attestation-bindings/dist
-
   windows:
     runs-on: windows-latest
     steps:
@@ -61,13 +58,12 @@ jobs:
           command: build
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0 
+          rust-toolchain: 1.79.0
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: python-attestation-bindings/dist
-
   macos:
     runs-on: macos-latest
     steps:
@@ -75,15 +71,16 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release -o dist --find-interpreter --target universal2-apple-darwin
+          args:
+            --release -o dist --find-interpreter --target
+            universal2-apple-darwin
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0 
+          rust-toolchain: 1.79.0
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: python-attestation-bindings/dist
-
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -92,12 +89,11 @@ jobs:
     steps:
       - name: Get version from tag
         id: get-version
-        run: |
-          echo "using version tag ${GITHUB_REF:18}"
+        run: echo "using version tag ${GITHUB_REF:18}"
       - uses: actions/checkout@v3
       - name: Assert versions match
+        working-directory: python-attestation-bindings
         run: |
-          cd python-attestation-bindings
           PACKAGE_VERSION=$(cat pyproject.toml | awk -F '=' '/version/ {gsub(/"/, "", $2); gsub(/ /, "", $2); print $2}')
           if [ "$PACKAGE_VERSION" != "${GITHUB_REF:18}" ]; then
             echo "Version in tag does not match package.json"
@@ -118,4 +114,4 @@ jobs:
           command: upload
           args: --skip-existing *
           working-directory: python-attestation-bindings/wheels
-          rust-toolchain: 1.79.0 
+          rust-toolchain: 1.79.0
