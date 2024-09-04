@@ -47,7 +47,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux
           path: python-attestation-bindings/dist
   windows:
     runs-on: windows-latest
@@ -62,7 +62,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows
           path: python-attestation-bindings/dist
   macos:
     runs-on: macos-latest
@@ -79,7 +79,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos
           path: python-attestation-bindings/dist
   release:
     name: Release
@@ -106,6 +106,8 @@ jobs:
         with:
           path: python-attestation-bindings/wheels
           name: wheels
+          pattern: wheels-*
+          merge-multiple: true
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
