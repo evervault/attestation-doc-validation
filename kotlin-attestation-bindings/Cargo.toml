@@ -9,10 +9,10 @@ crate-type = ["cdylib"]
 
 [dependencies]
 attestation-doc-validation = "0.6.3"
-uniffi = { version = "0.24.1" }
+uniffi = { version = "0.28.1" }
 
 [build-dependencies]
-uniffi = { version = "0.24.1", features = [ "build" ] }
+uniffi = { version = "0.28.1", features = [ "build" ] }
 
 [[bin]]
 # This can be whatever name makes sense for your project, but the rest of this tutorial assumes uniffi-bindgen.
