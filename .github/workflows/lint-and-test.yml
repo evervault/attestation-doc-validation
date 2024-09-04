@@ -19,7 +19,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@689ca68d60478a0ba51fb79b2c739219d7daf6a2
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
         run: cargo make ci
@@ -42,7 +42,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@689ca68d60478a0ba51fb79b2c739219d7daf6a2
       - name: Install dependencies
         working-directory: node-attestation-bindings
         run: yarn install
