@@ -106,7 +106,7 @@ jobs:
           fi
       - name: Guarantee wheels dir exists
         run: mkdir python-attestation-bindings/wheels
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           path: python-attestation-bindings/wheels
           name: wheels
