@@ -39,4 +39,4 @@ aws-nitro-enclaves-nsm-api = { version = "^0.4", default-features = false }
 rcgen = "0.10"
 base64 = "0.21"
 serde_json = "1"
-pem = "1.1.1"
+pem = "3.0.4"
