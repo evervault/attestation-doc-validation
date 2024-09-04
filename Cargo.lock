@@ -182,7 +182,7 @@ dependencies = [
  "aes-gcm",
  "aws-nitro-enclaves-cose",
  "aws-nitro-enclaves-nsm-api",
- "base64 0.21.7",
+ "base64 0.22.1",
  "chrono",
  "der 0.7.9",
  "ecdsa 0.16.9",
