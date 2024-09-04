@@ -87,7 +87,7 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         if: ${{ !matrix.settings.docker }}
@@ -173,7 +173,7 @@ jobs:
           - '18'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -215,7 +215,7 @@ jobs:
           - '18'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -263,7 +263,7 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run:
           docker run --rm --privileged multiarch/qemu-user-static:register
           --reset
@@ -303,7 +303,7 @@ jobs:
   #     run:
   #       working-directory: ${{ env.SUBDIRECTORY }}
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
   #     - name: Download artifacts
   #       uses: actions/download-artifact@v4.1.7
@@ -345,7 +345,7 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run:
           docker run --rm --privileged multiarch/qemu-user-static:register
           --reset
@@ -384,7 +384,7 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -428,7 +428,7 @@ jobs:
         id: get-version
         run: |
           echo "using version tag ${GITHUB_REF:16}"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Assert versions match
         run: |
           PACKAGE_VERSION=$(cat ./node-attestation-bindings/package.json | jq .version | tr -d '"')
