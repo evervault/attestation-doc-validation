@@ -19,7 +19,7 @@ jobs:
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
           rust-toolchain: 1.79.0
-      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-qemu-action@v3
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
