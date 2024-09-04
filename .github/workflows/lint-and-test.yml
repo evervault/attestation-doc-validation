@@ -12,7 +12,7 @@ jobs:
   lint_and_test_rust:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install latest stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -28,7 +28,7 @@ jobs:
   lint_and_test_node:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -52,7 +52,7 @@ jobs:
   build_and_test_python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           command: build
