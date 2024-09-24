@@ -55,9 +55,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
+          manylinux: '2_28'
           command: build
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
+          rust-toolchain: 1.79.0 
         env:
           PYO3_CROSS_PYTHON_VERSION: '3.9'
       - name: Build and Test
