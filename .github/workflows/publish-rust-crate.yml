@@ -43,7 +43,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@baeb514032fb4ecb517a91c88b0d5aae9dbe9695
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
         run: cargo make ci
@@ -57,7 +57,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@baeb514032fb4ecb517a91c88b0d5aae9dbe9695
       - name: Package and Publish Cargo to registry
         working-directory: attestation-doc-validation
         run: cargo publish --dry-run --token ${{ secrets.CARGO_AUTH_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@baeb514032fb4ecb517a91c88b0d5aae9dbe9695
       - name: Package and Publish Cargo to registry
         working-directory: attestation-doc-validation
         run: cargo publish --token ${{ secrets.CARGO_AUTH_TOKEN }}
