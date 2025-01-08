@@ -4,7 +4,8 @@ members = [
   "python-attestation-bindings",
   "node-attestation-bindings",
   "swift-attestation-bindings",
-  "kotlin-attestation-bindings"
+  "kotlin-attestation-bindings",
+  "wasm-attestation-bindings"
 ]
 
 [profile.release]

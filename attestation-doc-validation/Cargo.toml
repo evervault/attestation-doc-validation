@@ -35,6 +35,10 @@ rand = { version = "^0.8", features = ["getrandom"] }
 chrono = "0.4.26"
 aws-nitro-enclaves-nsm-api = { version = "^0.4", default-features = false }
 
+[target.'cfg(target = "wasm-unknown-unknown")'.dependencies]
+# Override indirect dependency of rand to force getrandom to have wasm support
+getrandom = { version = "0.2", features = ["js"] }
+
 [dev-dependencies]
 rcgen = "0.10"
 base64 = "0.21"
