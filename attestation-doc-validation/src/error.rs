@@ -1,7 +1,7 @@
 //! Module for categorizing errors returned during attestation
 use thiserror::Error;
 
-use crate::{nsm::error::NsmError as InnerNsm, time::TimeError};
+use crate::{nsm::error::NsmError as InnerNsm, time};
 
 /// Generic Result type for the top level functions of the library
 pub type AttestResult<T> = Result<T, AttestError>;
@@ -98,7 +98,7 @@ where
     #[error(transparent)]
     HexError(#[from] hex::FromHexError),
     #[error(transparent)]
-    TimeError(#[from] TimeError),
+    TimeError(#[from] time::Error),
     #[error("Failed to parse cert from pem encoding")]
     PemError(#[from] x509_parser::error::PEMError),
     #[error("Failed to parse x509 cert from pem encoding")]

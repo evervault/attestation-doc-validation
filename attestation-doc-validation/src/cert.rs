@@ -1,6 +1,6 @@
 //! Module for parsing and validating X509 certs
-use crate::time::epoch;
 use super::error::{CertError, CertResult};
+use crate::time::epoch;
 use serde_bytes::ByteBuf;
 use std::str::FromStr;
 use webpki::{EndEntityCert, TrustAnchor};
