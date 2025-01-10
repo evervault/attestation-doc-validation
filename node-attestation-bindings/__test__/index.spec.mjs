@@ -35,6 +35,7 @@ for (let testSpec of directory) {
     const attestationDocString = resolveFile(attestationDoc, "utf8");
     const attestationDocBuf = Buffer.from(attestationDocString, "base64");
     const isConnectionValid = attestEnclave(certBuf, [pcrs], attestationDocBuf);
-    t.deepEqual(isConnectionValid, isAttestationDocValid && shouldPcrsMatch);
+    t.deepEqual(isConnectionValid, isAttestationDocValid);
+    t.deepEqual(isConnectionValid, shouldPcrsMatch);
   });
 }
