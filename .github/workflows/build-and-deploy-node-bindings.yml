@@ -81,7 +81,7 @@ jobs:
               aarch64-unknown-linux-musl && yarn build --target
               aarch64-unknown-linux-musl &&
               /aarch64-linux-musl-cross/bin/aarch64-linux-musl-strip *.node
-    name: stable - ${{ matrix.settings.target }} - node@18
+    name: stable - ${{ matrix.settings.target }} - node@20
     runs-on: ${{ matrix.settings.host }}
     defaults:
       run:
@@ -92,7 +92,7 @@ jobs:
         uses: actions/setup-node@v3
         if: ${{ !matrix.settings.docker }}
         with:
-          node-version: 18
+          node-version: 20
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
@@ -129,7 +129,7 @@ jobs:
         uses: actions/setup-node@v3
         if: matrix.settings.target == 'i686-pc-windows-msvc'
         with:
-          node-version: 18
+          node-version: 20
           check-latest: true
           cache: yarn
           architecture: x86
@@ -167,9 +167,9 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          # - "14"
-          # - "16"
           - '18'
+          - '20'
+          - '22'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -180,11 +180,6 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
@@ -208,9 +203,9 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          # - "14"
-          # - "16"
           - '18'
+          - '20'
+          - '22'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -221,11 +216,6 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
@@ -252,9 +242,9 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          # - "14"
-          # - "16"
           - '18'
+          - '20'
+          - '22'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -334,9 +324,9 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          # - "14"
-          # - "16"
           - '18'
+          - '20'
+          - '22'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -385,7 +375,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
@@ -417,7 +407,6 @@ jobs:
       - test-linux-x64-gnu-binding
       - test-linux-x64-musl-binding
       - test-linux-aarch64-gnu-binding
-      # - test-linux-aarch64-musl-binding
       - test-linux-arm-gnueabihf-binding
       - universal-macOS
     steps:
@@ -437,7 +426,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
