@@ -207,6 +207,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "attestation-doc-validation"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb740cfcf6c1167edf66243e2e81681abe61d0698ac54f26ab6787990ffd7aa2"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "aws-nitro-enclaves-cose",
+ "aws-nitro-enclaves-nsm-api",
+ "base64 0.21.7",
+ "chrono",
+ "der 0.7.9",
+ "ecdsa 0.16.9",
+ "hex",
+ "p256 0.13.2",
+ "p384 0.13.0",
+ "rand",
+ "serde",
+ "serde_bytes",
+ "serde_cbor",
+ "serde_with 2.3.3",
+ "sha2",
+ "thiserror",
+ "webpki",
+ "x509-parser",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1409,7 +1437,7 @@ dependencies = [
 name = "python-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.6.3",
+ "attestation-doc-validation 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pyo3",
 ]
 
