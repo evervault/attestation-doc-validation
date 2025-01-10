@@ -48,7 +48,3 @@ rcgen = "0.10"
 base64 = "0.21"
 serde_json = "1"
 pem = "1.1.1"
-
-# [features]
-# default = []
-# wasm_support = ["getrandom", "time", "wasm-bindgen"]
