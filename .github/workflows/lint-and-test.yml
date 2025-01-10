@@ -13,12 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install latest stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
@@ -29,12 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install latest stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - name: Install wasmpack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build wasm bindings with wasm-pack
@@ -52,12 +40,6 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./node-attestation-bindings/yarn.lock
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: node-attestation-bindings
