@@ -200,6 +200,8 @@ dependencies = [
  "serde_with 2.3.3",
  "sha2",
  "thiserror",
+ "time",
+ "wasm-bindgen",
  "webpki",
  "x509-parser",
 ]
@@ -390,6 +392,16 @@ checksum = "773f3b9af64447d2ce9850330c473515014aa235e6a783b02db81ff39e4a3dad"
 dependencies = [
  "crypto-common",
  "inout",
+]
+
+[[package]]
+name = "console_error_panic_hook"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
+dependencies = [
+ "cfg-if",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1896,6 +1908,7 @@ checksum = "b0fdd63d58b18d663fbdf70e049f00a22c8e42be082203be7f26589213cd75ea"
 dependencies = [
  "deranged",
  "itoa",
+ "js-sys",
  "serde",
  "time-core",
  "time-macros",
@@ -2124,6 +2137,7 @@ version = "0.0.0"
 dependencies = [
  "attestation-doc-validation 0.9.0",
  "base64 0.22.1",
+ "console_error_panic_hook",
  "wasm-bindgen",
 ]
 
