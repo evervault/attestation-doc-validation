@@ -31,7 +31,7 @@ mod wasm {
         let signed_js_ts = Date::now() as i64;
         let js_ms = signed_js_ts
             .try_into()
-            .map_err(|_| TimeError::NegativeTimestamp)?;
+            .map_err(|_| Error::NegativeTimestamp)?;
         Ok(Duration::from_millis(js_ms))
     }
 }
