@@ -14,7 +14,7 @@ pub enum Error {
 
 #[cfg(target_arch = "wasm32")]
 mod wasm {
-    use super::{Duration, TimeError};
+    use super::{Duration, Error};
     use wasm_bindgen::prelude::wasm_bindgen;
 
     #[wasm_bindgen]
