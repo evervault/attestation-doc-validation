@@ -1,5 +1,6 @@
 //! Module for parsing and validating X509 certs
 use super::error::{CertError, CertResult};
+use crate::time::epoch;
 use serde_bytes::ByteBuf;
 use std::str::FromStr;
 use webpki::{EndEntityCert, TrustAnchor};
@@ -82,10 +83,7 @@ pub(super) fn export_public_key_to_der<'a>(cert: &'a X509Certificate) -> &'a [u8
 /// Returns a `CertError::TimeError` when the current timestamp is before the unix epoch...
 #[cfg(not(test))]
 fn get_epoch() -> CertResult<u64> {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|time_since_epoch| time_since_epoch.as_secs())
-        .map_err(|_| CertError::TimeError)
+    Ok(epoch()?.as_secs())
 }
 
 // Testing version of this function attempts to get the timestamp to use from env vars
@@ -98,10 +96,7 @@ fn get_epoch() -> CertResult<u64> {
                 .expect("Invalid FAKETIME given, epoch expected");
             Ok(parsed_epoch)
         }
-        Err(_) => std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|time_since_epoch| time_since_epoch.as_secs())
-            .map_err(|_| CertError::TimeError),
+        Err(_) => Ok(epoch()?.as_secs()),
     }
 }
 
