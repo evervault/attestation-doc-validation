@@ -26,33 +26,33 @@ jobs:
           - host: macos-latest
             target: x86_64-apple-darwin
             build: |
-              yarn build --target x86_64-apple-darwin
+              pnpm build --target x86_64-apple-darwin
               strip -x *.node
           - host: windows-latest
-            build: yarn build
+            build: pnpm build
             target: x86_64-pc-windows-msvc
           - host: windows-latest
-            build: yarn build --target i686-pc-windows-msvc
+            build: pnpm build --target i686-pc-windows-msvc
             target: i686-pc-windows-msvc
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-zig
             build:
-              set -e && yarn build --target x86_64-unknown-linux-gnu && strip *.node
+              set -e && pnpm build --target x86_64-unknown-linux-gnu && strip *.node
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine-zig
-            build: set -e && apk add perl openssl && yarn build && strip *.node
+            build: set -e && apk add perl openssl && pnpm build && strip *.node
           - host: macos-latest
             target: aarch64-apple-darwin
             build: |
-              yarn build --target aarch64-apple-darwin
+              pnpm build --target aarch64-apple-darwin
               strip -x *.node
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-zig
             build:
-              set -e && yarn build --target aarch64-unknown-linux-gnu &&
+              set -e && pnpm build --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
           - host: ubuntu-latest
             target: armv7-unknown-linux-gnueabihf
@@ -60,24 +60,24 @@ jobs:
               sudo apt-get update
               sudo apt-get install gcc-arm-linux-gnueabihf -y
             build: |
-              yarn build --target=armv7-unknown-linux-gnueabihf
+              pnpm build --target=armv7-unknown-linux-gnueabihf
               arm-linux-gnueabihf-strip *.node
           - host: ubuntu-latest
             target: aarch64-linux-android
             build: |
-              yarn build --target aarch64-linux-android
+              pnpm build --target aarch64-linux-android
               ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip *.node
           - host: ubuntu-latest
             target: armv7-linux-androideabi
             build: |
-              yarn build --target armv7-linux-androideabi
+              pnpm build --target armv7-linux-androideabi
               ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip *.node
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine-zig
             build:
               set -e && apk add perl openssl && rustup target add
-              aarch64-unknown-linux-musl && yarn build --target
+              aarch64-unknown-linux-musl && pnpm build --target
               aarch64-unknown-linux-musl &&
               /aarch64-linux-musl-cross/bin/aarch64-linux-musl-strip *.node
     name: stable - ${{ matrix.settings.target }} - node@20
@@ -93,8 +93,8 @@ jobs:
         with:
           node-version: 20
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
       - name: Install
         uses: dtolnay/rust-toolchain@stable
         if: ${{ !matrix.settings.docker }}
@@ -118,21 +118,21 @@ jobs:
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
         shell: bash
-      - name: Setup node x86
-        if: matrix.settings.target == 'i686-pc-windows-msvc'
-        run: yarn config set supportedArchitectures.cpu "ia32"
-        shell: bash
       - name: Install dependencies
-        run: yarn install
+        if: ${{ matrix.settings.target == 'i686-pc-windows-msvc' }}
+        run: pnpm install --config.architecture=ia32
+      - name: Install dependencies
+        if: ${{ matrix.settings.target != 'i686-pc-windows-msvc' }}
+        run: pnpm install
       - name: Setup node x86
         uses: actions/setup-node@v3
-        if: matrix.settings.target == 'i686-pc-windows-msvc'
+        if: ${{ matrix.settings.target == 'i686-pc-windows-msvc' }}
         with:
           node-version: 20
           check-latest: true
-          cache: yarn
+          cache: pnpm
           architecture: x86
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
       - name: Build in docker
         uses: addnab/docker-run-action@v3
         if: ${{ matrix.settings.docker }}
@@ -177,12 +177,12 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
-        run: yarn install
+        run: pnpm install
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.8
         with:
@@ -213,14 +213,13 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
         run: |
-          yarn config set supportedArchitectures.libc "musl"
-          yarn install
+          pnpm install --config.libc=musl
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.8
         with:
@@ -263,9 +262,7 @@ jobs:
         shell: bash
       - name: Install dependencies
         run: |
-          yarn config set supportedArchitectures.cpu "arm64"
-          yarn config set supportedArchitectures.libc "glibc"
-          yarn install
+          pnpm install --config.libc=glibc --config.architecture=arm64
       - name: Setup and run tests
         uses: addnab/docker-run-action@v3
         with:
@@ -278,7 +275,7 @@ jobs:
             set -e
             apt-get install -y libfaketime
             export FAKETIME="2023-09-18 15:16:05"
-            LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1 yarn test
+            LD_PRELOAD=/usr/lib/aarch64-linux-gnu/faketime/libfaketime.so.1 pnpm test
             ls -la
   # test-linux-aarch64-musl-binding:
   #   name: Test bindings on aarch64-unknown-linux-musl - node@${{ matrix.node }}
@@ -301,19 +298,17 @@ jobs:
   #       shell: bash
   #     - name: Install dependencies
   #       run: |
-  #         yarn config set supportedArchitectures.cpu "arm64"
-  #         yarn config set supportedArchitectures.libc "musl"
-  #         yarn install
+  #         pnpm install --config.libc=musl --config.architecture=arm64
   #     - name: Setup and run tests
   #       uses: addnab/docker-run-action@v3
   #       with:
   #         image: multiarch/alpine:aarch64-latest-stable
   #         options: "-v ${{ github.workspace }}/${{ env.SUBDIRECTORY }}:/build -v ${{ github.workspace }}/test-specs:/test-specs -v ${{ github.workspace }}/test-data:/test-data -w /build"
   #         run: |
-  #           apk upgrade ; apk update ; apk add nodejs npm yarn
+  #           apk upgrade ; apk update ; apk add nodejs npm pnpm
   #           apk add libfaketime --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
   #           export FAKETIME="2023-09-18 15:16:05"
-  #           LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1 yarn test || exit 1
+  #           LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1 pnpm test || exit 1
   test-linux-arm-gnueabihf-binding:
     name:
       Test bindings on armv7-unknown-linux-gnueabihf - node@${{ matrix.node }}
@@ -345,8 +340,7 @@ jobs:
         shell: bash
       - name: Install dependencies
         run: |
-          yarn config set supportedArchitectures.cpu "arm"
-          yarn install
+          pnpm install --config.architecture=arm
       - name: Setup and run tests
         uses: addnab/docker-run-action@v3
         with:
@@ -359,7 +353,7 @@ jobs:
             set -e
             apt-get install -y libfaketime
             export FAKETIME="2023-09-18 15:16:05"
-            LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/faketime/libfaketime.so.1 yarn test
+            LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/faketime/libfaketime.so.1 pnpm test
             ls -la
   universal-macOS:
     name: Build universal macOS binary
@@ -376,10 +370,10 @@ jobs:
         with:
           node-version: 20
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
       - name: Download macOS x64 artifact
         uses: actions/download-artifact@v4.1.8
         with:
@@ -391,7 +385,7 @@ jobs:
           name: bindings-aarch64-apple-darwin
           path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Combine binaries
-        run: yarn universal
+        run: pnpm universal
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -427,19 +421,19 @@ jobs:
         with:
           node-version: 20
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
           registry-url: https://registry.npmjs.org/
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
-        run: yarn install
+        run: pnpm install
       - name: Download all artifacts
         uses: actions/download-artifact@v4.1.8
         with:
           path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Move artifacts
         working-directory: ${{ env.SUBDIRECTORY }}
-        run: yarn artifacts
+        run: pnpm artifacts
       - name: List packages
         working-directory: ${{ env.SUBDIRECTORY }}
         run: ls -R ./npm

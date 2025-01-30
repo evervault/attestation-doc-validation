@@ -29,12 +29,12 @@ jobs:
         with:
           node-version: '20'
           check-latest: true
-          cache: yarn
-          cache-dependency-path: ./node-attestation-bindings/yarn.lock
+          cache: pnpm
+          cache-dependency-path: ./node-attestation-bindings/pnpm.lock
       - uses: davidB/rust-cargo-make@63a0488810710962bfe5dc150b3fa313a08738fe # 1.12.1
       - name: Install dependencies
         working-directory: node-attestation-bindings
-        run: yarn install
+        run: pnpm install
       - name: Test node bindings
         working-directory: node-attestation-bindings
         run: cargo make test
