@@ -16,16 +16,22 @@ extern "C" {
     fn error(s: &str);
 }
 
-#[wasm_bindgen(getter_with_clone)]
+// PCR class for mapping between JS and rust.
+#[wasm_bindgen(js_name = PCRs)]
 pub struct JsPCRs {
+    #[wasm_bindgen(getter_with_clone, js_name = hashAlgorithm)]
     pub hash_algorithm: Option<String>,
+    #[wasm_bindgen(getter_with_clone, js_name = pcr0)]
     pub pcr_0: Option<String>,
+    #[wasm_bindgen(getter_with_clone, js_name = pcr1)]
     pub pcr_1: Option<String>,
+    #[wasm_bindgen(getter_with_clone, js_name = pcr2)]
     pub pcr_2: Option<String>,
+    #[wasm_bindgen(getter_with_clone, js_name = pcr8)]
     pub pcr_8: Option<String>,
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = PCRs)]
 impl JsPCRs {
     #[wasm_bindgen(constructor)]
     pub fn new(
@@ -44,6 +50,12 @@ impl JsPCRs {
       }
     }
 
+    /// Helper to create an empty PCR container, to support setting the PCRs explicitly
+    /// ```js
+    /// const pcrs = PCRs.empty();
+    /// pcrs.pcr0 = "...";
+    /// pcrs.pcr8 = "...";
+    /// ```
     pub fn empty() -> Self {
       Self {
         pcr_0: None,
@@ -52,31 +64,6 @@ impl JsPCRs {
         pcr_8: None,
         hash_algorithm: None
       }
-    }
-
-    #[wasm_bindgen(js_name = setPcr0)]
-    pub fn set_pcr0(&mut self, pcr_0: String) {
-      self.pcr_0 = Some(pcr_0);
-    }
-
-    #[wasm_bindgen(js_name = setPcr1)]
-    pub fn set_pcr1(&mut self, pcr_1: String) {
-      self.pcr_1 = Some(pcr_1);
-    }
-
-    #[wasm_bindgen(js_name = setPcr2)]
-    pub fn set_pcr2(&mut self, pcr_2: String) {
-      self.pcr_2 = Some(pcr_2);
-    }
-
-    #[wasm_bindgen(js_name = setPcr8)]
-    pub fn set_pcr8(&mut self, pcr_8: String) {
-      self.pcr_8 = Some(pcr_8);
-    }
-
-    #[wasm_bindgen(js_name = setHashAlgorithm)]
-    pub fn set_hash_algorithm(&mut self, hash_algorithm: String) {
-      self.hash_algorithm = Some(hash_algorithm);
     }
 }
 
