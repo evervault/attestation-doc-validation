@@ -15,8 +15,8 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn error(s: &str);
 }
+
 #[wasm_bindgen(getter_with_clone)]
-#[derive(Debug)]
 pub struct JsPCRs {
     pub hash_algorithm: Option<String>,
     pub pcr_0: Option<String>,
