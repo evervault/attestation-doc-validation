@@ -15,14 +15,28 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn error(s: &str);
 }
-
 #[wasm_bindgen(getter_with_clone)]
+#[derive(Debug)]
 pub struct JsPCRs {
     pub hash_algorithm: Option<String>,
     pub pcr_0: Option<String>,
     pub pcr_1: Option<String>,
     pub pcr_2: Option<String>,
     pub pcr_8: Option<String>,
+}
+
+#[wasm_bindgen]
+impl JsPCRs {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self {
+            hash_algorithm: None,
+            pcr_0: None,
+            pcr_1: None,
+            pcr_2: None,
+            pcr_8: None,
+        }
+    }
 }
 
 impl PCRProvider for JsPCRs {
@@ -109,7 +123,7 @@ pub fn attest_enclave(
 #[wasm_bindgen]
 pub fn validate_attestation_doc_pcrs(
     attestation_doc: &str,
-    expected_pcrs_list: Box<[JsPCRs]>,
+    expected_pcrs_list: JsPCRs,
 ) -> bool {
     console_error_panic_hook::set_once();
     let decoded_ad = match BASE64_STANDARD.decode(attestation_doc.as_bytes()) {
@@ -131,12 +145,10 @@ pub fn validate_attestation_doc_pcrs(
     };
 
     let mut observed_error = None;
-    for expected_pcrs in expected_pcrs_list.as_ref() {
-        match validate_expected_pcrs(&validated_attestation_doc, expected_pcrs) {
-            Ok(_) => return true,
-            Err(err) => {
-                observed_error = Some(err);
-            }
+    match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs_list) {
+        Ok(_) => return true,
+        Err(err) => {
+            observed_error = Some(err);
         }
     }
 
