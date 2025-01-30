@@ -27,11 +27,11 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           check-latest: true
           cache: yarn
           cache-dependency-path: ./node-attestation-bindings/yarn.lock
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@63a0488810710962bfe5dc150b3fa313a08738fe # 1.12.1
       - name: Install dependencies
         working-directory: node-attestation-bindings
         run: yarn install
