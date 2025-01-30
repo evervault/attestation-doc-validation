@@ -93,8 +93,8 @@ jobs:
         with:
           node-version: 20
           check-latest: true
-          cache: pnpm
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
+      - uses: pnpm/action-setup@v4
+        if: ${{ !matrix.settings.docker }}
       - name: Install
         uses: dtolnay/rust-toolchain@stable
         if: ${{ !matrix.settings.docker }}
@@ -129,10 +129,9 @@ jobs:
         if: ${{ matrix.settings.target == 'i686-pc-windows-msvc' }}
         with:
           node-version: 20
-          check-latest: true
-          cache: pnpm
           architecture: x86
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
+      - uses: pnpm/action-setup@v4
+        if: ${{ matrix.settings.target == 'i686-pc-windows-msvc' }}
       - name: Build in docker
         uses: addnab/docker-run-action@v3
         if: ${{ matrix.settings.docker }}
@@ -175,10 +174,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
-          check-latest: true
-          cache: pnpm
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
+          node-version: '20'
+      - uses: pnpm/action-setup@v4
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
@@ -211,10 +208,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
-          check-latest: true
-          cache: pnpm
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
+          node-version: '20'
+      - uses: pnpm/action-setup@v4
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
@@ -368,10 +363,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 20
-          check-latest: true
-          cache: pnpm
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
+          node-version: '20'
+      - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install
       - name: Download macOS x64 artifact
@@ -419,11 +412,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 20
-          check-latest: true
-          cache: pnpm
-          cache-dependency-path: ./${{ env.SUBDIRECTORY }}/pnpm.lock
-          registry-url: https://registry.npmjs.org/
+          node-version: '20'
+      - uses: pnpm/action-setup@v4
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
         run: pnpm install

@@ -28,9 +28,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          check-latest: true
-          cache: pnpm
-          cache-dependency-path: ./node-attestation-bindings/pnpm.lock
+      - uses: pnpm/action-setup@v4
       - uses: davidB/rust-cargo-make@63a0488810710962bfe5dc150b3fa313a08738fe # 1.12.1
       - name: Install dependencies
         working-directory: node-attestation-bindings
