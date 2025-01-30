@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example Browser Attestation Client</title>
+</head>
+<body>
+  <script type="module">
+    import init, { validateAttestationDocPcrs, PCRs } from './pkg/index.js';
+
+    function readInput(id) {
+      return document.getElementById(id).value;
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).innerText = value;
+    }
+
+    let initializationPromise = init();
+    async function run() {
+      setText('error', '');
+      setText('result', '');
+      try {
+        await initializationPromise;
+        const pcrContainer = PCRs.empty();
+        pcrContainer.pcr0 = readInput('expected-pcr0');
+        const expectedPcrs = [pcrContainer];
+        const enclaveHostname = readInput('enclave-hostname');
+        const { attestation_doc: attestationDoc } = await fetch(`https://${enclaveHostname}/.well-known/attestation`).then(res => res.json());
+        console.log(expectedPcrs);
+        const result = validateAttestationDocPcrs(attestationDoc, expectedPcrs);
+        console.log("Attestation doc validation result:", result);
+        setText('result', result ? 'Success' : 'Failure');
+      } catch (e) {
+        console.error(e);
+        setText('error', e.message);
+      }
+    }
+    document.getElementById('run-attest').addEventListener('click', run);
+  </script>
+
+  <div>
+    <div>
+      <p>Enter your enclave hostname:</p>
+      <input type="text" id="enclave-hostname" value="my-enclave.app_deadbeef.enclave.evervault.com" />
+    </div>
+    <div>
+      <p>Enter your expected pcr0 value:</p>
+      <input type="text" id="expected-pcr0" value="MY_PCR0" />
+    </div>
+    <button id="run-attest">Attest</button>
+    <p>Attestation result: <span id="result" style="font-weight:bold"></span></p>
+    <p id="error" style="color:red"></p>
+  </div>
+</body>
+</html>
