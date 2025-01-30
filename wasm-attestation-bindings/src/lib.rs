@@ -25,6 +25,61 @@ pub struct JsPCRs {
     pub pcr_8: Option<String>,
 }
 
+#[wasm_bindgen]
+impl JsPCRs {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        pcr_0: Option<String>,
+        pcr_1: Option<String>,
+        pcr_2: Option<String>,
+        pcr_8: Option<String>,
+        hash_algorithm: Option<String>,
+    ) -> Self {
+      Self {
+        pcr_0,
+        pcr_1,
+        pcr_2,
+        pcr_8,
+        hash_algorithm
+      }
+    }
+
+    pub fn empty() -> Self {
+      Self {
+        pcr_0: None,
+        pcr_1: None,
+        pcr_2: None,
+        pcr_8: None,
+        hash_algorithm: None
+      }
+    }
+
+    #[wasm_bindgen(js_name = setPcr0)]
+    pub fn set_pcr0(&mut self, pcr_0: String) {
+      self.pcr_0 = Some(pcr_0);
+    }
+
+    #[wasm_bindgen(js_name = setPcr1)]
+    pub fn set_pcr1(&mut self, pcr_1: String) {
+      self.pcr_1 = Some(pcr_1);
+    }
+
+    #[wasm_bindgen(js_name = setPcr2)]
+    pub fn set_pcr2(&mut self, pcr_2: String) {
+      self.pcr_2 = Some(pcr_2);
+    }
+
+    #[wasm_bindgen(js_name = setPcr8)]
+    pub fn set_pcr8(&mut self, pcr_8: String) {
+      self.pcr_8 = Some(pcr_8);
+    }
+
+    #[wasm_bindgen(js_name = setHashAlgorithm)]
+    pub fn set_hash_algorithm(&mut self, hash_algorithm: String) {
+      self.hash_algorithm = Some(hash_algorithm);
+    }
+}
+
 impl PCRProvider for JsPCRs {
     fn pcr_0(&self) -> Option<&str> {
         self.pcr_0.as_deref()
@@ -47,7 +102,9 @@ const LOG_NAMESPACE: &'static str = "ATTESTATION ::";
 
 /// A client can call out to `<enclave-url>/.well-known/attestation` to fetch the attestation doc from the Enclave
 /// The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
-#[wasm_bindgen]
+/// Note: this is the typical attestation flow used in our server side SDK, but is unlikely to be usable in browser
+/// as there's no access to the Remote TLS Certificate. You likely need the validateAttestationDocPcrs function.
+#[wasm_bindgen(js_name = attestEnclave)]
 pub fn attest_enclave(
     cert: Box<[u8]>,
     expected_pcrs_list: Box<[JsPCRs]>,
@@ -106,7 +163,7 @@ pub fn attest_enclave(
 
 /// A client can call out to `<enclave-url>/.well-known/attestation` to fetch the attestation doc from the Enclave
 /// The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = validateAttestationDocPcrs)]
 pub fn validate_attestation_doc_pcrs(
     attestation_doc: &str,
     expected_pcrs_list: Box<[JsPCRs]>,
