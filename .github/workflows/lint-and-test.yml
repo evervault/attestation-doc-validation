@@ -55,13 +55,17 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      # - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: node-attestation-bindings
         run: yarn install
       - name: Test node bindings
         working-directory: node-attestation-bindings
-        run: cargo make test
+        run: |
+          sudo apt-get install -y libfaketime
+          yarn
+          yarn run build
+          LD_PRELOAD="/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1" FAKETIME="2023-09-18 15:16:05" yarn test
   build_and_test_python:
     runs-on: ubuntu-latest
     steps:
