@@ -13,5 +13,5 @@ name = "evervault_attestation_bindings"
 crate-type = ["cdylib"]
 
 [dependencies]
-attestation-doc-validation = { version = "0.9.0" }
+attestation-doc-validation = { version = "0.10.0" }
 pyo3 = { version = "0.18", features = ["extension-module"] }

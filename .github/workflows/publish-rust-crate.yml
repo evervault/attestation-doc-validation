@@ -19,7 +19,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
       - name: Ensure version of crate matches release
@@ -40,7 +39,6 @@ jobs:
       - name: Install latest stable toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
@@ -54,7 +52,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
@@ -69,7 +66,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b

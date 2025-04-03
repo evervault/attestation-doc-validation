@@ -11,4 +11,4 @@ repository = "https://github.com/evervault/attestation-doc-validation"
 crate-type = ["staticlib"]
 
 [dependencies]
-attestation-doc-validation = "0.6.3"
+attestation-doc-validation = "0.10.0"
