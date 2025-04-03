@@ -71,7 +71,6 @@ jobs:
           command: build
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: '1.79.0'
         env:
           PYO3_CROSS_PYTHON_VERSION: '3.9'
       - name: Build and Test
