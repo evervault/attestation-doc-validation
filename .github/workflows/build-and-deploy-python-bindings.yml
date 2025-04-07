@@ -105,7 +105,6 @@ jobs:
       - uses: actions/download-artifact@v4.1.8
         with:
           path: python-attestation-bindings/wheels
-          name: wheels
           pattern: wheels-*
           merge-multiple: true
       - name: Publish to PyPI
