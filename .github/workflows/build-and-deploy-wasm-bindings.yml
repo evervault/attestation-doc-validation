@@ -2,6 +2,8 @@ name: Build and Publish WASM Package
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'wasm-attestation-bindings/**'
 
@@ -20,6 +22,7 @@ jobs:
           override: true
           target: wasm32-unknown-unknown
 
+      # wasm-pack is pinned to 0.12.1 as later versions are not compatible with rust 1.79 this can be removed when we upgrade to rust 1.81
       - name: Install wasm-pack
         run: cargo install wasm-pack --version 0.12.1 --locked
 
