@@ -13,3 +13,4 @@ attestation-doc-validation = { path = "../attestation-doc-validation" }
 base64 = "0.22.1"
 console_error_panic_hook = "0.1.7"
 wasm-bindgen = "0.2.99"
+
