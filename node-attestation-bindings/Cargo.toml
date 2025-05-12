@@ -17,4 +17,4 @@ napi-derive = "2.9.4"
 attestation-doc-validation = "0.6.3"
 
 [build-dependencies]
-napi-build = "2.0.1"
+napi-build = "=2.0.1"
