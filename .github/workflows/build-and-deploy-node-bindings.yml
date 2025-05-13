@@ -5,17 +5,17 @@ env:
   SUBDIRECTORY: node-attestation-bindings
   MACOSX_DEPLOYMENT_TARGET: '10.13'
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'node/v*'
-    paths-ignore:
-      - '**/*.md'
-      - LICENSE
-      - '**/*.gitignore'
-      - .editorconfig
-      - docs/**
+  # push:
+  #   branches:
+  #     - main
+  #   tags:
+  #     - 'node/v*'
+  #   paths-ignore:
+  #     - '**/*.md'
+  #     - LICENSE
+  #     - '**/*.gitignore'
+  #     - .editorconfig
+  #     - docs/**
   pull_request: null
 jobs:
   build:
