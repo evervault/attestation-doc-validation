@@ -1,0 +1,74 @@
+name: Build and Publish WASM Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'wasm-attestation-bindings/**'
+      - 'attestation-doc-validation/**'
+      - '.github/workflows/build-and-deploy-wasm-bindings.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.79.0
+          override: true
+          target: wasm32-unknown-unknown
+
+      # wasm-pack is pinned to 0.12.1 as later versions are not compatible with rust 1.79 this can be removed when we upgrade to rust 1.81
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --version 0.12.1 --locked
+
+      - name: Build WASM bindings
+        run: |
+          wasm-pack build ./wasm-attestation-bindings \
+            -s evervault \
+            --out-name index \
+            --release \
+            --target web
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-attestation-bindings
+          path: wasm-attestation-bindings/pkg/
+
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/wasm/v')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --version 0.12.1 --locked
+
+      - name: Build WASM bindings
+        run: |
+          wasm-pack build ./wasm-attestation-bindings \
+            -s evervault \
+            --out-name index \
+            --release \
+            --target web
+
+      - name: Publish to NPM
+        run: npm publish --access public
+        working-directory: wasm-attestation-bindings/pkg
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
