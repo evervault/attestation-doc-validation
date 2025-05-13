@@ -3,7 +3,7 @@ authors = ["Evervault Engineering engineering@evervault.com"]
 edition = "2021"
 name = "wasm-attestation-bindings"
 publish = false
-version = "0.0.0"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
