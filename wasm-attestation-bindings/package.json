@@ -24,6 +24,9 @@
       "evervault"
     ],
     "author": "Evervault",
-    "license": "MIT"
+    "license": "MIT",
+    "publishConfig": {
+      "access": "public"
+    }
   }
   
