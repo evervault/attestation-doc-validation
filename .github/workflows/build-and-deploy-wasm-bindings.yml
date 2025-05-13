@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'wasm-attestation-bindings/**'
+      - 'attestation-doc-validation/**'
+      - '.github/workflows/build-and-deploy-wasm-bindings.yml'
 
 jobs:
   build:
