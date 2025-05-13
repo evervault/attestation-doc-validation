@@ -20,10 +20,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@4a967c1422bcefedc3e9d03815f71eecdc71e5b7
         with:
-          toolchain: 1.79.0
-          override: true
           target: wasm32-unknown-unknown
 
       # wasm-pack is pinned to 0.12.1 as later versions are not compatible with rust 1.79 this can be removed when we upgrade to rust 1.81
@@ -53,10 +51,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@4a967c1422bcefedc3e9d03815f71eecdc71e5b7
         with:
-          toolchain: 1.79.0
-          override: true
           target: wasm32-unknown-unknown
 
       - name: Set up Node.js
