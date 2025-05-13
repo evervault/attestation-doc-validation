@@ -10,7 +10,7 @@ on:
       - 'wasm-attestation-bindings/**'
       - 'attestation-doc-validation/**'
       - '.github/workflows/build-and-deploy-wasm-bindings.yml'
-
+  pull_request: 
 jobs:
   build:
     runs-on: ubuntu-latest
