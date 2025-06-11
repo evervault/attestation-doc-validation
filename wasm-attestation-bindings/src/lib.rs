@@ -1,6 +1,7 @@
+use std::str::Bytes;
+
 use attestation_doc_validation::{
-    parse_cert, validate_and_parse_attestation_doc, validate_attestation_doc_against_cert,
-    validate_expected_pcrs, PCRProvider,
+    attestation_doc::decode_attestation_document, parse_cert, validate_and_parse_attestation_doc, validate_attestation_doc_against_cert, validate_expected_pcrs, PCRProvider
 };
 use base64::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -192,5 +193,17 @@ pub fn validate_attestation_doc_pcrs(
             error(&error_msg);
             false
         }
+    }
+}
+
+
+/// Return the user data from the attestation doc
+#[wasm_bindgen(js_name = getUserData)]
+pub fn get_user_data(
+    attestation_doc: &[u8],
+) -> Result<Option<Vec<u8>>, JsValue> {
+    match decode_attestation_document(attestation_doc) {
+        Ok((_, doc)) => Ok(doc.user_data.map(|buf| buf.to_vec())),
+        Err(e) => Err(JsValue::from_str(&format!("Failed to decode attestation document: {:?}", e))),
     }
 }
