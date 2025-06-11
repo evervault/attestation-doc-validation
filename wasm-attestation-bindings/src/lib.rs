@@ -1,7 +1,8 @@
 use std::str::Bytes;
 
 use attestation_doc_validation::{
-    attestation_doc::decode_attestation_document, parse_cert, validate_and_parse_attestation_doc, validate_attestation_doc_against_cert, validate_expected_pcrs, PCRProvider
+    attestation_doc::decode_attestation_document, parse_cert, validate_and_parse_attestation_doc,
+    validate_attestation_doc_against_cert, validate_expected_pcrs, PCRProvider,
 };
 use base64::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -42,13 +43,13 @@ impl JsPCRs {
         pcr_8: Option<String>,
         hash_algorithm: Option<String>,
     ) -> Self {
-      Self {
-        pcr_0,
-        pcr_1,
-        pcr_2,
-        pcr_8,
-        hash_algorithm
-      }
+        Self {
+            pcr_0,
+            pcr_1,
+            pcr_2,
+            pcr_8,
+            hash_algorithm,
+        }
     }
 
     /// Helper to create an empty PCR container, to support setting the PCRs explicitly
@@ -58,13 +59,13 @@ impl JsPCRs {
     /// pcrs.pcr8 = "...";
     /// ```
     pub fn empty() -> Self {
-      Self {
-        pcr_0: None,
-        pcr_1: None,
-        pcr_2: None,
-        pcr_8: None,
-        hash_algorithm: None
-      }
+        Self {
+            pcr_0: None,
+            pcr_1: None,
+            pcr_2: None,
+            pcr_8: None,
+            hash_algorithm: None,
+        }
     }
 }
 
@@ -196,18 +197,23 @@ pub fn validate_attestation_doc_pcrs(
     }
 }
 
-
 /// Return the user data from the attestation doc
 #[wasm_bindgen(js_name = getUserData)]
-pub fn get_user_data(
-    attestation_doc: &str,
-) -> Result<Option<Vec<u8>>, JsValue> {
+pub fn get_user_data(attestation_doc: &str) -> Result<Option<Vec<u8>>, JsValue> {
     let decoded_ad = match BASE64_STANDARD.decode(attestation_doc.as_bytes()) {
         Ok(ad) => ad,
-        Err(e) => return Err(JsValue::from_str(&format!("Failed to decode attestation document: {:?}", e))),
+        Err(e) => {
+            return Err(JsValue::from_str(&format!(
+                "Failed to decode attestation document: {:?}",
+                e
+            )))
+        }
     };
     match decode_attestation_document(&decoded_ad) {
         Ok((_, doc)) => Ok(doc.user_data.map(|buf| buf.to_vec())),
-        Err(e) => Err(JsValue::from_str(&format!("Failed to decode attestation document: {:?}", e))),
+        Err(e) => Err(JsValue::from_str(&format!(
+            "Failed to decode attestation document: {:?}",
+            e
+        ))),
     }
 }
