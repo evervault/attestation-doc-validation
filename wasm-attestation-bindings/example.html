@@ -7,7 +7,7 @@
 </head>
 <body>
   <script type="module">
-    import init, { validateAttestationDocPcrs, PCRs } from './pkg/index.js';
+    import init, { validateAttestationDocPcrs, PCRs, getUserData } from './pkg/index.js';
 
     function readInput(id) {
       return document.getElementById(id).value;
@@ -31,6 +31,8 @@
         console.log(expectedPcrs);
         const result = validateAttestationDocPcrs(attestationDoc, expectedPcrs);
         console.log("Attestation doc validation result:", result);
+        const userData = getUserData(attestationDoc);
+        console.log("User data:", userData);
         setText('result', result ? 'Success' : 'Failure');
       } catch (e) {
         console.error(e);
