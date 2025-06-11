@@ -200,9 +200,13 @@ pub fn validate_attestation_doc_pcrs(
 /// Return the user data from the attestation doc
 #[wasm_bindgen(js_name = getUserData)]
 pub fn get_user_data(
-    attestation_doc: &[u8],
+    attestation_doc: &str,
 ) -> Result<Option<Vec<u8>>, JsValue> {
-    match decode_attestation_document(attestation_doc) {
+    let decoded_ad = match BASE64_STANDARD.decode(attestation_doc.as_bytes()) {
+        Ok(ad) => ad,
+        Err(e) => return Err(JsValue::from_str(&format!("Failed to decode attestation document: {:?}", e))),
+    };
+    match decode_attestation_document(&decoded_ad) {
         Ok((_, doc)) => Ok(doc.user_data.map(|buf| buf.to_vec())),
         Err(e) => Err(JsValue::from_str(&format!("Failed to decode attestation document: {:?}", e))),
     }
