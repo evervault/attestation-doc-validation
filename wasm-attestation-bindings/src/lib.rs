@@ -197,7 +197,7 @@ pub fn validate_attestation_doc_pcrs(
     }
 }
 
-/// Return the user data from the attestation doc
+/// Given an attestation document, return the user data if it exists
 #[wasm_bindgen(js_name = getUserData)]
 pub fn get_user_data(attestation_doc: &str) -> Result<Option<Vec<u8>>, JsValue> {
     let decoded_ad = match BASE64_STANDARD.decode(attestation_doc.as_bytes()) {
