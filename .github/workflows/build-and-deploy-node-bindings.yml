@@ -187,7 +187,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@63a0488810710962bfe5dc150b3fa313a08738fe
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
         run: yarn install
@@ -229,7 +229,7 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
+      - uses: davidB/rust-cargo-make@63a0488810710962bfe5dc150b3fa313a08738fe
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
         run: |
