@@ -202,7 +202,7 @@ mod test {
 
     use rcgen::generate_simple_self_signed;
 
-    fn embed_attestation_doc_in_cert(hostname: &str, cose_bytes: &[u8]) -> rcgen::Certificate {
+    fn embed_attestation_doc_in_cert(hostname: &str, cose_bytes: &[u8]) -> rcgen::CertifiedKey<rcgen::KeyPair> {
         let subject_alt_names = vec![
             hostname.to_string(),
             format!("{}.{hostname}", hex::encode(cose_bytes)),
@@ -211,8 +211,8 @@ mod test {
         generate_simple_self_signed(subject_alt_names).unwrap()
     }
 
-    fn rcgen_cert_to_der(cert: rcgen::Certificate) -> Vec<u8> {
-        cert.serialize_der().unwrap()
+    fn rcgen_cert_to_der(cert: rcgen::CertifiedKey<rcgen::KeyPair>) -> Vec<u8> {
+        cert.cert.der().to_vec()
     }
 
     #[test]
