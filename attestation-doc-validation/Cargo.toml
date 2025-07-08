@@ -39,12 +39,12 @@ aws-nitro-enclaves-nsm-api = { version = "^0.4", default-features = false }
 # Override indirect dependency of rand to force getrandom to have wasm support
 getrandom = { version = "0.2", features = ["js"] }
 # Add wasm support to time
-time = { version = "0.3", features = ["wasm-bindgen"] }
+time = { version = "0.3.35", features = ["wasm-bindgen"] }
 # Include wasm bindings to create a time-shim module
 wasm-bindgen = { version = "0.2.99" }
 
 [dev-dependencies]
-rcgen = "0.10"
+rcgen = "0.14.1"
 base64 = "0.21"
 serde_json = "1"
 pem = "1.1.1"

@@ -56,7 +56,7 @@ impl PCRs {
     fn __getitem__<'py>(&self, py: Python<'py>, key: PyObject) -> PyResult<PyObject> {
         let lookup_key = key.extract::<String>(py)?.to_lowercase();
         let matching_pcr = self.lookup_pcr(&lookup_key);
-        let pcr_object = matching_pcr.map(String::from).to_object(py);
+        let pcr_object = matching_pcr.map(String::from).into_py(py);
         Ok(pcr_object)
     }
 
@@ -172,7 +172,7 @@ pub fn attest_enclave(
 
 /// A small python module offering bindings to the rust attestation doc validation project
 #[pymodule]
-fn evervault_attestation_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
+fn evervault_attestation_bindings(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(attest_connection, m)?)?;
     m.add_function(wrap_pyfunction!(attest_cage, m)?)?;
     m.add_function(wrap_pyfunction!(attest_enclave, m)?)?;

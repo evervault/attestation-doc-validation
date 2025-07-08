@@ -9,7 +9,7 @@ version = "0.2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-attestation-doc-validation = { path = "../attestation-doc-validation" }
+attestation-doc-validation = { version = "0.10.0" }
 base64 = "0.22.1"
 console_error_panic_hook = "0.1.7"
 wasm-bindgen = "0.2.99"
