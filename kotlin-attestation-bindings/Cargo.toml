@@ -8,16 +8,12 @@ name = "bindings"
 crate-type = ["cdylib"]
 
 [dependencies]
-attestation-doc-validation = "0.6.3"
-uniffi = { version = "0.24.1" }
+attestation-doc-validation = "0.10.0"
+uniffi = { version = "0.28.0" }
 
 [build-dependencies]
-uniffi = { version = "0.24.1", features = [ "build" ] }
+uniffi = { version = "0.28.0", features = [ "build" ] }
 
-[[bin]]
-# This can be whatever name makes sense for your project, but the rest of this tutorial assumes uniffi-bindgen.
-name = "uniffi-bindgen"
-path = "uniffi-bindgen.rs"
 
 #[target.'cfg(target_os="android")'.dependencies]
 #jni = { version = "0.20", default-features = false }

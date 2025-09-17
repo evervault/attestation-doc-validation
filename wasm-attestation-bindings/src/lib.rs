@@ -1,4 +1,3 @@
-use std::str::Bytes;
 
 use attestation_doc_validation::{
     attestation_doc::decode_attestation_document, parse_cert, validate_and_parse_attestation_doc,
