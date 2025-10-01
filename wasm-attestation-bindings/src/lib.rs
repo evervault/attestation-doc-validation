@@ -217,3 +217,24 @@ pub fn get_user_data(attestation_doc: &str) -> Result<Option<Vec<u8>>, JsValue> 
         ))),
     }
 }
+
+/// Given an attestation document, return the nonce if it exists
+#[wasm_bindgen(js_name = getNonce)]
+pub fn get_nonce(attestation_doc: &str) -> Result<Option<Vec<u8>>, JsValue> {
+    let decoded_ad = match BASE64_STANDARD.decode(attestation_doc.as_bytes()) {
+        Ok(ad) => ad,
+        Err(e) => {
+            return Err(JsValue::from_str(&format!(
+                "Failed to decode attestation document: {:?}",
+                e
+            )))
+        }
+    };
+    match decode_attestation_document(&decoded_ad) {
+        Ok((_, doc)) => Ok(doc.nonce.map(|buf| buf.to_vec())),
+        Err(e) => Err(JsValue::from_str(&format!(
+            "Failed to decode attestation document: {:?}",
+            e
+        ))),
+    }
+}
