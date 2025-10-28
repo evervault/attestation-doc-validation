@@ -1,6 +1,6 @@
 {
   "name": "@evervault/wasm-attestation-bindings",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "WebAssembly bindings for Nitro Enclave attestation document validation",
   "main": "index.js",
   "module": "index.js",
