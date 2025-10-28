@@ -1996,7 +1996,7 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
 name = "wasm-attestation-bindings"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "attestation-doc-validation 0.10.0",
  "base64 0.22.1",
