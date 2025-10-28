@@ -18,7 +18,6 @@ jobs:
           command: build
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - uses: docker/setup-qemu-action@v3
       - uses: PyO3/maturin-action@v1
         with:
@@ -27,7 +26,6 @@ jobs:
           target: armv7-unknown-linux-gnueabihf
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
@@ -35,7 +33,6 @@ jobs:
           target: aarch64-unknown-linux-gnu
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: 'musllinux_1_2'
@@ -43,7 +40,6 @@ jobs:
           target: aarch64-unknown-linux-musl
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -58,7 +54,6 @@ jobs:
           command: build
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -75,7 +70,6 @@ jobs:
             --release -o dist --find-interpreter --target
             universal2-apple-darwin
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -115,4 +109,3 @@ jobs:
           command: upload
           args: --skip-existing *
           working-directory: python-attestation-bindings/wheels
-          rust-toolchain: 1.79.0

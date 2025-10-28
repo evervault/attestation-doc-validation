@@ -20,7 +20,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@4a967c1422bcefedc3e9d03815f71eecdc71e5b7
+        # 1.88.0
+        uses: dtolnay/rust-toolchain@6691ebadcb18182cc1391d07c9f295f657c593cd
         with:
           target: wasm32-unknown-unknown
 
@@ -51,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@4a967c1422bcefedc3e9d03815f71eecdc71e5b7
+        uses: dtolnay/rust-toolchain@6691ebadcb18182cc1391d07c9f295f657c593cd
         with:
           target: wasm32-unknown-unknown
 

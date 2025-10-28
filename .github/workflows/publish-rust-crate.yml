@@ -17,11 +17,6 @@ jobs:
     needs: [get-version]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - name: Ensure version of crate matches release
         id: get-cargo-version
         run: |
@@ -37,12 +32,6 @@ jobs:
     needs: [get-version, assert-matching-version]
     steps:
       - uses: actions/checkout@v4
-      - name: Install latest stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
@@ -52,11 +41,6 @@ jobs:
     needs: [get-version, assert-matching-version, run-ci-checks]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Package and Publish Cargo to registry
         working-directory: attestation-doc-validation
@@ -67,11 +51,6 @@ jobs:
     needs: [get-version, assert-matching-version, dry-run-publish]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Package and Publish Cargo to registry
         working-directory: attestation-doc-validation
