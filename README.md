@@ -56,6 +56,41 @@ To run tests
 maturin develop && pytest
 ```
 
+## Wasm Setup Guide
+
+The WASM project requires [wasm-pack](https://rustwasm.github.io/wasm-pack/).
+
+To build the WASM bindings, you can run the following command:
+
+```sh
+wasm-pack build ./wasm-attestation-bindings -s evervault --out-name index --release --target=web
+```
+
+This will:
+- Build the wasm lib, with the output going into `./wasm-attestation-bindings/pkg`
+- Sets the `scope` of the output JS package as `@evervault` (so the full name as `@evervault/wasm-attestation-bindings`)
+- Use `index` as the base for each file name e.g. `index.js`, `index_bg.js`, `index_bg.wasm` etc.
+- Sets the build to be a release build, targetting the web as its platform.
+
+### Compiling WASM on Mac
+
+It's not possible to compile the wasm bindings on Mac using the version of Clang shipped in MacOS. 
+One approach to get around this is to install LLVM from homebrew, and set it as your C-Compiler using the `TARGET_CC` env var:
+
+```sh
+TARGET_CC="/opt/homebrew/opt/llvm/bin/clang" wasm-pack build ./wasm-attestation-bindings -s evervault --out-name index --release --target=web
+```
+
+### A Note on Attesting from Web Browsers
+
+The process of attesting an Enclave involves validating the attestation document structure, its signature, the embedded PCRs, and, *crucially* that it contains the public key of the current TLS
+certificate as its challenge — this final step allows us to confidently assert that the TLS connection is being terminated by the Enclave, 
+and acts as a bind between the code integrity of the attestation document, and the host identity of the TLS certificate.
+
+The attestation process is slightly hindered when performed in a web browser. Web browsers do not expose any details of the remote server's TLS certificate to the client. This makes it impossible to perform our full attestation process as we cannot check that the TLS public key is in the returned attestation document. 
+
+This changes the trust model drastically, and should be deeply considered if integrating.
+
 ## Makefile
 
 Each project has some useful tasks defined in their `Makefile.toml`:

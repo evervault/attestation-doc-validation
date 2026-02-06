@@ -87,7 +87,7 @@ impl PCRProvider for PCRs {
     }
 }
 
-/// Top level function to attest the Cage being connected to.
+/// Top level function to attest the Enclave being connected to.
 /// * If the cert fails to parse, return an error
 /// * If the attestation doc fails to validate, return an error
 /// * If the list of PCRs to check is empty, return true
@@ -111,6 +111,7 @@ pub fn attest_connection(cert: &[u8], expected_pcrs_list: Vec<PCRs>) -> PyResult
     result
 }
 
+/// Note: this function is deprecated. Users should update to consume the `attest_enclave` entrypoint.
 /// Top level function to attest the Cage being connected to.
 /// * If the cert fails to parse, return an error
 /// * If the attestation doc fails to validate, return an error
@@ -140,11 +141,41 @@ pub fn attest_cage(
     result
 }
 
+/// Top level function to attest the Enclave being connected to.
+/// * If the cert fails to parse, return an error
+/// * If the attestation doc fails to validate, return an error
+/// * If the list of PCRs to check is empty, return true
+/// * If any of the PCRs in the list match, return true
+/// * If they all fail, return the last error
+#[pyfunction]
+pub fn attest_enclave(
+    cert: &[u8],
+    expected_pcrs_list: Vec<PCRs>,
+    attestation_doc: &[u8],
+) -> PyResult<bool> {
+    let parsed_cert = parse_cert(cert.as_ref())
+        .map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
+
+    let validated_attestation_doc =
+        validate_attestation_doc_against_cert(&parsed_cert, attestation_doc.as_ref())
+            .map_err(|parse_err| PyValueError::new_err(format!("{parse_err}")))?;
+
+    let mut result = Ok(true);
+    for expected_pcrs in expected_pcrs_list {
+        match validate_expected_pcrs(&validated_attestation_doc, &expected_pcrs) {
+            Ok(_) => return Ok(true),
+            Err(err) => result = Err(PyValueError::new_err(format!("{err}"))),
+        }
+    }
+    result
+}
+
 /// A small python module offering bindings to the rust attestation doc validation project
 #[pymodule]
 fn evervault_attestation_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(attest_connection, m)?)?;
     m.add_function(wrap_pyfunction!(attest_cage, m)?)?;
+    m.add_function(wrap_pyfunction!(attest_enclave, m)?)?;
     m.add_class::<PCRs>()?;
     Ok(())
 }
