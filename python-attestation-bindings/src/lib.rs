@@ -2,11 +2,10 @@ use attestation_doc_validation::{
     attestation_doc::{validate_expected_pcrs, PCRProvider},
     parse_cert, validate_attestation_doc_against_cert, validate_attestation_doc_in_cert,
 };
-use pyo3::exceptions::PyValueError;
-use pyo3::prelude::*;
+use pyo3::{exceptions::PyValueError, prelude::*};
 
 #[pyclass]
-#[derive(Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, FromPyObject, Default)]
 
 pub struct PCRs {
     pcr_0: Option<String>,
@@ -47,17 +46,20 @@ impl PCRs {
         }
     }
 
-    fn __contains__<'py>(&self, py: Python<'py>, key: PyObject) -> PyResult<bool> {
-        let lookup_key = key.extract::<String>(py)?.to_lowercase();
+    fn __contains__<'py>(&self, key: &Bound<'py, PyAny>) -> PyResult<bool> {
+        let lookup_key = key.extract::<String>()?.to_lowercase();
         let matching_pcr = self.lookup_pcr(&lookup_key);
         Ok(matching_pcr.is_some())
     }
 
-    fn __getitem__<'py>(&self, py: Python<'py>, key: PyObject) -> PyResult<PyObject> {
-        let lookup_key = key.extract::<String>(py)?.to_lowercase();
-        let matching_pcr = self.lookup_pcr(&lookup_key);
-        let pcr_object = matching_pcr.map(String::from).to_object(py);
-        Ok(pcr_object)
+    fn __getitem__<'py>(&self, key: &Bound<'py, PyAny>) -> PyResult<Option<String>> {
+        let lookup_key = key.extract::<String>()?.to_lowercase();
+        let Some(matching_pcr) = self.lookup_pcr(&lookup_key) else {
+            return Ok(None);
+        };
+
+        let pcr_object = String::from(matching_pcr);
+        Ok(Some(pcr_object))
     }
 
     fn __str__(&self) -> String {
@@ -172,10 +174,13 @@ pub fn attest_enclave(
 
 /// A small python module offering bindings to the rust attestation doc validation project
 #[pymodule]
-fn evervault_attestation_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(attest_connection, m)?)?;
-    m.add_function(wrap_pyfunction!(attest_cage, m)?)?;
-    m.add_function(wrap_pyfunction!(attest_enclave, m)?)?;
-    m.add_class::<PCRs>()?;
-    Ok(())
+mod evervault_attestation_bindings {
+    #[pymodule_export]
+    use super::attest_connection;
+    #[pymodule_export]
+    use super::attest_cage;
+    #[pymodule_export]
+    use super::attest_enclave;
+    #[pymodule_export]
+    use super::PCRs;
 }
