@@ -4,13 +4,17 @@ use attestation_doc_validation::{
 };
 use pyo3::{exceptions::PyValueError, prelude::*};
 
-#[pyclass]
+#[pyclass(str)]
 #[derive(Debug, PartialEq, Eq, FromPyObject, Default)]
 
 pub struct PCRs {
+    #[pyo3(get)]
     pcr_0: Option<String>,
+    #[pyo3(get)]
     pcr_1: Option<String>,
+    #[pyo3(get)]
     pcr_2: Option<String>,
+    #[pyo3(get)]
     pcr_8: Option<String>,
 }
 
@@ -62,12 +66,15 @@ impl PCRs {
         Ok(Some(pcr_object))
     }
 
-    fn __str__(&self) -> String {
-        self.to_string()
-    }
-
     fn __repr__(&self) -> String {
-        self.to_string()
+        PCRProvider::to_string(self)
+    }
+}
+
+impl std::fmt::Display for PCRs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let pcr_str = PCRProvider::to_string(self);
+        f.write_str(&pcr_str)
     }
 }
 
