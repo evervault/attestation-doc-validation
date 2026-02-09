@@ -57,7 +57,7 @@ jobs:
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
         env:
-          PYO3_CROSS_PYTHON_VERSION: '3.9'
+          PYO3_CROSS_PYTHON_VERSION: '3.10'
       - name: Build and Test
         working-directory: python-attestation-bindings
         run: |-
