@@ -341,9 +341,9 @@ checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
 
 [[package]]
 name = "bytes"
-version = "1.10.1"
+version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
+checksum = "c4872d67bab6358e59b2c0b335e8309d6653aba7baa239b3987823e275ec60c5"
 
 [[package]]
 name = "camino"
@@ -1263,9 +1263,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.8.5"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
+checksum = "4a4cbb8a2b75b56854dafb4975d3be65d371beed541b2849b787e2f763a8cacc"
 dependencies = [
  "libc",
  "rand_chacha",
@@ -1293,12 +1293,12 @@ dependencies = [
 
 [[package]]
 name = "rcgen"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffbe84efe2f38dea12e9bfc1f65377fdf03e53a18cb3b995faedf7934c7e785b"
+checksum = "a34a2d4a5c2e5064a8e2e9eb0331a1ae49a8251f60f6e1e99b90f87199e9c65c"
 dependencies = [
  "pem",
- "ring 0.16.20",
+ "ring 0.17.0",
  "time",
  "yasna",
 ]
@@ -1360,21 +1360,6 @@ checksum = "f8dd2a808d456c4a54e300a23e9f5a67e122c3024119acbfd73e3bf664491cb2"
 dependencies = [
  "hmac",
  "subtle",
-]
-
-[[package]]
-name = "ring"
-version = "0.16.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3053cf52e236a3ed746dfc745aa9cacf1b791d846bdaf412f60a8d7d6e17c8fc"
-dependencies = [
- "cc",
- "libc",
- "once_cell",
- "spin",
- "untrusted 0.7.1",
- "web-sys",
- "winapi",
 ]
 
 [[package]]
@@ -1737,9 +1722,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.41"
+version = "0.3.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a7619e19bc266e0f9c5e6686659d394bc57973859340060a69221e57dbc0c40"
+checksum = "5df4e73e75b5f50e8f4e0f7f8d9d7f0d5e7f5a9c7d5e4f3e2d1c0b9a8f7e6d5c"
 dependencies = [
  "deranged",
  "itoa",
