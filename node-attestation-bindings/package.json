@@ -28,6 +28,9 @@
   "ava": {
     "timeout": "3m"
   },
+  "resolutions": {
+    "picomatch": "^2.3.2"
+  },
   "engines": {
     "node": ">= 10"
   },
