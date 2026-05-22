@@ -26,7 +26,8 @@
     "ava": "^5.2.0"
   },
   "ava": {
-    "timeout": "3m"
+    "timeout": "3m",
+    "workerThreads": false
   },
   "resolutions": {
     "picomatch": "2.3.2",
