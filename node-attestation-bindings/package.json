@@ -29,6 +29,11 @@
     "timeout": "3m",
     "workerThreads": false
   },
+  "resolutions": {
+    "picomatch": "2.3.2",
+    "brace-expansion": "2.0.3",
+    "lodash": "4.18.0"
+  },
   "engines": {
     "node": ">= 10"
   },
