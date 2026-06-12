@@ -2,6 +2,7 @@ pub mod attestation_doc;
 pub mod cert;
 pub mod error;
 mod nsm;
+mod time;
 
 pub use attestation_doc::{validate_expected_nonce, validate_expected_pcrs, PCRProvider};
 use aws_nitro_enclaves_nsm_api::api::AttestationDoc;
@@ -158,6 +159,39 @@ pub fn validate_attestation_doc(
     attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
 
     Ok(())
+}
+
+/// Validates an attestation doc by:
+/// - Validating the cert structure
+/// - Decoding and validating the attestation doc
+/// - Validating the signature on the attestation doc
+/// Ultimately returning the parsed attestation doc.
+///
+/// # Errors
+///
+/// Will return an error if:
+/// - The cose1 encoded attestation doc fails to parse, or its signature is invalid
+/// - The attestation document is not signed by the nitro cert chain
+/// - Any of the certificates are malformed
+///
+pub fn validate_and_parse_attestation_doc(
+    attestation_doc_cose_sign_1_bytes: &[u8],
+) -> error::AttestResult<AttestationDoc> {
+    // Parse attestation doc from cose signature and validate structure
+    let (cose_sign_1_decoded, decoded_attestation_doc) =
+        attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
+    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+
+    // Validate that the attestation doc's signature can be tied back to the AWS Nitro CA
+    let intermediate_certs = create_intermediate_cert_stack(&decoded_attestation_doc.cabundle);
+    cert::validate_cert_trust_chain(&decoded_attestation_doc.certificate, &intermediate_certs)?;
+
+    // Validate Cose signature over attestation doc
+    let pub_key: nsm::PublicKey = attestation_doc_signing_cert.public_key().try_into()?;
+    attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
+
+    Ok(decoded_attestation_doc)
 }
 
 #[cfg(test)]
