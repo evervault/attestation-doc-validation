@@ -55,7 +55,7 @@ impl<'a> SigningPublicKey for PublicKey<'a> {
             SignatureAlgorithm::ES512 => self.verify_p521_signature(digest, signature),
         };
         signature_verification_result
-            .map(|_| true)
+            .map(|()| true)
             .or_else(|_| Ok(false))
     }
 }

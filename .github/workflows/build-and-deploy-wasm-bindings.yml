@@ -1,0 +1,79 @@
+name: Build and Publish WASM Package
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'wasm/v*'
+    paths:
+      - 'wasm-attestation-bindings/**'
+      - 'attestation-doc-validation/**'
+      - '.github/workflows/build-and-deploy-wasm-bindings.yml'
+  pull_request: 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        # 1.88.0
+        uses: dtolnay/rust-toolchain@6691ebadcb18182cc1391d07c9f295f657c593cd
+        with:
+          target: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --version 0.13.1 --locked
+
+      - name: Build WASM bindings
+        run: |
+          wasm-pack build ./wasm-attestation-bindings \
+            -s evervault \
+            --out-name index \
+            --release \
+            --target web
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-attestation-bindings
+          path: wasm-attestation-bindings/pkg/
+
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/wasm/v')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@6691ebadcb18182cc1391d07c9f295f657c593cd
+        with:
+          target: wasm32-unknown-unknown
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --version 0.13.1 --locked
+
+      - name: Build WASM bindings
+        run: |
+          wasm-pack build ./wasm-attestation-bindings \
+            -s evervault \
+            --out-name index \
+            --release \
+            --target web
+
+      - name: Publish to NPM
+        run: npm publish --access public
+        working-directory: wasm-attestation-bindings/pkg
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

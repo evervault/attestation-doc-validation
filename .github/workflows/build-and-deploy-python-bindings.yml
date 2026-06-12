@@ -11,15 +11,14 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
           command: build
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
-      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-qemu-action@v3
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
@@ -27,7 +26,6 @@ jobs:
           target: armv7-unknown-linux-gnueabihf
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
@@ -35,7 +33,6 @@ jobs:
           target: aarch64-unknown-linux-gnu
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: 'musllinux_1_2'
@@ -43,7 +40,6 @@ jobs:
           target: aarch64-unknown-linux-musl
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -52,13 +48,12 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           command: build
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -67,7 +62,7 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           command: build
@@ -75,7 +70,6 @@ jobs:
             --release -o dist --find-interpreter --target
             universal2-apple-darwin
           working-directory: python-attestation-bindings
-          rust-toolchain: 1.79.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -90,7 +84,7 @@ jobs:
       - name: Get version from tag
         id: get-version
         run: echo "using version tag ${GITHUB_REF:18}"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Assert versions match
         working-directory: python-attestation-bindings
         run: |
@@ -102,10 +96,9 @@ jobs:
           fi
       - name: Guarantee wheels dir exists
         run: mkdir python-attestation-bindings/wheels
-      - uses: actions/download-artifact@v4.1.7
+      - uses: actions/download-artifact@v4.1.8
         with:
           path: python-attestation-bindings/wheels
-          name: wheels
           pattern: wheels-*
           merge-multiple: true
       - name: Publish to PyPI
@@ -116,4 +109,3 @@ jobs:
           command: upload
           args: --skip-existing *
           working-directory: python-attestation-bindings/wheels
-          rust-toolchain: 1.79.0
