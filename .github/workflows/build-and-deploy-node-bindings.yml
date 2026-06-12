@@ -5,18 +5,18 @@ env:
   SUBDIRECTORY: node-attestation-bindings
   MACOSX_DEPLOYMENT_TARGET: '10.13'
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'node/v*'
-    paths-ignore:
-      - '**/*.md'
-      - LICENSE
-      - '**/*.gitignore'
-      - .editorconfig
-      - docs/**
-  pull_request: null
+  # push:
+  #   branches:
+  #     - main
+  #   tags:
+  #     - 'node/v*'
+  #   paths-ignore:
+  #     - '**/*.md'
+  #     - LICENSE
+  #     - '**/*.gitignore'
+  #     - .editorconfig
+  #     - docs/**
+  # pull_request: null
 jobs:
   build:
     strategy:
@@ -87,7 +87,7 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         if: ${{ !matrix.settings.docker }}
@@ -100,10 +100,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         if: ${{ !matrix.settings.docker }}
         with:
-          toolchain: 1.79.0
           targets: ${{ matrix.settings.target }}
       - name: Cache cargo
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry/index/
@@ -173,7 +172,7 @@ jobs:
           - '18'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -181,18 +180,12 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./${{ env.SUBDIRECTORY }}/yarn.lock
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.79.0
-          override: true
-          components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
       - name: Install dependencies
         working-directory: ${{ env.SUBDIRECTORY }}
         run: yarn install
       - name: Download artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bindings-x86_64-unknown-linux-gnu
           path: ${{ env.SUBDIRECTORY }}
@@ -215,7 +208,7 @@ jobs:
           - '18'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -226,7 +219,6 @@ jobs:
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
       - uses: davidB/rust-cargo-make@10579dcff82285736fad5291533b52d3c93d6b3b
@@ -236,7 +228,7 @@ jobs:
           yarn config set supportedArchitectures.libc "musl"
           yarn install
       - name: Download artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bindings-x86_64-unknown-linux-musl
           path: ${{ env.SUBDIRECTORY }}
@@ -263,12 +255,12 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run:
           docker run --rm --privileged multiarch/qemu-user-static:register
           --reset
       - name: Download artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bindings-aarch64-unknown-linux-gnu
           path: ${{ env.SUBDIRECTORY }}
@@ -303,10 +295,10 @@ jobs:
   #     run:
   #       working-directory: ${{ env.SUBDIRECTORY }}
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
   #     - name: Download artifacts
-  #       uses: actions/download-artifact@v4.1.7
+  #       uses: actions/download-artifact@v4.1.8
   #       with:
   #         name: bindings-aarch64-unknown-linux-musl
   #         path: ${{ env.SUBDIRECTORY }}
@@ -345,12 +337,12 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run:
           docker run --rm --privileged multiarch/qemu-user-static:register
           --reset
       - name: Download artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bindings-armv7-unknown-linux-gnueabihf
           path: ${{ env.SUBDIRECTORY }}
@@ -384,7 +376,7 @@ jobs:
       run:
         working-directory: ${{ env.SUBDIRECTORY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -395,12 +387,12 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Download macOS x64 artifact
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bindings-x86_64-apple-darwin
           path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Download macOS arm64 artifact
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bindings-aarch64-apple-darwin
           path: ${{ env.SUBDIRECTORY }}/artifacts
@@ -428,7 +420,7 @@ jobs:
         id: get-version
         run: |
           echo "using version tag ${GITHUB_REF:16}"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Assert versions match
         run: |
           PACKAGE_VERSION=$(cat ./node-attestation-bindings/package.json | jq .version | tr -d '"')
@@ -449,7 +441,7 @@ jobs:
         working-directory: ${{ env.SUBDIRECTORY }}
         run: yarn install
       - name: Download all artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           path: ${{ env.SUBDIRECTORY }}/artifacts
       - name: Move artifacts
