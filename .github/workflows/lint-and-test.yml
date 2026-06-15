@@ -12,7 +12,7 @@ jobs:
   lint_and_test_rust:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: davidB/rust-cargo-make@184c522bf8152f601a20749ca36c742b57ba568b
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
@@ -22,7 +22,7 @@ jobs:
   build_wasm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install wasmpack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build wasm bindings with wasm-pack
@@ -32,7 +32,7 @@ jobs:
   lint_and_test_node:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -50,7 +50,7 @@ jobs:
   build_and_test_python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: PyO3/maturin-action@v1
         with:
           command: build
