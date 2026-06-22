@@ -41,7 +41,7 @@ jobs:
           args: --release --sdist -o dist --find-interpreter
           working-directory: python-attestation-bindings
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-linux
           path: python-attestation-bindings/dist
@@ -55,7 +55,7 @@ jobs:
           args: --release -o dist --find-interpreter
           working-directory: python-attestation-bindings
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-windows
           path: python-attestation-bindings/dist
@@ -71,7 +71,7 @@ jobs:
             universal2-apple-darwin
           working-directory: python-attestation-bindings
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-macos
           path: python-attestation-bindings/dist
