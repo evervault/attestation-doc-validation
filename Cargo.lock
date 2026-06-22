@@ -150,7 +150,7 @@ dependencies = [
  "aes",
  "aes-gcm",
  "aws-nitro-enclaves-cose",
- "aws-nitro-enclaves-nsm-api",
+ "aws-nitro-enclaves-nsm-api 0.4.0",
  "base64 0.21.7",
  "chrono",
  "der",
@@ -176,7 +176,7 @@ dependencies = [
  "aes",
  "aes-gcm",
  "aws-nitro-enclaves-cose",
- "aws-nitro-enclaves-nsm-api",
+ "aws-nitro-enclaves-nsm-api 0.5.1",
  "base64 0.22.1",
  "chrono",
  "der",
@@ -210,7 +210,7 @@ dependencies = [
  "aes",
  "aes-gcm",
  "aws-nitro-enclaves-cose",
- "aws-nitro-enclaves-nsm-api",
+ "aws-nitro-enclaves-nsm-api 0.4.0",
  "base64 0.21.7",
  "chrono",
  "der",
@@ -256,6 +256,19 @@ name = "aws-nitro-enclaves-nsm-api"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d92c1f4471b33f6a7af9ea421b249ed18a11c71156564baf6293148fa6ad1b09"
+dependencies = [
+ "libc",
+ "log",
+ "serde",
+ "serde_bytes",
+ "serde_cbor",
+]
+
+[[package]]
+name = "aws-nitro-enclaves-nsm-api"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "973aa18816fcc09c669dfc311362028f63f6f7b4142ef4e98461078d91ef46b7"
 dependencies = [
  "libc",
  "log",
