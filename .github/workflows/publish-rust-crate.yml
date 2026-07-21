@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Ensure version of crate matches release
         id: get-cargo-version
         run: |
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version, assert-matching-version]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: davidB/rust-cargo-make@184c522bf8152f601a20749ca36c742b57ba568b
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version, assert-matching-version, run-ci-checks]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: davidB/rust-cargo-make@184c522bf8152f601a20749ca36c742b57ba568b
       - name: Package and Publish Cargo to registry
         working-directory: attestation-doc-validation
@@ -50,7 +50,7 @@ jobs:
     environment: public-release
     needs: [get-version, assert-matching-version, dry-run-publish]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: davidB/rust-cargo-make@184c522bf8152f601a20749ca36c742b57ba568b
       - name: Package and Publish Cargo to registry
         working-directory: attestation-doc-validation

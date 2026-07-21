@@ -11,7 +11,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           manylinux: '2_28'
@@ -48,7 +48,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           command: build
@@ -62,7 +62,7 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           command: build
@@ -84,7 +84,7 @@ jobs:
       - name: Get version from tag
         id: get-version
         run: echo "using version tag ${GITHUB_REF:18}"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Assert versions match
         working-directory: python-attestation-bindings
         run: |
