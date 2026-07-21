@@ -3,7 +3,7 @@ use attestation_doc_validation::{
   parse_cert, validate_attestation_doc_against_cert,
 };
 
-use napi::JsBuffer;
+use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
 
 #[napi(object)]
@@ -37,19 +37,11 @@ impl PCRProvider for NodePCRs {
 /// The fetched attestation doc will have the public key of the domain's cert embedded inside it along with an expiry
 #[napi]
 fn attest_enclave(
-  cert: JsBuffer,
+  cert: Buffer,
   expected_pcrs_list: Vec<NodePCRs>,
-  attestation_doc: JsBuffer,
+  attestation_doc: Buffer,
 ) -> bool {
-  let cert_val = match cert.into_value() {
-    Ok(cert_value) => cert_value,
-    Err(e) => {
-      eprintln!("Failed to access cert value passed from node to rust: {e}");
-      return false;
-    }
-  };
-
-  let parsed_cert = match parse_cert(cert_val.as_ref()) {
+  let parsed_cert = match parse_cert(cert.as_ref()) {
     Ok(parsed_cert) => parsed_cert,
     Err(e) => {
       eprintln!("Failed to parse provided cert: {e}");
@@ -57,17 +49,9 @@ fn attest_enclave(
     }
   };
 
-  let attestation_doc_value = match attestation_doc.into_value() {
-    Ok(attestation_doc) => attestation_doc,
-    Err(e) => {
-      eprintln!("Failed to access attestation doc value passed from node to rust: {e}");
-      return false;
-    }
-  };
-
   let validated_attestation_doc = match validate_attestation_doc_against_cert(
     &parsed_cert,
-    attestation_doc_value.as_ref(),
+    attestation_doc.as_ref(),
   ) {
     Ok(attestation_doc) => attestation_doc,
     Err(e) => {
