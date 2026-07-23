@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set up Rust
         # 1.88.0
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@6691ebadcb18182cc1391d07c9f295f657c593cd
@@ -56,7 +56,7 @@ jobs:
           target: wasm32-unknown-unknown
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org/'
