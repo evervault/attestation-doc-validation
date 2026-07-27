@@ -180,7 +180,6 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "der 0.7.10",
- "ecdsa 0.16.9",
  "getrandom 0.2.16",
  "hex",
  "p256",
