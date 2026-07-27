@@ -26,7 +26,7 @@ webpki = { version = "0.22", features = ["alloc"] }
 x509-parser = "0.14.0"
 der = { version = "^0.7", features = ["alloc","derive","oid"] }
 p256 = { version = "^0.13", features = ["ecdsa"] }
-p384 = { version = "^0.13", features = ["ecdsa","arithmetic"] }
+p384 = { version = "^0.14", features = ["ecdsa","arithmetic"] }
 ecdsa = { version = "^0.16", features = ["verifying"] }
 sha2 = "^0.10"
 aes = "^0.8"
