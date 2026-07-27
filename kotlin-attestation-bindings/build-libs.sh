@@ -11,5 +11,5 @@ cp ../target/aarch64-linux-android/release/libbindings.so $ANDROID_SDK_PATH/ever
 cp ../target/armv7-linux-androideabi/release/libbindings.so $ANDROID_SDK_PATH/evervault-cages/src/main/jniLibs/armeabi-v7a/libuniffi_bindings.so
 cp ../target/i686-linux-android/release/libbindings.so $ANDROID_SDK_PATH/evervault-cages/src/main/jniLibs/x86/libuniffi_bindings.so
 
-cargo run --features=uniffi/cli --bin uniffi-bindgen generate --language kotlin src/bindings.udl
+cargo run --features=uniffi/cli --bin uniffi-bindgen generate --language kotlin --out-dir src src/bindings.udl
 cp src/uniffi/bindings/bindings.kt $ANDROID_SDK_PATH/evervault-cages/src/main/java/uniffi/bindings/bindings.kt
