@@ -4,7 +4,6 @@ use aws_nitro_enclaves_cose::crypto::{MessageDigest, SignatureAlgorithm};
 use aws_nitro_enclaves_cose::error::CoseError;
 use core::str::FromStr;
 use der::Decode;
-use ecdsa::signature::hazmat::PrehashVerifier;
 use x509_parser::oid_registry::asn1_rs::BitString;
 use x509_parser::x509::SubjectPublicKeyInfo;
 
@@ -70,10 +69,9 @@ macro_rules! verify {
 // Macro to implement signature verification over the passed curve
 macro_rules! impl_signature_verification {
     ($self:ident, $curve:ident, $digest:ident, $signature:ident) => {
-        let encoded_point: $curve::EncodedPoint =
-            verify!($curve::EncodedPoint::from_bytes($self.public_key()))?;
+        use $curve::ecdsa::signature::hazmat::PrehashVerifier;
         let verifying_key: $curve::ecdsa::VerifyingKey = verify!(
-            $curve::ecdsa::VerifyingKey::from_encoded_point(&encoded_point)
+            $curve::ecdsa::VerifyingKey::from_sec1_bytes($self.public_key().as_ref())
         )?;
         let hex_string = hex::encode($signature);
         let sig = verify!($curve::ecdsa::Signature::from_str(&hex_string))?;
