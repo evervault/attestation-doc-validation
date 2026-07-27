@@ -30,7 +30,7 @@ p384 = { version = "^0.13", features = ["ecdsa","arithmetic"] }
 ecdsa = { version = "^0.16", features = ["verifying"] }
 sha2 = "^0.10"
 aes = "^0.8"
-aes-gcm = "^0.10"
+aes-gcm = "^0.11"
 rand = { version = "^0.8", features = ["getrandom"] }
 chrono = "0.4.26"
 aws-nitro-enclaves-nsm-api = { version = "^0.4", default-features = false }
