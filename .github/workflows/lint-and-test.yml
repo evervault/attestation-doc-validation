@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: davidB/rust-cargo-make@184c522bf8152f601a20749ca36c742b57ba568b
+      - uses: davidB/rust-cargo-make@eb4338cc4e8145107109b722ee749f23e61455f0
       - name: Run CI Tasks with backtrace
         working-directory: attestation-doc-validation
         run: cargo make ci
@@ -40,7 +40,7 @@ jobs:
           check-latest: true
           cache: yarn
           cache-dependency-path: ./node-attestation-bindings/yarn.lock
-      - uses: davidB/rust-cargo-make@184c522bf8152f601a20749ca36c742b57ba568b
+      - uses: davidB/rust-cargo-make@eb4338cc4e8145107109b722ee749f23e61455f0
       - name: Install dependencies
         working-directory: node-attestation-bindings
         run: yarn install
