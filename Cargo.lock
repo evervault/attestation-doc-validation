@@ -172,6 +172,37 @@ dependencies = [
 [[package]]
 name = "attestation-doc-validation"
 version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73d09f8ce9c08df11cc4626c2b1ad1c58c52e9470b086622ae3ab7c05cb68500"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "aws-nitro-enclaves-cose",
+ "aws-nitro-enclaves-nsm-api",
+ "base64 0.21.7",
+ "chrono",
+ "der",
+ "ecdsa",
+ "getrandom",
+ "hex",
+ "p256",
+ "p384",
+ "rand",
+ "serde",
+ "serde_bytes",
+ "serde_cbor",
+ "serde_with 2.3.3",
+ "sha2",
+ "thiserror",
+ "time",
+ "wasm-bindgen",
+ "webpki",
+ "x509-parser",
+]
+
+[[package]]
+name = "attestation-doc-validation"
+version = "0.10.1"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -193,37 +224,6 @@ dependencies = [
  "serde_cbor",
  "serde_json",
  "serde_with 3.21.0",
- "sha2",
- "thiserror",
- "time",
- "wasm-bindgen",
- "webpki",
- "x509-parser",
-]
-
-[[package]]
-name = "attestation-doc-validation"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73d09f8ce9c08df11cc4626c2b1ad1c58c52e9470b086622ae3ab7c05cb68500"
-dependencies = [
- "aes",
- "aes-gcm",
- "aws-nitro-enclaves-cose",
- "aws-nitro-enclaves-nsm-api",
- "base64 0.21.7",
- "chrono",
- "der",
- "ecdsa",
- "getrandom",
- "hex",
- "p256",
- "p384",
- "rand",
- "serde",
- "serde_bytes",
- "serde_cbor",
- "serde_with 2.3.3",
  "sha2",
  "thiserror",
  "time",
@@ -1284,7 +1284,7 @@ dependencies = [
 name = "python-attestation-bindings"
 version = "0.0.0"
 dependencies = [
- "attestation-doc-validation 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "attestation-doc-validation 0.10.0",
  "pyo3",
 ]
 
@@ -1993,7 +1993,7 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 name = "wasm-attestation-bindings"
 version = "0.3.1"
 dependencies = [
- "attestation-doc-validation 0.10.0",
+ "attestation-doc-validation 0.10.1",
  "base64 0.22.1",
  "console_error_panic_hook",
  "wasm-bindgen",
