@@ -317,7 +317,7 @@ mod test {
             let is_pem_cert = test_spec.file.ends_with(".pem");
             let cert_content = if is_pem_cert {
                 let pem_cert = pem::parse(input_bytes).unwrap();
-                pem_cert.contents.clone()
+                pem_cert.contents().to_vec()
             } else {
                 input_bytes
             };
