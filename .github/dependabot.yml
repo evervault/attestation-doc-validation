@@ -12,3 +12,7 @@ updates:
     directory: '/node-attestation-bindings'
     schedule:
       interval: monthly
+  - package-ecosystem: pip
+    directory: '/python-attestation-bindings'
+    schedule:
+      interval: monthly
