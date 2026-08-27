@@ -3,12 +3,12 @@ updates:
   - package-ecosystem: cargo
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: npm
     directory: '/node-attestation-bindings'
     schedule:
-      interval: weekly
+      interval: monthly
