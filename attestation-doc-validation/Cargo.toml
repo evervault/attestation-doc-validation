@@ -14,7 +14,6 @@ categories = ["cryptography", "development-tools::ffi", "development-tools"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-aws-nitro-enclaves-cose = { version = "0.5.1", default-features = false }
 thiserror = "1.0"
 serde_cbor = "0.11"
 hex = "0.4.3"
@@ -35,7 +34,18 @@ rand = { version = "^0.8", features = ["getrandom"] }
 chrono = "0.4.26"
 aws-nitro-enclaves-nsm-api = { version = "^0.5", default-features = false }
 
+# `key_kms` is enabled so the CoseError match in src/nsm/error.rs stays exhaustive.
+# aws-nitro-enclaves-image-format 0.6+ turns this feature on through Cargo's feature
+# unification, which silently adds three variants to CoseError. Enabling it ourselves means
+# those variants always exist here and are matched explicitly, so an upstream addition is a
+# compile error rather than something a catch-all arm swallows.
+# Excluded on wasm32: key_kms pulls in tokio (mio) and openssl, neither of which builds for
+# wasm32-unknown-unknown.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+aws-nitro-enclaves-cose = { version = "0.5.1", default-features = false, features = ["key_kms"] }
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+aws-nitro-enclaves-cose = { version = "0.5.1", default-features = false }
 # Override indirect dependency of rand to force getrandom to have wasm support
 getrandom = { version = "0.2", features = ["js"] }
 # Add wasm support to time

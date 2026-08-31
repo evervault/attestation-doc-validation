@@ -46,6 +46,18 @@ impl std::convert::From<CoseError> for NsmError {
             CoseError::TagError(inner) => NsmError::TagError(inner),
             CoseError::EncryptionError(inner) => NsmError::EncryptionError(inner.to_string()),
             CoseError::SignatureError(inner) => NsmError::SignatureError(inner.to_string()),
+            // These variants only exist when aws-nitro-enclaves-cose is built with `key_kms`,
+            // which Cargo.toml enables on every target except wasm32. Matching them
+            // explicitly keeps this match exhaustive, so adding a variant upstream is a
+            // compile error here rather than something silently swallowed by a catch-all.
+            // We never construct KMS-backed keys — attestation docs are verified locally —
+            // so in practice these are unreachable.
+            #[cfg(not(target_arch = "wasm32"))]
+            CoseError::AwsSignError(inner) => NsmError::SignatureError(inner.to_string()),
+            #[cfg(not(target_arch = "wasm32"))]
+            CoseError::AwsVerifyError(inner) => NsmError::SignatureError(inner.to_string()),
+            #[cfg(not(target_arch = "wasm32"))]
+            CoseError::AwsGetPublicKeyError(inner) => NsmError::SignatureError(inner.to_string()),
         }
     }
 }
