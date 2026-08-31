@@ -46,6 +46,14 @@ impl std::convert::From<CoseError> for NsmError {
             CoseError::TagError(inner) => NsmError::TagError(inner),
             CoseError::EncryptionError(inner) => NsmError::EncryptionError(inner.to_string()),
             CoseError::SignatureError(inner) => NsmError::SignatureError(inner.to_string()),
+            // CoseError gains extra variants when aws-nitro-enclaves-cose is built with
+            // `key_kms` (AwsSignError, AwsVerifyError, AwsGetPublicKeyError). We never enable
+            // that feature ourselves, but Cargo unifies features across the dependency graph,
+            // so another crate in a consumer's tree can switch it on and make this match
+            // non-exhaustive. This arm keeps us compiling in that case, and is unreachable
+            // whenever the feature is off.
+            #[allow(unreachable_patterns)]
+            other => NsmError::UnsupportedError(other.to_string()),
         }
     }
 }
