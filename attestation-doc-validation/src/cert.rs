@@ -108,6 +108,30 @@ fn get_epoch() -> CertResult<u64> {
 /// Returns a `CertError::UntrustedCert` when the trust chain fails to validate
 /// Returns a `CertError::Openssl` if an error occurred while preparing the context
 pub fn validate_cert_trust_chain(target: &[u8], intermediates: &[&[u8]]) -> CertResult<()> {
+    validate_cert_trust_chain_at_time(target, intermediates, get_epoch()?)
+}
+
+/// Same as [`validate_cert_trust_chain`], but validates against a caller-supplied
+/// unix timestamp instead of the real system clock.
+///
+/// This exists for downstream consumers who want to write a deterministic test
+/// against a real, previously-captured certificate chain. A real Nitro leaf
+/// certificate is only valid for a few hours after issuance (this crate's own
+/// test suite notes ~3 hours in its `time_sensitive_beta` tests), so a fixture
+/// captured today will otherwise only verify successfully for that window. This
+/// crate's own `FAKETIME` env-var override (see `get_epoch`) cannot help here:
+/// it is `#[cfg(test)]`-gated and so only ever compiles into THIS crate's own
+/// test binary, never into the published library a downstream crate depends on.
+///
+/// # Errors
+///
+/// Returns a `CertError::UntrustedCert` when the trust chain fails to validate
+/// Returns a `CertError::Openssl` if an error occurred while preparing the context
+pub fn validate_cert_trust_chain_at_time(
+    target: &[u8],
+    intermediates: &[&[u8]],
+    now: u64,
+) -> CertResult<()> {
     let end_entity_cert = EndEntityCert::try_from(target).map_err(|_| CertError::DecodeError)?;
 
     let (_, nitro_pem_cert) = x509_parser::pem::parse_x509_pem(NITRO_ROOT_CA_BYTES)
@@ -116,7 +140,6 @@ pub fn validate_cert_trust_chain(target: &[u8], intermediates: &[&[u8]]) -> Cert
         .map_err(|_| CertError::DecodeError)?];
     let server_trust_anchors = webpki::TlsServerTrustAnchors(&nitro_trust_anchor);
 
-    let now = get_epoch()?;
     let time = webpki::Time::from_seconds_since_unix_epoch(now);
 
     end_entity_cert.verify_is_valid_tls_server_cert(

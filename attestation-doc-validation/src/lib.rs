@@ -194,6 +194,39 @@ pub fn validate_and_parse_attestation_doc(
     Ok(decoded_attestation_doc)
 }
 
+/// Same as [`validate_and_parse_attestation_doc`], but validates the certificate
+/// trust chain against a caller-supplied unix timestamp instead of the real
+/// system clock, via [`cert::validate_cert_trust_chain_at_time`] -- see that
+/// function's doc comment for why this exists (deterministically testing
+/// against a real, previously-captured document, which a real Nitro leaf
+/// certificate's short validity window would otherwise make impossible from
+/// outside this crate's own test suite).
+///
+/// # Errors
+///
+/// Same as [`validate_and_parse_attestation_doc`].
+pub fn validate_and_parse_attestation_doc_at_time(
+    attestation_doc_cose_sign_1_bytes: &[u8],
+    now: u64,
+) -> error::AttestResult<AttestationDoc> {
+    let (cose_sign_1_decoded, decoded_attestation_doc) =
+        attestation_doc::decode_attestation_document(attestation_doc_cose_sign_1_bytes)?;
+    attestation_doc::validate_attestation_document_structure(&decoded_attestation_doc)?;
+    let attestation_doc_signing_cert = cert::parse_der_cert(&decoded_attestation_doc.certificate)?;
+
+    let intermediate_certs = create_intermediate_cert_stack(&decoded_attestation_doc.cabundle);
+    cert::validate_cert_trust_chain_at_time(
+        &decoded_attestation_doc.certificate,
+        &intermediate_certs,
+        now,
+    )?;
+
+    let pub_key: nsm::PublicKey = attestation_doc_signing_cert.public_key().try_into()?;
+    attestation_doc::validate_cose_signature::<CryptoClient>(&pub_key, &cose_sign_1_decoded)?;
+
+    Ok(decoded_attestation_doc)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -390,5 +423,66 @@ mod test {
         let maybe_attestation_doc =
             validate_attestation_doc_against_cert(&cert, &attestation_doc_bytes);
         assert!(maybe_attestation_doc.is_ok());
+    }
+
+    // Robust, timestamp-value-agnostic proof that `validate_and_parse_attestation_doc_at_time`
+    // behaves identically to `validate_and_parse_attestation_doc` when given an
+    // equivalent "now" -- deliberately does NOT depend on knowing any fixture's
+    // exact valid window. An earlier version of this test asserted success at this
+    // file's own documented "captured 2023-01-18 ~15:15 (epoch 1674054914)" comment
+    // and failed: that comment's "approximately" turned out to matter -- the real
+    // leaf cert's actual NotBefore/NotAfter for THIS specific fixture file didn't
+    // cover that exact second. Rather than go hunt down a more precise timestamp
+    // for one fixture, this asserts the thing that actually matters for a safe
+    // refactor: the new function must reach the SAME conclusion as the existing one
+    // when given an equivalent clock reading, for any fixture, expired or not.
+    #[test]
+    fn validate_and_parse_attestation_doc_at_time_matches_the_real_clock_entry_point_given_the_same_now() {
+        let attestation_doc_cose_bytes = std::fs::read(std::path::Path::new(
+            "../test-data/beta/valid-attestation-doc-bytes",
+        ))
+        .unwrap();
+
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+
+        let via_real_clock = validate_and_parse_attestation_doc(&attestation_doc_cose_bytes);
+        let via_explicit_time =
+            validate_and_parse_attestation_doc_at_time(&attestation_doc_cose_bytes, now);
+
+        assert_eq!(
+            via_real_clock.is_ok(),
+            via_explicit_time.is_ok(),
+            "the _at_time variant must agree with the real-clock variant given the real \
+             current time: via_real_clock={via_real_clock:?} via_explicit_time={via_explicit_time:?}"
+        );
+    }
+
+    // Confirms the explicit time parameter has real effect, independent of any
+    // fixture's own validity window: 1970 is before every real AWS Nitro
+    // certificate that has ever existed, so this must always fail.
+    #[test]
+    fn validate_and_parse_attestation_doc_at_time_rejects_a_real_doc_at_the_unix_epoch() {
+        let attestation_doc_cose_bytes = std::fs::read(std::path::Path::new(
+            "../test-data/beta/valid-attestation-doc-bytes",
+        ))
+        .unwrap();
+        let result = validate_and_parse_attestation_doc_at_time(&attestation_doc_cose_bytes, 0);
+        assert!(result.is_err(), "no real Nitro certificate was valid at the unix epoch");
+    }
+
+    // The same fixture must still fail today via the real-clock entry point
+    // -- confirms this isn't a case where the new function is simply
+    // skipping the check. real_fixture's chain genuinely expired years ago.
+    #[test]
+    fn validate_and_parse_attestation_doc_rejects_the_same_long_expired_real_doc_at_the_real_current_time() {
+        let attestation_doc_cose_bytes = std::fs::read(std::path::Path::new(
+            "../test-data/beta/valid-attestation-doc-bytes",
+        ))
+        .unwrap();
+        let result = validate_and_parse_attestation_doc(&attestation_doc_cose_bytes);
+        assert!(result.is_err(), "a 2023 document's leaf cert must be expired by now");
     }
 }
