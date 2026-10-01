@@ -200,7 +200,7 @@ mod test {
     use cert::get_subject_alt_names_from_cert;
     use x509_parser::extensions::GeneralName;
 
-    use rcgen::generate_simple_self_signed;
+    use rcgen::{generate_simple_self_signed, CertifiedKey};
 
     fn embed_attestation_doc_in_cert(hostname: &str, cose_bytes: &[u8]) -> rcgen::Certificate {
         let subject_alt_names = vec![
@@ -208,11 +208,12 @@ mod test {
             format!("{}.{hostname}", hex::encode(cose_bytes)),
         ];
 
-        generate_simple_self_signed(subject_alt_names).unwrap()
+        let CertifiedKey { cert, .. } = generate_simple_self_signed(subject_alt_names).unwrap();
+        cert
     }
 
     fn rcgen_cert_to_der(cert: rcgen::Certificate) -> Vec<u8> {
-        cert.serialize_der().unwrap()
+        cert.der().to_vec()
     }
 
     #[test]
